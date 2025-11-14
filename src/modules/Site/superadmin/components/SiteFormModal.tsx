@@ -1,0 +1,409 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Site, CreateSiteData, UpdateSiteData, SiteType, YesNo } from '../../types/site.types';
+
+interface SiteFormModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: CreateSiteData | UpdateSiteData) => Promise<void>;
+  site?: Site | null;
+  mode: 'create' | 'edit';
+}
+
+export default function SiteFormModal({ isOpen, onClose, onSubmit, site, mode }: SiteFormModalProps) {
+  const [formData, setFormData] = useState<any>({
+    site_host: '',
+    site_db_name: '',
+    site_db_host: 'localhost',
+    site_db_login: 'root',
+    site_db_password: '',
+    site_company: '',
+    site_type: 'CUST' as SiteType,
+    site_available: 'YES' as YesNo,
+    site_admin_available: 'YES' as YesNo,
+    site_frontend_available: 'YES' as YesNo,
+    is_customer: 'NO' as YesNo,
+    site_access_restricted: 'NO' as YesNo,
+    price: '',
+    create_database: false,
+    setup_tables: false,
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (mode === 'edit' && site) {
+      setFormData({
+        site_host: site.host,
+        site_db_name: site.database.name,
+        site_db_host: site.database.host,
+        site_db_login: site.database.login || '',
+        site_db_password: '', // Toujours vide par défaut, pour ne pas afficher le mot de passe
+        site_company: site.company || '',
+        site_type: site.type || 'CUST',
+        site_available: site.availability.site ? 'YES' : 'NO',
+        site_admin_available: site.availability.admin ? 'YES' : 'NO',
+        site_frontend_available: site.availability.frontend ? 'YES' : 'NO',
+        is_customer: site.is_customer ? 'YES' : 'NO',
+        site_access_restricted: site.access_restricted ? 'YES' : 'NO',
+        price: site.price?.toString() || '',
+      });
+    } else if (mode === 'create') {
+      // Reset form for create mode
+      setFormData({
+        site_host: '',
+        site_db_name: '',
+        site_db_host: 'localhost',
+        site_db_login: 'root',
+        site_db_password: '',
+        site_company: '',
+        site_type: 'CUST' as SiteType,
+        site_available: 'YES' as YesNo,
+        site_admin_available: 'YES' as YesNo,
+        site_frontend_available: 'YES' as YesNo,
+        is_customer: 'NO' as YesNo,
+        site_access_restricted: 'NO' as YesNo,
+        price: '',
+        create_database: false,
+        setup_tables: false,
+      });
+    }
+  }, [mode, site, isOpen]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+
+    setFormData((prev: any) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      const submitData: any = { ...formData };
+
+      // Convertir le prix en nombre
+      if (submitData.price) {
+        submitData.price = parseFloat(submitData.price);
+      }
+
+      // En mode édition, ne pas envoyer le mot de passe s'il est vide
+      if (mode === 'edit' && !submitData.site_db_password) {
+        delete submitData.site_db_password;
+      }
+
+      await onSubmit(submitData);
+      onClose();
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Une erreur est survenue');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <form onSubmit={handleSubmit}>
+            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  {mode === 'create' ? 'Créer un nouveau site' : 'Modifier le site'}
+                </h3>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {error && (
+                <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-sm text-red-800">{error}</p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Domaine */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Domaine <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="site_host"
+                    value={formData.site_host}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="exemple.com"
+                  />
+                </div>
+
+                {/* Base de données */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nom de la base de données <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="site_db_name"
+                    value={formData.site_db_name}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="db_exemple"
+                  />
+                </div>
+
+                {/* Hôte DB */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hôte de la base de données <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="site_db_host"
+                    value={formData.site_db_host}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="localhost"
+                  />
+                </div>
+
+                {/* Login DB */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Login de la base de données {mode === 'create' && <span className="text-red-500">*</span>}
+                  </label>
+                  <input
+                    type="text"
+                    name="site_db_login"
+                    value={formData.site_db_login}
+                    onChange={handleChange}
+                    required={mode === 'create'}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="root"
+                  />
+                </div>
+
+                {/* Password DB */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Mot de passe de la base de données
+                    {mode === 'edit' && <span className="text-xs text-gray-500 ml-2">(laisser vide pour ne pas modifier)</span>}
+                  </label>
+                  <input
+                    type="password"
+                    name="site_db_password"
+                    value={formData.site_db_password}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder={mode === 'edit' ? '••••••••' : ''}
+                  />
+                </div>
+
+                {/* Société */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Société
+                  </label>
+                  <input
+                    type="text"
+                    name="site_company"
+                    value={formData.site_company}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Nom de la société"
+                  />
+                </div>
+
+                {/* Type */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Type de site
+                  </label>
+                  <select
+                    name="site_type"
+                    value={formData.site_type}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="CUST">CRM</option>
+                    <option value="ECOM">E-commerce</option>
+                    <option value="CMS">CMS</option>
+                  </select>
+                </div>
+
+                {/* Prix */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Prix
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="0.00"
+                  />
+                </div>
+
+                {/* Disponibilité Site */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Site disponible
+                  </label>
+                  <select
+                    name="site_available"
+                    value={formData.site_available}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="YES">Oui</option>
+                    <option value="NO">Non</option>
+                  </select>
+                </div>
+
+                {/* Disponibilité Admin */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Admin disponible
+                  </label>
+                  <select
+                    name="site_admin_available"
+                    value={formData.site_admin_available}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="YES">Oui</option>
+                    <option value="NO">Non</option>
+                  </select>
+                </div>
+
+                {/* Disponibilité Frontend */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Frontend disponible
+                  </label>
+                  <select
+                    name="site_frontend_available"
+                    value={formData.site_frontend_available}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="YES">Oui</option>
+                    <option value="NO">Non</option>
+                  </select>
+                </div>
+
+                {/* Est client */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Est un client
+                  </label>
+                  <select
+                    name="is_customer"
+                    value={formData.is_customer}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="YES">Oui</option>
+                    <option value="NO">Non</option>
+                  </select>
+                </div>
+
+                {/* Accès restreint */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Accès restreint
+                  </label>
+                  <select
+                    name="site_access_restricted"
+                    value={formData.site_access_restricted}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="YES">Oui</option>
+                    <option value="NO">Non</option>
+                  </select>
+                </div>
+              </div>
+
+              {mode === 'create' && (
+                <div className="mt-6 space-y-4 border-t pt-4">
+                  <div className="flex items-center">
+                    <input
+                      id="create_database"
+                      name="create_database"
+                      type="checkbox"
+                      checked={formData.create_database}
+                      onChange={handleChange}
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="create_database" className="ml-2 block text-sm text-gray-900">
+                      Créer la base de données automatiquement
+                    </label>
+                  </div>
+
+                  <div className="flex items-center">
+                    <input
+                      id="setup_tables"
+                      name="setup_tables"
+                      type="checkbox"
+                      checked={formData.setup_tables}
+                      onChange={handleChange}
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="setup_tables" className="ml-2 block text-sm text-gray-900">
+                      Configurer les tables de base
+                    </label>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? 'Enregistrement...' : mode === 'create' ? 'Créer' : 'Enregistrer'}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+              >
+                Annuler
+              </button>
+            </div>
+          </form>
+      </div>
+    </div>
+  );
+}
