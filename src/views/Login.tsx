@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 // Next Imports
 import Link from 'next/link'
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 
 // MUI Imports
 import Typography from '@mui/material/Typography'
@@ -19,10 +19,9 @@ import Divider from '@mui/material/Divider'
 import Alert from '@mui/material/Alert'
 
 // Third-party Imports
-import { signIn } from 'next-auth/react'
 import { Controller, useForm } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
-import { object, minLength, string, email, pipe, nonEmpty } from 'valibot'
+import { object, minLength, string, pipe, nonEmpty } from 'valibot'
 import type { SubmitHandler } from 'react-hook-form'
 import type { InferInput } from 'valibot'
 import classnames from 'classnames'
@@ -40,29 +39,25 @@ import themeConfig from '@configs/themeConfig'
 // Hook Imports
 import { useImageVariant } from '@core/hooks/useImageVariant'
 import { useSettings } from '@core/hooks/useSettings'
+import { useAuth } from '@/modules/UsersGuard/admin/hooks/useAuth'
 
 // Util Imports
 import { getLocalizedUrl } from '@/utils/i18n'
 
-type ErrorType = {
-  message: string[]
-}
-
 type FormData = InferInput<typeof schema>
 
 const schema = object({
-  email: pipe(string(), minLength(1, 'This field is required'), email('Please enter a valid email address')),
+  username: pipe(string(), minLength(1, 'This field is required'), minLength(3, 'Username must be at least 3 characters long')),
   password: pipe(
     string(),
     nonEmpty('This field is required'),
-    minLength(5, 'Password must be at least 5 characters long')
+    minLength(3, 'Password must be at least 3 characters long')
   )
 })
 
 const Login = ({ mode }: { mode: Mode }) => {
   // States
   const [isPasswordShown, setIsPasswordShown] = useState(false)
-  const [errorState, setErrorState] = useState<ErrorType | null>(null)
 
   // Vars
   const darkImg = '/images/pages/auth-v2-mask-1-dark.png'
@@ -73,10 +68,10 @@ const Login = ({ mode }: { mode: Mode }) => {
   const borderedLightIllustration = '/images/illustrations/auth/v2-login-light-border.png'
 
   // Hooks
-  const router = useRouter()
   const searchParams = useSearchParams()
   const { lang: locale } = useParams()
   const { settings } = useSettings()
+  const { login, isLoading, error } = useAuth()
 
   const {
     control,
@@ -85,7 +80,7 @@ const Login = ({ mode }: { mode: Mode }) => {
   } = useForm<FormData>({
     resolver: valibotResolver(schema),
     defaultValues: {
-      email: 'admin@materialize.com',
+      username: 'admin',
       password: 'admin'
     }
   })
@@ -103,28 +98,16 @@ const Login = ({ mode }: { mode: Mode }) => {
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
   const onSubmit: SubmitHandler<FormData> = async (data: FormData) => {
-    const res = await signIn('credentials', {
-      email: data.email,
-      password: data.password,
-      redirect: false
-    })
-
-    if (res && res.ok && res.error === null) {
-      // Vars
-      const redirectURL = searchParams.get('redirectTo') ?? '/'
-
-      router.replace(getLocalizedUrl(redirectURL, locale as Locale))
-    } else {
-      if (res?.error) {
-        try {
-          const error = JSON.parse(res.error)
-
-          setErrorState(error)
-        } catch {
-          // Handle non-JSON errors (e.g., "Failed to fetch")
-          setErrorState({ message: [res.error] })
-        }
-      }
+    try {
+      await login({
+        username: data.username,
+        password: data.password,
+        application: 'admin'
+      })
+      // La redirection est gérée automatiquement par le hook useAuth
+    } catch (err) {
+      // L'erreur est gérée par le hook useAuth et affichée via la variable error
+      console.error('Login failed:', err)
     }
   }
 
@@ -158,10 +141,15 @@ const Login = ({ mode }: { mode: Mode }) => {
           </div>
           <Alert icon={false} className='bg-[var(--mui-palette-primary-lightOpacity)]'>
             <Typography variant='body2' color='primary.main'>
-              Email: <span className='font-medium'>admin@materialize.com</span> / Pass:{' '}
+              Username: <span className='font-medium'>admin</span> / Pass:{' '}
               <span className='font-medium'>admin</span>
             </Typography>
           </Alert>
+          {error && (
+            <Alert severity='error'>
+              <Typography variant='body2'>{error}</Typography>
+            </Alert>
+          )}
 
           <form
             noValidate
@@ -171,7 +159,7 @@ const Login = ({ mode }: { mode: Mode }) => {
             className='flex flex-col gap-5'
           >
             <Controller
-              name='email'
+              name='username'
               control={control}
               rules={{ required: true }}
               render={({ field }) => (
@@ -179,15 +167,12 @@ const Login = ({ mode }: { mode: Mode }) => {
                   {...field}
                   fullWidth
                   autoFocus
-                  type='email'
-                  label='Email'
-                  onChange={e => {
-                    field.onChange(e.target.value)
-                    errorState !== null && setErrorState(null)
-                  }}
-                  {...((errors.email || errorState !== null) && {
+                  type='text'
+                  label='Username'
+                  disabled={isLoading}
+                  {...(errors.username && {
                     error: true,
-                    helperText: errors?.email?.message || errorState?.message[0]
+                    helperText: errors.username.message
                   })}
                 />
               )}
@@ -203,10 +188,7 @@ const Login = ({ mode }: { mode: Mode }) => {
                   label='Password'
                   id='login-password'
                   type={isPasswordShown ? 'text' : 'password'}
-                  onChange={e => {
-                    field.onChange(e.target.value)
-                    errorState !== null && setErrorState(null)
-                  }}
+                  disabled={isLoading}
                   slotProps={{
                     input: {
                       endAdornment: (
@@ -216,6 +198,7 @@ const Login = ({ mode }: { mode: Mode }) => {
                             onClick={handleClickShowPassword}
                             onMouseDown={e => e.preventDefault()}
                             aria-label='toggle password visibility'
+                            disabled={isLoading}
                           >
                             <i className={isPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
                           </IconButton>
@@ -238,8 +221,8 @@ const Login = ({ mode }: { mode: Mode }) => {
                 Forgot password?
               </Typography>
             </div>
-            <Button fullWidth variant='contained' type='submit'>
-              Log In
+            <Button fullWidth variant='contained' type='submit' disabled={isLoading}>
+              {isLoading ? 'Logging in...' : 'Log In'}
             </Button>
             <div className='flex justify-center items-center flex-wrap gap-2'>
               <Typography>New on our platform?</Typography>
@@ -248,16 +231,6 @@ const Login = ({ mode }: { mode: Mode }) => {
               </Typography>
             </div>
           </form>
-          <Divider className='gap-3'>or</Divider>
-          <Button
-            color='secondary'
-            className='self-center text-textPrimary'
-            startIcon={<img src='/images/logos/google.png' alt='Google' width={22} />}
-            sx={{ '& .MuiButton-startIcon': { marginInlineEnd: 3 } }}
-            onClick={() => signIn('google')}
-          >
-            Sign in with Google
-          </Button>
         </div>
       </div>
     </div>

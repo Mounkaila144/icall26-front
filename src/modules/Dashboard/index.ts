@@ -7,13 +7,13 @@
  * @example
  * ```typescript
  * // Import components
- * import { MenuManager, Sidebar } from '@/src/modules/Dashboard';
+ * import { MenuManager, Sidebar } from '@/modules/Dashboard';
  *
  * // Import hooks
- * import { useMenus, useMenu } from '@/src/modules/Dashboard';
+ * import { useMenus, useMenu } from '@/modules/Dashboard';
  *
  * // Import types
- * import type { MenuItem, MenuFormData } from '@/src/modules/Dashboard';
+ * import type { MenuItem, MenuFormData } from '@/modules/Dashboard';
  * ```
  */
 

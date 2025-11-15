@@ -6,35 +6,50 @@ import { ApiError } from '../types/api.types';
  */
 const isSuperadminContext = (): boolean => {
     if (typeof window === 'undefined') return false;
-    return window.location.pathname.startsWith('/superadmin');
+    return window.location.pathname.includes('/superadmin');
 };
 
 /**
  * Récupérer le token d'authentification selon le contexte
+ * Utilise localStorage pour l'authentification personnalisée
  */
 const getAuthToken = (): string | null => {
     if (typeof window === 'undefined') return null;
 
-    // Si on est dans le contexte superadmin, chercher le token superadmin
+    // Récupérer le token depuis localStorage selon le contexte
     if (isSuperadminContext()) {
         return localStorage.getItem('superadmin_auth_token');
     }
 
-    // Sinon, chercher le token admin
     return localStorage.getItem('auth_token');
 };
 
 /**
+ * Récupérer le tenant ID depuis localStorage
+ */
+const getTenantId = (): string | null => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('tenant_id');
+};
+
+/**
  * Récupérer la locale actuelle pour le header Accept-Language
+ * Utilise le système [lang] du template Next.js
  * Retourne un format simple: fr, en, ar (pas fr_FR ou fr-FR)
  */
 const getCurrentLocale = (): string => {
-    if (typeof window === 'undefined') return 'fr';
+    if (typeof window === 'undefined') return 'en';
 
-    const locale = localStorage.getItem('app_language') || 'fr';
+    // Extraire la langue depuis l'URL du template: /en/admin, /fr/superadmin, etc.
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const langFromUrl = pathParts[0];
 
-    // S'assurer que la locale est au format simple (fr, en, ar)
-    // Convertir fr_FR -> fr, en_US -> en, etc.
+    if (['en', 'fr', 'ar'].includes(langFromUrl)) {
+        return langFromUrl;
+    }
+
+    // Fallback sur localStorage si nécessaire
+    const locale = localStorage.getItem('app_language') || 'en';
     return locale.split('_')[0].split('-')[0].toLowerCase();
 };
 
@@ -56,9 +71,12 @@ const clearAuthData = (): void => {
 
 /**
  * Obtenir l'URL de login selon le contexte
+ * Intègre le système [lang] du template
  */
 const getLoginUrl = (): string => {
-    return isSuperadminContext() ? '/superadmin/login' : '/admin/login';
+    const locale = getCurrentLocale();
+    // Tous les contextes utilisent la même page de login
+    return `/${locale}/login`;
 };
 
 /**
@@ -77,7 +95,7 @@ export const createApiClient = (tenantId?: string): AxiosInstance => {
         withCredentials: true, // Important pour les cookies
     });
 
-    // Request interceptor to add auth token and locale
+    // Request interceptor to add auth token, tenant ID, and locale
     client.interceptors.request.use(
         (config: InternalAxiosRequestConfig) => {
             if (config.headers) {
@@ -85,6 +103,14 @@ export const createApiClient = (tenantId?: string): AxiosInstance => {
                 const token = getAuthToken();
                 if (token) {
                     config.headers.Authorization = `Bearer ${token}`;
+                }
+
+                // Add X-Tenant-ID header for multi-tenancy (if not superadmin context)
+                if (!isSuperadminContext()) {
+                    const tenantId = getTenantId();
+                    if (tenantId) {
+                        config.headers['X-Tenant-ID'] = tenantId;
+                    }
                 }
 
                 // Add Accept-Language header with current locale

@@ -1,0 +1,90 @@
+'use client'
+
+// React Imports
+import { Fragment } from 'react'
+
+// Next Imports
+import { useParams } from 'next/navigation'
+
+// Component Imports
+import { MenuItem, SubMenu } from '@menu/vertical-menu'
+
+// Hook Imports
+import { useConfigMenus } from '@/shared/hooks/useConfigMenus'
+
+// Type Imports
+import type { MenuConfig } from '@/shared/types/menu-config.types'
+
+/**
+ * Module Menu Component
+ *
+ * Dynamically renders menu items from module configurations
+ */
+const ModuleMenu = () => {
+  // Hooks
+  const { menus, isLoading } = useConfigMenus({ visibleOnly: true })
+  const { lang: locale } = useParams()
+
+  // Render loading state
+  if (isLoading) {
+    return null
+  }
+
+  // Recursive function to render menu items
+  const renderMenuItem = (menu: MenuConfig): JSX.Element | null => {
+    // Skip invisible or inactive menus
+    if (menu.isVisible === false || menu.isActive === false) {
+      return null
+    }
+
+    // Get icon based on type
+    const getIcon = () => {
+      if (!menu.icon) return undefined
+
+      if (menu.icon.type === 'emoji') {
+        return <span style={{ fontSize: '1.25rem' }}>{menu.icon.value}</span>
+      }
+
+      if (menu.icon.type === 'iconify') {
+        return <i className={menu.icon.value} />
+      }
+
+      return <i className={menu.icon.value} />
+    }
+
+    // Has children - render as SubMenu
+    if (menu.children && menu.children.length > 0) {
+      return (
+        <SubMenu key={menu.id} label={menu.label} icon={getIcon()}>
+          {menu.children.map(child => renderMenuItem(child))}
+        </SubMenu>
+      )
+    }
+
+    // No children - render as MenuItem
+    if (menu.route) {
+      const href = menu.route.startsWith('/') ? `/${locale}${menu.route}` : menu.route
+
+      return (
+        <MenuItem key={menu.id} href={href} icon={getIcon()}>
+          {menu.label}
+        </MenuItem>
+      )
+    }
+
+    // Menu item without route (shouldn't happen, but handle it)
+    return (
+      <MenuItem key={menu.id} icon={getIcon()}>
+        {menu.label}
+      </MenuItem>
+    )
+  }
+
+  return (
+    <Fragment>
+      {menus.map(menu => renderMenuItem(menu))}
+    </Fragment>
+  )
+}
+
+export default ModuleMenu

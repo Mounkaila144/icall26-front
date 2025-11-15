@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useEffect, useState, ComponentType } from 'react';
-import dynamic from 'next/dynamic';
-import {toPascalCase} from "@/shared/utils/menu-route-generator";
+import { toPascalCase } from "@/shared/utils/menu-route-generator";
+import { getComponent } from '@/shared/config/component-registry';
 
 interface DynamicModuleLoaderProps {
     slug: string[];
+    context?: 'admin' | 'superadmin';
 }
 
 /**
@@ -26,7 +27,7 @@ interface DynamicModuleLoaderProps {
  *   → Component: ContractsList1
  *   → Import: @/src/modules/CustomersContracts/admin/components/ContractsList1
  */
-export function DynamicModuleLoader({ slug }: DynamicModuleLoaderProps) {
+export function DynamicModuleLoader({ slug, context = 'admin' }: DynamicModuleLoaderProps) {
     const [Component, setComponent] = useState<ComponentType<any> | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -38,19 +39,14 @@ export function DynamicModuleLoader({ slug }: DynamicModuleLoaderProps) {
                 setError(null);
 
                 // Convert slug to module and component names
-                const { moduleName, componentName, importPath } = transformSlugToModule(slug);
+                const { moduleName, componentName, importPath } = transformSlugToModule(slug, context);
 
-                // Dynamically import the component
-                const module = await import(
-                    `@/src/modules/${moduleName}/admin/components/${componentName}.tsx`
-                    );
-
-                // Get the default or named export
-                const LoadedComponent = module.default || module[componentName];
+                // Get component from registry
+                const LoadedComponent = getComponent(moduleName, componentName, context);
 
                 if (!LoadedComponent) {
                     throw new Error(
-                        `Component "${componentName}" not found in module "${moduleName}"`
+                        `Component "${componentName}" not found in module "${moduleName}". Make sure it's registered in component-registry.ts`
                     );
                 }
 
@@ -63,14 +59,14 @@ export function DynamicModuleLoader({ slug }: DynamicModuleLoaderProps) {
         }
 
         loadComponent();
-    }, [slug.join('/')]);
+    }, [slug.join('/'), context]);
 
     if (isLoading) {
         return <LoadingState />;
     }
 
     if (error) {
-        return <ErrorState error={error} slug={slug} />;
+        return <ErrorState error={error} slug={slug} context={context} />;
     }
 
     if (!Component) {
@@ -91,7 +87,7 @@ export function DynamicModuleLoader({ slug }: DynamicModuleLoaderProps) {
  * - PascalCase: ['CustomersContracts', 'ContractsList1'] → Direct use
  * - snake_case: ['customers_contracts', 'contracts_list1'] → Converted to PascalCase
  */
-function transformSlugToModule(slug: string[]) {
+function transformSlugToModule(slug: string[], context: string = 'admin') {
     if (slug.length === 0) {
         throw new Error('Invalid slug: empty array');
     }
@@ -103,7 +99,7 @@ function transformSlugToModule(slug: string[]) {
         return {
             moduleName: componentName,
             componentName: componentName,
-            importPath: `@/src/modules/${componentName}/admin/components/${componentName}`,
+            importPath: `@/modules/${componentName}/${context}/components/${componentName}`,
         };
     }
 
@@ -115,7 +111,7 @@ function transformSlugToModule(slug: string[]) {
     return {
         moduleName,
         componentName,
-        importPath: `@/src/modules/${moduleName}/admin/components/${componentName}`,
+        importPath: `@/modules/${moduleName}/${context}/components/${componentName}`,
     };
 }
 
@@ -172,8 +168,8 @@ function LoadingState() {
 /**
  * Error state component
  */
-function ErrorState({ error, slug }: { error: string; slug: string[] }) {
-    const { moduleName, componentName, importPath } = transformSlugToModule(slug);
+function ErrorState({ error, slug, context = 'admin' }: { error: string; slug: string[]; context?: string }) {
+    const { moduleName, componentName, importPath } = transformSlugToModule(slug, context);
 
     return (
         <div
@@ -300,19 +296,6 @@ function ErrorState({ error, slug }: { error: string; slug: string[] }) {
                     </h3>
                     <ol style={{ margin: 0, paddingLeft: '20px', color: '#333' }}>
                         <li style={{ marginBottom: '8px' }}>
-                            Ensure the module exists at:{' '}
-                            <code
-                                style={{
-                                    background: '#fff',
-                                    padding: '2px 6px',
-                                    borderRadius: '4px',
-                                    fontSize: '13px',
-                                }}
-                            >
-                                src/modules/{moduleName}/
-                            </code>
-                        </li>
-                        <li style={{ marginBottom: '8px' }}>
                             Ensure the component exists at:{' '}
                             <code
                                 style={{
@@ -322,11 +305,36 @@ function ErrorState({ error, slug }: { error: string; slug: string[] }) {
                                     fontSize: '13px',
                                 }}
                             >
-                                src/modules/{moduleName}/admin/components/{componentName}.tsx
+                                src/modules/{moduleName}/{context}/components/{componentName}.tsx
                             </code>
                         </li>
                         <li style={{ marginBottom: '8px' }}>
-                            Ensure the component exports a default export or named export
+                            Register the component in:{' '}
+                            <code
+                                style={{
+                                    background: '#fff',
+                                    padding: '2px 6px',
+                                    borderRadius: '4px',
+                                    fontSize: '13px',
+                                }}
+                            >
+                                src/shared/config/component-registry.ts
+                            </code>
+                        </li>
+                        <li style={{ marginBottom: '8px' }}>
+                            Add this line to the registry:{' '}
+                            <code
+                                style={{
+                                    background: '#fff',
+                                    padding: '2px 6px',
+                                    borderRadius: '4px',
+                                    fontSize: '13px',
+                                    display: 'block',
+                                    marginTop: '4px',
+                                }}
+                            >
+                                '{moduleName}:{componentName}': YourComponent
+                            </code>
                         </li>
                         <li>Check that the file name matches exactly (case-sensitive)</li>
                     </ol>
@@ -370,3 +378,5 @@ function NotFoundState({ slug }: { slug: string[] }) {
         </div>
     );
 }
+
+export default DynamicModuleLoader;

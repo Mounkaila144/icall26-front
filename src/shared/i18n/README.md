@@ -13,7 +13,7 @@
 
 ```typescript
 'use client';
-import { useTranslation } from '@/src/shared/i18n';
+import { useTranslation } from '@/shared/i18n';
 
 export function MyComponent() {
   const { t } = useTranslation();

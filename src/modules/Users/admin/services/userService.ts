@@ -1,5 +1,5 @@
-import { createApiClient } from '@/src/shared/lib/api-client';
-import type { ApiResponse } from '@/src/shared/types/api.types';
+import { createApiClient } from '@/shared/lib/api-client';
+import type { ApiResponse } from '@/shared/types/api.types';
 import type { User, UserFilters } from '../../types/user.types';
 
 /**

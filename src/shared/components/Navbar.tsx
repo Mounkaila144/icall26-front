@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useLanguage } from '../lib/language-context';
-import { useAuth } from '@/src/modules/UsersGuard';
+import { useAuth } from '@/modules/UsersGuard';
 
 /**
  * Navbar Component

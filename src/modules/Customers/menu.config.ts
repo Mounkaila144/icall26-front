@@ -1,4 +1,4 @@
-import { ModuleMenuConfig } from '@/src/shared/types/menu-config.types';
+import { ModuleMenuConfig } from '@/shared/types/menu-config.types';
 
 /**
  * Customers Module Menu Configuration

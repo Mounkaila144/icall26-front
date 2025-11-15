@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { MenuConfig } from '@/src/shared/types/menu-config.types';
-import { getAllMenus, getVisibleMenus, getModuleMenus } from '@/src/shared/config/menu-registry';
+import { MenuConfig } from '@/shared/types/menu-config.types';
+import { getAllMenus, getVisibleMenus, getModuleMenus } from '@/shared/config/menu-registry';
 
 /**
  * Hook for accessing configuration-based menus

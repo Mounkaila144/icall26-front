@@ -6,8 +6,8 @@
 
 import React, { useState } from 'react';
 import { useContracts } from '../hooks/useContracts';
-import { useSidebar } from '@/src/shared/lib/sidebar-context';
-import { useTranslation } from '@/src/shared/i18n';
+import { useSidebar } from '@/shared/lib/sidebar-context';
+import { useTranslation } from '@/shared/i18n';
 import CreateContractModal from './CreateContractModal';
 import EditContractModal from './EditContractModal';
 import type { CustomerContract } from '../../types';

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslation } from '@/src/shared/i18n';
+import { useTranslation } from '@/shared/i18n';
 import { useUsers } from '../hooks/useUsers';
 import type { User } from '../../types/user.types';
 

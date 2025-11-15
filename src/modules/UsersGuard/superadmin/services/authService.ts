@@ -1,6 +1,6 @@
-import { createApiClient } from '@/src/shared/lib/api-client';
+import { createApiClient } from '@/shared/lib/api-client';
 import { LoginCredentials, LoginResponse, User } from '../../types/auth.types';
-import { ApiResponse } from '@/src/shared/types/api.types';
+import { ApiResponse } from '@/shared/types/api.types';
 
 class SuperadminAuthService {
     /**

@@ -9,7 +9,7 @@
  * @module Can
  */
 
-import { usePermissions } from '@/src/shared/contexts/PermissionsContext'
+import { usePermissions } from '@/shared/contexts/PermissionsContext'
 
 interface CanProps {
   /** Credential(s) to check - supports string, array, or nested array (Symfony 1 style) */

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useTenant } from '@/src/shared/lib/tenant-context';
+import { useTenant } from '@/shared/lib/tenant-context';
 import { menuService } from '../services/menuService';
 import type { MenuItem, MenuFormData, MenuReorderItem } from '../../types';
 

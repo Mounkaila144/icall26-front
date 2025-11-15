@@ -5,7 +5,7 @@
 // following the repository pattern from the Laravel backend.
 // ============================================================================
 
-import { apiClient } from '@/src/shared/lib/api-client';
+import { apiClient } from '@/shared/lib/api-client';
 import type {
   CustomerContract,
   ContractListResponse,

@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useConfigMenus } from '@/src/shared/hooks/useConfigMenus';
-import { useSidebar } from '@/src/shared/lib/sidebar-context';
-import type { MenuConfig } from '@/src/shared/types/menu-config.types';
+import { useConfigMenus } from '@/shared/hooks/useConfigMenus';
+import { useSidebar } from '@/shared/lib/sidebar-context';
+import type { MenuConfig } from '@/shared/types/menu-config.types';
 
 const FALLBACK_ICONS: React.ReactElement[] = [
   (

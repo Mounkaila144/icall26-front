@@ -16,7 +16,7 @@ import {
   loadPermissionsFromStorage,
   savePermissionsToStorage,
   clearPermissionsFromStorage
-} from '@/src/shared/lib/permissions/extractPermissions'
+} from '@/shared/lib/permissions/extractPermissions'
 
 interface PermissionsContextType {
   /** Current user permissions or null if not loaded */
@@ -48,7 +48,7 @@ const PermissionsContext = createContext<PermissionsContextType | undefined>(und
  * @example
  * ```tsx
  * // In app/admin/layout.tsx
- * import { PermissionsProvider } from '@/src/shared/contexts/PermissionsContext'
+ * import { PermissionsProvider } from '@/shared/contexts/PermissionsContext'
  *
  * export default function AdminLayout({ children }) {
  *   return (
@@ -227,7 +227,7 @@ export function PermissionsProvider({ children }: { children: React.ReactNode })
  *
  * @example
  * ```typescript
- * import { usePermissions } from '@/src/shared/contexts/PermissionsContext'
+ * import { usePermissions } from '@/shared/contexts/PermissionsContext'
  *
  * function MyComponent() {
  *   const { hasCredential, hasGroup, permissions } = usePermissions()
@@ -258,7 +258,7 @@ export function usePermissions() {
  *
  * @example
  * ```typescript
- * import { usePermissionsOptional } from '@/src/shared/contexts/PermissionsContext'
+ * import { usePermissionsOptional } from '@/shared/contexts/PermissionsContext'
  *
  * function MyComponent() {
  *   const permissions = usePermissionsOptional()

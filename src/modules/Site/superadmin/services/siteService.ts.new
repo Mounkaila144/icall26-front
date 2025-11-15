@@ -1,4 +1,4 @@
-import { createApiClient } from '@/src/shared/lib/api-client';
+import { createApiClient } from '@/shared/lib/api-client';
 import {
   Site,
   SiteListItem,
@@ -11,7 +11,7 @@ import {
   ToggleAvailabilityData,
   TestConnectionResult,
 } from '../../types/site.types';
-import { ApiResponse } from '@/src/shared/types/api.types';
+import { ApiResponse } from '@/shared/types/api.types';
 
 /**
  * Service pour gérer les sites (Superadmin uniquement)

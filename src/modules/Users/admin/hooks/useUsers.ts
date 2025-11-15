@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useTenant } from '@/src/shared/lib/tenant-context';
+import { useTenant } from '@/shared/lib/tenant-context';
 import { userService } from '../services/userService';
 import type { User, UserFilters } from '../../types/user.types';
 

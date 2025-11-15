@@ -6,9 +6,9 @@
  * Comprehensive debug tool to diagnose permission loading issues
  */
 
-import { usePermissionsOptional } from '@/src/shared/contexts/PermissionsContext'
-import { useAuth } from '@/src/modules/UsersGuard'
-import { loadPermissionsFromStorage } from '@/src/shared/lib/permissions/extractPermissions'
+import { usePermissionsOptional } from '@/shared/contexts/PermissionsContext'
+import { useAuth } from '@/modules/UsersGuard'
+import { loadPermissionsFromStorage } from '@/shared/lib/permissions/extractPermissions'
 import { useState, useEffect } from 'react'
 
 export function DebugPermissionsState() {

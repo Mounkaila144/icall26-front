@@ -5,13 +5,13 @@
  * and provides a centralized access point for the application.
  */
 
-import { MenuConfig, ModuleMenuConfig } from '@/src/shared/types/menu-config.types';
+import { MenuConfig, ModuleMenuConfig } from '@/shared/types/menu-config.types';
 
 // Import menu configurations from modules
-import { dashboardMenuConfig } from '@/src/modules/Dashboard/menu.config';
+import { dashboardMenuConfig } from '@/modules/Dashboard/menu.config';
 import { usersGuardMenuConfig } from '@/modules/Users/menu.config';
-import { customersMenuConfig } from '@/src/modules/Customers/menu.config';
-import { CustomersContractsMenuConfig } from '@/src/modules/CustomersContracts/menu.config';
+import { customersMenuConfig } from '@/modules/Customers/menu.config';
+import { CustomersContractsMenuConfig } from '@/modules/CustomersContracts/menu.config';
 
 /**
  * Registry of all module menu configurations

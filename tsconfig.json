@@ -48,6 +48,14 @@
       ],
       "@views/*": [
         "./src/views/*"
+      ],
+
+
+      "@/modules/*": [
+        "./src/modules/*"
+      ],
+      "@/shared/*": [
+        "./src/shared/*"
       ]
     }
   },

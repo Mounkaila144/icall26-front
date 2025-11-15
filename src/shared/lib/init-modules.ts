@@ -6,7 +6,7 @@
  * which loads menus from the Laravel backend API
  */
 
-import { initUsersGuardModule } from '@/src/modules/UsersGuard';
+import { initUsersGuardModule } from '@/modules/UsersGuard';
 
 /**
  * Initialize all application modules

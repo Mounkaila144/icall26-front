@@ -1,15 +1,29 @@
-// Third-party Imports
-import { getServerSession } from 'next-auth'
+'use client'
+
+// React Imports
+import { useEffect } from 'react'
 
 // Type Imports
 import type { Locale } from '@configs/i18n'
 import type { ChildrenType } from '@core/types'
 
+// Hook Imports
+import { useAuth } from '@/modules/UsersGuard/admin/hooks/useAuth'
+
 // Component Imports
 import AuthRedirect from '@/components/AuthRedirect'
 
-export default async function AuthGuard({ children, locale }: ChildrenType & { locale: Locale }) {
-  const session = await getServerSession()
+export default function AuthGuard({ children, locale }: ChildrenType & { locale: Locale }) {
+  const { isAuthenticated, isLoading } = useAuth()
 
-  return <>{session ? children : <AuthRedirect lang={locale} />}</>
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <div>Loading...</div>
+      </div>
+    )
+  }
+
+  return <>{isAuthenticated ? children : <AuthRedirect lang={locale} />}</>
 }

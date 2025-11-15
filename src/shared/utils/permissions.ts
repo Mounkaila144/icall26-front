@@ -1,4 +1,4 @@
-import { User, Permission } from '@/src/modules/UsersGuard';
+import { User, Permission } from '@/modules/UsersGuard';
 
 /**
  * Extract permission slugs from user

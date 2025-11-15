@@ -455,7 +455,7 @@ All API calls automatically include:
 - **Bearer Token:** From localStorage (`auth_token`)
 - **Tenant Context:** Domain-based or explicit tenant ID
 
-Handled by the shared `apiClient` from `@/src/shared/lib/api-client`.
+Handled by the shared `apiClient` from `@/shared/lib/api-client`.
 
 ## 🌍 Multi-Tenancy
 

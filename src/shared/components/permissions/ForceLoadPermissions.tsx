@@ -7,9 +7,9 @@
  * Useful when user was logged in before permissions system was installed
  */
 
-import { usePermissionsOptional } from '@/src/shared/contexts/PermissionsContext'
-import { useAuth } from '@/src/modules/UsersGuard'
-import { extractPermissionsFromLogin } from '@/src/shared/lib/permissions/extractPermissions'
+import { usePermissionsOptional } from '@/shared/contexts/PermissionsContext'
+import { useAuth } from '@/modules/UsersGuard'
+import { extractPermissionsFromLogin } from '@/shared/lib/permissions/extractPermissions'
 import { useState } from 'react'
 
 export function ForceLoadPermissions() {

@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation';
 import { adminAuthService } from '../services/authService';
 import { AuthState, LoginCredentials } from '../../types/auth.types';
 import { AxiosError } from 'axios';
-import { usePermissionsOptional } from '@/src/shared/contexts/PermissionsContext';
-import { extractPermissionsFromLogin } from '@/src/shared/lib/permissions/extractPermissions';
+import { usePermissionsOptional } from '@/shared/contexts/PermissionsContext';
+import { extractPermissionsFromLogin } from '@/shared/lib/permissions/extractPermissions';
 
 interface UseAuthReturn extends AuthState {
     login: (credentials: LoginCredentials) => Promise<void>;
@@ -124,7 +124,10 @@ export const useAuth = (): UseAuthReturn => {
                 isLoading: false,
             });
 
-            router.push('/admin/login');
+            // Get current locale from URL
+            const currentPath = window.location.pathname;
+            const locale = currentPath.split('/')[1] || 'en';
+            router.push(`/${locale}/login`);
         }
     }, [router, permissionsContext]);
 

@@ -7,7 +7,7 @@
  * Shows all loaded permissions and tests specific permission checks
  */
 
-import { usePermissions } from '@/src/shared/contexts/PermissionsContext'
+import { usePermissions } from '@/shared/contexts/PermissionsContext'
 import { useState } from 'react'
 
 export function DebugPermissions() {

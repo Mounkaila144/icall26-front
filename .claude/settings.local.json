@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \"Get-ChildItem -Path ''C:\\Users\\Mounkaila\\PhpstormProjects\\icall26-front\\src\\modules\\modules'' -Name\")",
+      "Bash(powershell:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

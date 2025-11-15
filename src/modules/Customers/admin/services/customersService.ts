@@ -3,7 +3,7 @@
  * Handles API calls for customer management
  */
 
-import { apiClient } from '@/src/shared/lib/api-client';
+import { apiClient } from '@/shared/lib/api-client';
 import type {
   CustomerListResponse,
   CustomerDetailResponse,

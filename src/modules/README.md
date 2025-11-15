@@ -104,7 +104,7 @@ export interface YourType {
 Create `admin/services/yourService.ts`:
 
 ```typescript
-import { createApiClient } from '@/src/shared/lib/api-client';
+import { createApiClient } from '@/shared/lib/api-client';
 
 class YourService {
   async getData(tenantId?: string) {
@@ -125,7 +125,7 @@ Create `admin/hooks/useYourHook.ts`:
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTenant } from '@/src/shared/lib/tenant-context';
+import { useTenant } from '@/shared/lib/tenant-context';
 import { yourService } from '../services/yourService';
 
 export const useYourHook = () => {
@@ -195,8 +195,8 @@ All modules support multi-tenancy through:
 ### Example:
 
 ```typescript
-import { useTenant } from '@/src/shared/lib/tenant-context';
-import { createApiClient } from '@/src/shared/lib/api-client';
+import { useTenant } from '@/shared/lib/tenant-context';
+import { createApiClient } from '@/shared/lib/api-client';
 
 function MyComponent() {
   const { tenantId, setTenantId } = useTenant();
@@ -242,7 +242,7 @@ function MyComponent() {
 All API calls should use the shared API client:
 
 ```typescript
-import { createApiClient } from '@/src/shared/lib/api-client';
+import { createApiClient } from '@/shared/lib/api-client';
 
 // With tenant
 const client = createApiClient(tenantId);

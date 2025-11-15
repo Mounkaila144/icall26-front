@@ -1,7 +1,7 @@
-import { createApiClient } from '@/src/shared/lib/api-client';
-import { generateAdminRoute } from '@/src/shared/utils/routeGenerator';
+import { createApiClient } from '@/shared/lib/api-client';
+import { generateAdminRoute } from '@/shared/utils/routeGenerator';
 import type { MenuItem, MenuFormData, MenuReorderItem, BackendMenuItem } from '../../types';
-import type { ApiResponse } from '@/src/shared/types/api.types';
+import type { ApiResponse } from '@/shared/types/api.types';
 
 /**
  * Menu Service

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext } from 'react';
-import { useLanguage } from '@/src/shared/lib/language-context';
+import { useLanguage } from '@/shared/lib/language-context';
 import { Locale, TranslationContextValue } from './types';
 
 const TranslationContext = createContext<TranslationContextValue | undefined>(undefined);
