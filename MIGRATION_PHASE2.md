@@ -298,4 +298,4 @@ pnpm format
 
 **Date**: 2025-11-14
 **Migration de**: `icall26` → `icall26-front`
-**Template**: Materialize MUI Next.js Admin Template
+**Template**: Icall26 MUI Next.js Admin Template
