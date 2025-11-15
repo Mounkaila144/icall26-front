@@ -69,4 +69,39 @@ export interface PaginationMeta {
   total: number;
   per_page: number;
   last_page: number;
+  from: number | null;
+  to: number | null;
+}
+
+/**
+ * Statistics for users
+ */
+export interface UserStatistics {
+  total_users: number;
+  active_users: number;
+  inactive_users: number;
+  locked_users: number;
+}
+
+/**
+ * Paginated response from API
+ */
+export interface PaginatedUsersResponse {
+  data: User[];
+  meta: PaginationMeta;
+  statistics: UserStatistics;
+}
+
+/**
+ * Query parameters for user list
+ */
+export interface UserQueryParams {
+  page?: number;
+  nbitemsbypage?: number;
+  filter?: {
+    search?: string;
+    equal?: Record<string, string>;
+    order?: Record<string, 'asc' | 'desc'>;
+    range?: Record<string, { from: string; to: string }>;
+  };
 }
