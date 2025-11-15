@@ -14,6 +14,9 @@ import Divider from '@mui/material/Divider'
 import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
 
+// Translation Imports
+import { useTranslation } from '@/shared/i18n'
+
 // Type Imports
 import type { User } from '../../types/user.types'
 
@@ -24,6 +27,8 @@ interface UserGroupsModalProps {
 }
 
 const UserGroupsModal = ({ open, onClose, user }: UserGroupsModalProps) => {
+  const { t } = useTranslation('Users')
+
   if (!user) return null
 
   // Use groups array if available, otherwise parse groups_list
@@ -41,7 +46,7 @@ const UserGroupsModal = ({ open, onClose, user }: UserGroupsModalProps) => {
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
       <DialogTitle className='flex items-center justify-between'>
         <div>
-          <Typography variant='h5'>User Groups</Typography>
+          <Typography variant='h5'>{t('User Groups')}</Typography>
           <Typography variant='body2' color='text.secondary'>
             {user.username} - {user.full_name}
           </Typography>
@@ -54,12 +59,12 @@ const UserGroupsModal = ({ open, onClose, user }: UserGroupsModalProps) => {
       <DialogContent>
         {groups.length === 0 ? (
           <Typography color='text.secondary' className='text-center py-8'>
-            No groups assigned to this user
+            {t('No groups assigned to this user')}
           </Typography>
         ) : (
           <div className='space-y-4'>
             <Typography variant='body2' color='text.secondary'>
-              Total: {groups.length} group{groups.length > 1 ? 's' : ''}
+              {t('Total')}: {groups.length} {groups.length > 1 ? t('groups') : t('group')}
             </Typography>
             <div className='grid grid-cols-1 gap-2'>
               {groups.map((group, index) => (
@@ -79,7 +84,7 @@ const UserGroupsModal = ({ open, onClose, user }: UserGroupsModalProps) => {
                   </div>
                   {group.permissions && group.permissions.length > 0 && (
                     <Chip
-                      label={`${group.permissions.length} permissions`}
+                      label={`${group.permissions.length} ${t('permissions')}`}
                       size='small'
                       color='info'
                       variant='tonal'
@@ -94,7 +99,7 @@ const UserGroupsModal = ({ open, onClose, user }: UserGroupsModalProps) => {
       <Divider />
       <DialogActions>
         <Button onClick={onClose} variant='outlined' color='secondary'>
-          Close
+          {t('Close')}
         </Button>
       </DialogActions>
     </Dialog>

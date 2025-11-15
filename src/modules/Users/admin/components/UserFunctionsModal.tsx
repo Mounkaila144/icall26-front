@@ -14,6 +14,9 @@ import Divider from '@mui/material/Divider'
 import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
 
+// Translation Imports
+import { useTranslation } from '@/shared/i18n'
+
 // Type Imports
 import type { User } from '../../types/user.types'
 
@@ -24,6 +27,8 @@ interface UserFunctionsModalProps {
 }
 
 const UserFunctionsModal = ({ open, onClose, user }: UserFunctionsModalProps) => {
+  const { t } = useTranslation('Users')
+
   if (!user) return null
 
   // Parse functions list (assuming it's comma-separated or similar format)
@@ -35,7 +40,7 @@ const UserFunctionsModal = ({ open, onClose, user }: UserFunctionsModalProps) =>
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
       <DialogTitle className='flex items-center justify-between'>
         <div>
-          <Typography variant='h5'>User Functions</Typography>
+          <Typography variant='h5'>{t('User Functions')}</Typography>
           <Typography variant='body2' color='text.secondary'>
             {user.username} - {user.full_name}
           </Typography>
@@ -48,12 +53,12 @@ const UserFunctionsModal = ({ open, onClose, user }: UserFunctionsModalProps) =>
       <DialogContent>
         {functions.length === 0 ? (
           <Typography color='text.secondary' className='text-center py-8'>
-            No functions assigned to this user
+            {t('No functions assigned to this user')}
           </Typography>
         ) : (
           <div className='space-y-4'>
             <Typography variant='body2' color='text.secondary'>
-              Total: {functions.length} function{functions.length > 1 ? 's' : ''}
+              {t('Total')}: {functions.length} {functions.length > 1 ? t('functions') : t('function')}
             </Typography>
             <div className='grid grid-cols-1 gap-2'>
               {functions.map((func, index) => (
@@ -78,7 +83,7 @@ const UserFunctionsModal = ({ open, onClose, user }: UserFunctionsModalProps) =>
       <Divider />
       <DialogActions>
         <Button onClick={onClose} variant='outlined' color='secondary'>
-          Close
+          {t('Close')}
         </Button>
       </DialogActions>
     </Dialog>

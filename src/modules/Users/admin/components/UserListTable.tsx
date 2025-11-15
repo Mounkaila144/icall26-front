@@ -33,6 +33,9 @@ import {
 } from '@tanstack/react-table'
 import type { ColumnDef } from '@tanstack/react-table'
 
+// Translation Imports
+import { useTranslation } from '@/shared/i18n'
+
 // Type Imports
 import type { ThemeColor } from '@core/types'
 import type { User } from '../../types/user.types'
@@ -103,6 +106,15 @@ const STORAGE_KEY = 'userListTableColumns'
 const columnHelper = createColumnHelper<UserWithAction>()
 
 const UserListTable = () => {
+  // Translation
+  const { t, locale } = useTranslation('Users')
+
+  // Debug: Log current locale
+  useEffect(() => {
+    console.log('📊 [UserListTable] Current locale:', locale);
+    console.log('📊 [UserListTable] Sample translation test:', t('Users Management'));
+  }, [locale, t]);
+
   // Context
   const {
     users,
@@ -314,9 +326,14 @@ const UserListTable = () => {
           />
         )
       },
+      columnHelper.accessor('id', {
+        id: 'id',
+        header: () => createSortableHeader('#', 'id'),
+        cell: ({ row }) => <Typography>{row.original.id || '-'}</Typography>
+      }),
       columnHelper.accessor('username', {
         id: 'username',
-        header: () => createSortableHeader('Username', 'username'),
+        header: () => createSortableHeader(t('Username'), 'username'),
         cell: ({ row }) => (
           <div className='flex items-center gap-3'>
             {getAvatar({ sex: row.original.sex, full_name: row.original.full_name })}
@@ -328,26 +345,26 @@ const UserListTable = () => {
       }),
       columnHelper.accessor('firstname', {
         id: 'firstname',
-        header: () => createSortableHeader('Firstname', 'firstname'),
+        header: () => createSortableHeader(t('Firstname'), 'firstname'),
         cell: ({ row }) => <Typography>{row.original.firstname || '-'}</Typography>
       }),
       columnHelper.accessor('lastname', {
         id: 'lastname',
-        header: () => createSortableHeader('Lastname', 'lastname'),
+        header: () => createSortableHeader(t('Lastname'), 'lastname'),
         cell: ({ row }) => <Typography>{row.original.lastname || '-'}</Typography>
       }),
       columnHelper.accessor('email', {
         id: 'email',
-        header: () => createSortableHeader('Email', 'email'),
+        header: () => createSortableHeader(t('Email'), 'email'),
         cell: ({ row }) => <Typography>{row.original.email || '-'}</Typography>
       }),
       columnHelper.accessor('is_secure_by_code', {
         id: 'code_by_email',
-        header: 'Code by Email',
+        header: t('Code by Email'),
         cell: ({ row }) => (
           <Chip
             variant='tonal'
-            label={row.original.is_secure_by_code === 'YES' ? 'Yes' : 'No'}
+            label={row.original.is_secure_by_code === 'YES' ? t('Yes') : t('No')}
             size='small'
             color={row.original.is_secure_by_code === 'YES' ? 'success' : 'secondary'}
           />
@@ -355,17 +372,17 @@ const UserListTable = () => {
       }),
       columnHelper.accessor('teams_list', {
         id: 'teams',
-        header: 'Teams',
+        header: t('Teams'),
         cell: ({ row }) => <Typography className='max-w-xs truncate'>{row.original.teams_list || '-'}</Typography>
       }),
       columnHelper.accessor('profiles', {
         id: 'profiles',
-        header: 'Profiles',
+        header: t('Profiles'),
         cell: ({ row }) => <Typography className='max-w-xs truncate'>{row.original.profiles || '-'}</Typography>
       }),
       columnHelper.accessor('groups_list', {
         id: 'groups',
-        header: 'Groups',
+        header: t('Groups'),
         cell: ({ row }) => {
           const groupsCount = row.original.groups.length > 0
             ? row.original.groups.length
@@ -376,7 +393,7 @@ const UserListTable = () => {
           return groupsCount > 0 ? (
             <Chip
               variant='tonal'
-              label={`${groupsCount} group${groupsCount > 1 ? 's' : ''}`}
+              label={`${groupsCount} ${groupsCount > 1 ? t('groups') : t('group')}`}
               size='small'
               color='success'
               onClick={() => handleOpenGroupsModal(row.original)}
@@ -389,11 +406,11 @@ const UserListTable = () => {
       }),
       columnHelper.accessor('permissions', {
         id: 'permissions',
-        header: 'Permissions',
+        header: t('Permissions'),
         cell: ({ row }) => (
           <Chip
             variant='tonal'
-            label={`${row.original.permissions} perms`}
+            label={`${row.original.permissions} ${t('perms')}`}
             size='small'
             color='info'
           />
@@ -401,7 +418,7 @@ const UserListTable = () => {
       }),
       columnHelper.accessor('functions_list', {
         id: 'functions',
-        header: 'Functions',
+        header: t('Functions'),
         cell: ({ row }) => {
           const functionsCount = row.original.functions_list
             ? row.original.functions_list.split(',').filter(Boolean).length
@@ -410,7 +427,7 @@ const UserListTable = () => {
           return functionsCount > 0 ? (
             <Chip
               variant='tonal'
-              label={`${functionsCount} function${functionsCount > 1 ? 's' : ''}`}
+              label={`${functionsCount} ${functionsCount > 1 ? t('functions') : t('function')}`}
               size='small'
               color='info'
               onClick={() => handleOpenFunctionsModal(row.original)}
@@ -423,11 +440,11 @@ const UserListTable = () => {
       }),
       columnHelper.accessor('is_active', {
         id: 'state',
-        header: 'State',
+        header: t('State'),
         cell: ({ row }) => (
           <Chip
             variant='tonal'
-            label={row.original.is_active === 'YES' ? 'Active' : 'Inactive'}
+            label={row.original.is_active === 'YES' ? t('Active') : t('Inactive')}
             size='small'
             color={userStatusObj[row.original.is_active]}
           />
@@ -435,7 +452,7 @@ const UserListTable = () => {
       }),
       columnHelper.accessor('status', {
         id: 'status',
-        header: 'Status',
+        header: t('Status'),
         cell: ({ row }) => (
           <Typography className='capitalize' color='text.primary'>
             {row.original.status}
@@ -444,17 +461,17 @@ const UserListTable = () => {
       }),
       columnHelper.accessor('team_id', {
         id: 'managers_teams',
-        header: 'Managers/Teams',
+        header: t('Managers/Teams'),
         cell: ({ row }) => <Typography>{row.original.team_id || '-'}</Typography>
       }),
       columnHelper.accessor('creator_id', {
         id: 'creator',
-        header: 'Creator',
+        header: t('Creator'),
         cell: ({ row }) => <Typography>{row.original.creator_id || '-'}</Typography>
       }),
       columnHelper.accessor('created_at', {
         id: 'created_at',
-        header: () => createSortableHeader('Date Creation', 'created_at'),
+        header: () => createSortableHeader(t('Date Creation'), 'created_at'),
         cell: ({ row }) => (
           <Typography>
             {row.original.created_at ? new Date(row.original.created_at).toLocaleString() : '-'}
@@ -463,7 +480,7 @@ const UserListTable = () => {
       }),
       columnHelper.accessor('lastlogin', {
         id: 'lastlogin',
-        header: () => createSortableHeader('Last Login', 'lastlogin'),
+        header: () => createSortableHeader(t('Last Login'), 'lastlogin'),
         cell: ({ row }) => (
           <Typography>
             {row.original.lastlogin ? new Date(row.original.lastlogin).toLocaleString() : '-'}
@@ -472,7 +489,7 @@ const UserListTable = () => {
       }),
       columnHelper.accessor('last_password_gen', {
         id: 'last_password_gen',
-        header: () => createSortableHeader('Last Password Gen', 'last_password_gen'),
+        header: () => createSortableHeader(t('Last Password Gen'), 'last_password_gen'),
         cell: ({ row }) => (
           <Typography>
             {row.original.last_password_gen ? new Date(row.original.last_password_gen).toLocaleString() : '-'}
@@ -481,11 +498,11 @@ const UserListTable = () => {
       }),
       columnHelper.accessor('is_locked', {
         id: 'locked',
-        header: 'Locked',
+        header: t('Locked'),
         cell: ({ row }) => (
           <Chip
             variant='tonal'
-            label={row.original.is_locked === 'YES' ? 'Locked' : 'Unlocked'}
+            label={row.original.is_locked === 'YES' ? t('Locked') : t('Unlocked')}
             size='small'
             color={userLockStatusObj[row.original.is_locked]}
           />
@@ -493,7 +510,7 @@ const UserListTable = () => {
       }),
       columnHelper.accessor('locked_at', {
         id: 'locked_at',
-        header: 'Locked At',
+        header: t('Locked At'),
         cell: ({ row }) => (
           <Typography>
             {row.original.locked_at ? new Date(row.original.locked_at).toLocaleString() : '-'}
@@ -502,32 +519,32 @@ const UserListTable = () => {
       }),
       columnHelper.accessor('unlocked_by', {
         id: 'unlocked_by',
-        header: 'Unlocked By',
+        header: t('Unlocked By'),
         cell: ({ row }) => <Typography>{row.original.unlocked_by || '-'}</Typography>
       }),
       columnHelper.accessor('number_of_try', {
         id: 'number_of_try',
-        header: 'Number of Tries',
+        header: t('Number of Tries'),
         cell: ({ row }) => <Typography>{row.original.number_of_try}</Typography>
       }),
       columnHelper.accessor('callcenter_id', {
         id: 'callcenter',
-        header: 'Callcenter',
+        header: t('Callcenter'),
         cell: ({ row }) => <Typography>{row.original.callcenter_id || '-'}</Typography>
       }),
       columnHelper.accessor('company_id', {
         id: 'company',
-        header: 'Company',
+        header: t('Company'),
         cell: ({ row }) => <Typography>{row.original.company_id || '-'}</Typography>
       }),
       columnHelper.accessor('action', {
-        header: 'Actions',
+        header: t('Actions'),
         cell: ({ row }) => (
           <div className='flex items-center gap-0.5'>
             <IconButton
               size='small'
               onClick={async () => {
-                if (confirm('Are you sure you want to delete this user?')) {
+                if (confirm(t('Are you sure you want to delete this user?'))) {
                   try {
                     await deleteUser(row.original.id)
                   } catch (error) {
@@ -549,8 +566,7 @@ const UserListTable = () => {
         enableSorting: false
       })
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [deleteUser, createSortableHeader, handleOpenFunctionsModal, handleOpenGroupsModal]
+    [t, deleteUser, createSortableHeader, handleOpenFunctionsModal, handleOpenGroupsModal]
   )
 
   // Filter columns based on visibility
@@ -590,7 +606,7 @@ const UserListTable = () => {
 
   return (
     <Card>
-      <CardHeader title='Users Management' className='pbe-4' />
+      <CardHeader title={t('Users Management')} className='pbe-4' />
       <Divider />
       <div className='flex justify-between gap-4 p-5 flex-col items-start sm:flex-row sm:items-center'>
         <div className='flex gap-2'>
@@ -601,7 +617,7 @@ const UserListTable = () => {
             className='max-sm:is-full'
             disabled={loading}
           >
-            Export
+            {t('Export')}
           </Button>
           <Button
             color='secondary'
@@ -610,14 +626,14 @@ const UserListTable = () => {
             onClick={handleOpenColumnMenu}
             className='max-sm:is-full'
           >
-            Columns
+            {t('Columns')}
           </Button>
         </div>
         <div className='flex items-center gap-x-4 max-sm:gap-y-4 flex-col max-sm:is-full sm:flex-row'>
           <TextField
             value={globalFilter}
             onChange={e => setGlobalFilter(e.target.value)}
-            placeholder='Search User'
+            placeholder={t('Search User')}
             size='small'
             className='max-sm:is-full'
             disabled={loading}
@@ -629,7 +645,7 @@ const UserListTable = () => {
             disabled={loading}
             className='max-sm:is-full'
           >
-            {loading ? 'Loading...' : 'Refresh'}
+            {loading ? t('Loading...') : t('Refresh')}
           </Button>
         </div>
       </div>
@@ -646,7 +662,7 @@ const UserListTable = () => {
       >
         <div className='p-4' style={{ width: 300 }}>
           <div className='flex items-center justify-between mb-4'>
-            <Typography variant='h6'>Show Columns</Typography>
+            <Typography variant='h6'>{t('Show Columns')}</Typography>
             <IconButton size='small' onClick={handleCloseColumnMenu}>
               <i className='ri-close-line' />
             </IconButton>
@@ -654,13 +670,13 @@ const UserListTable = () => {
           <Divider className='mb-2' />
           <div className='flex gap-2 mb-4'>
             <Button size='small' onClick={handleShowAllColumns} variant='outlined'>
-              Show All
+              {t('Show All')}
             </Button>
             <Button size='small' onClick={handleHideAllColumns} variant='outlined'>
-              Hide All
+              {t('Hide All')}
             </Button>
             <Button size='small' onClick={handleResetColumns} variant='outlined'>
-              Reset
+              {t('Reset')}
             </Button>
           </div>
           <Divider className='mb-2' />
@@ -670,7 +686,7 @@ const UserListTable = () => {
                 <ListItemButton onClick={() => handleToggleColumn(column.id)}>
                   <FormControlLabel
                     control={<Checkbox checked={columnVisibility[column.id] !== false} />}
-                    label={column.label}
+                    label={t(column.label)}
                     className='w-full m-0'
                   />
                 </ListItemButton>
@@ -707,7 +723,7 @@ const UserListTable = () => {
               <tr>
                 <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
                   <Box sx={{ py: 6 }}>
-                    <Typography>No data available</Typography>
+                    <Typography>{t('No data available')}</Typography>
                   </Box>
                 </td>
               </tr>

@@ -20,7 +20,12 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
     ? language as Locale
     : 'fr';
 
+  React.useEffect(() => {
+    console.log('🌍 [TranslationProvider] Locale:', locale);
+  }, [locale]);
+
   const setLocale = (newLocale: Locale) => {
+    console.log('🌍 [TranslationProvider] setLocale called:', newLocale);
     setLanguage(newLocale);
   };
 

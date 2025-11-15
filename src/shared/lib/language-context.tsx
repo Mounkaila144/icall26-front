@@ -15,6 +15,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   // Initialize language from localStorage or browser
   useEffect(() => {
     const savedLang = localStorage.getItem('app_language');
+    console.log('📚 [LanguageProvider] Initializing:', { savedLang, browserLang: navigator.language });
     if (savedLang) {
       setLanguageState(savedLang);
     } else {
@@ -24,9 +25,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setLanguage = useCallback((lang: string) => {
+    console.log('📚 [LanguageProvider] Language changed:', lang);
     setLanguageState(lang);
     localStorage.setItem('app_language', lang);
   }, []);
+
+  useEffect(() => {
+    console.log('📚 [LanguageProvider] Current language:', language);
+  }, [language]);
 
   // Memoize the context value to prevent unnecessary re-renders
   const value = useMemo(() => ({
