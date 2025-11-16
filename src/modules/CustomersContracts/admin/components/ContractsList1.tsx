@@ -27,6 +27,7 @@ import type { DataTableConfig, ColumnConfig } from '@/components/shared/DataTabl
 
 // Types
 import type { CustomerContract } from '../../types'
+import { Can } from '@/shared/components/permissions'
 
 // Column helper
 const columnHelper = createColumnHelper<CustomerContract>()
@@ -685,6 +686,10 @@ export default function ContractsList1() {
           ❌ {error}
         </Box>
       )}
+
+      <Can credential={[['admink', 'superadmin', 'settings_user_listk']]}>
+        <h1>{t('Edit User')}</h1>
+      </Can>
 
       <DataTable {...tableConfig} />
 

@@ -10,6 +10,20 @@ export const superAdminMenuConfig: ModuleMenuConfig = {
   module: 'SuperAdmin',
   menus: [
     {
+      id: 'superadmin-sites',
+      label: 'Sites',
+      route: '/superadmin/sites',
+      icon: {
+        type: 'emoji',
+        value: '🌐',
+      },
+      order: 5,
+      module: 'SuperAdmin',
+      roles: ['superadmin'],
+      isVisible: true,
+      isActive: true,
+    },
+    {
       id: 'superadmin-admins',
       label: 'Admin Management',
       icon: {

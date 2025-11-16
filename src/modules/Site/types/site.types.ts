@@ -57,6 +57,7 @@ export interface Site {
 
 export interface SiteListItem {
   id: number;
+  site_id?: number; // Alias pour la compatibilité avec la DB
   host: string;
   db_name: string;
   type: SiteType | null;

@@ -1,19 +1,52 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { SiteListItem } from '../../types/site.types';
-import { formatDistanceToNow } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { useMemo, useCallback } from 'react'
+import { createColumnHelper } from '@tanstack/react-table'
+
+// MUI Imports
+import Typography from '@mui/material/Typography'
+import IconButton from '@mui/material/IconButton'
+import Chip from '@mui/material/Chip'
+
+// Services & Types
+import type { SiteListItem } from '../../types/site.types'
+import type { ColumnDef } from '@tanstack/react-table'
+
+// Shared Components
+import { DataTable, StandardMobileCard } from '@/components/shared/DataTable'
+import type { DataTableConfig } from '@/components/shared/DataTable'
+
+// Date formatting
+import { formatDistanceToNow } from 'date-fns'
+import { fr } from 'date-fns/locale'
+
+// Column helper
+const columnHelper = createColumnHelper<SiteListItem>()
 
 interface SitesTableProps {
-  sites: SiteListItem[];
-  isLoading: boolean;
-  onEdit: (site: SiteListItem) => void;
-  onDelete: (site: SiteListItem) => void;
-  onView: (site: SiteListItem) => void;
-  onTestConnection: (site: SiteListItem) => void;
+  sites: SiteListItem[]
+  isLoading: boolean
+  onEdit: (site: SiteListItem) => void
+  onDelete: (site: SiteListItem) => void
+  onView: (site: SiteListItem) => void
+  onTestConnection: (site: SiteListItem) => void
+  onAdd?: () => void
+  pagination?: {
+    current_page: number
+    last_page: number
+    per_page: number
+    total: number
+  }
+  onPageChange?: (page: number) => void
+  onPageSizeChange?: (size: number) => void
+  onRefresh?: () => void
+  onSearch?: (value: string) => void
 }
 
+/**
+ * Sites Table Component
+ * Using the reusable DataTable architecture
+ */
 export default function SitesTable({
   sites,
   isLoading,
@@ -21,217 +54,233 @@ export default function SitesTable({
   onDelete,
   onView,
   onTestConnection,
+  onAdd,
+  pagination,
+  onPageChange,
+  onPageSizeChange,
+  onRefresh,
+  onSearch
 }: SitesTableProps) {
-  const [selectedSites, setSelectedSites] = useState<number[]>([]);
-
-  const toggleSelect = (id: number) => {
-    setSelectedSites((prev) =>
-      prev.includes(id) ? prev.filter((sid) => sid !== id) : [...prev, id]
-    );
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedSites.length === sites.length) {
-      setSelectedSites([]);
-    } else {
-      setSelectedSites(sites.map((site) => site.id));
-    }
-  };
-
-  const getTypeLabel = (type: string | null) => {
+  // Helper functions
+  const getTypeLabel = useCallback((type: string | null) => {
     switch (type) {
       case 'CUST':
-        return { label: 'CRM', color: 'bg-blue-100 text-blue-800' };
+        return { label: 'CRM', color: 'info' as const }
       case 'ECOM':
-        return { label: 'E-commerce', color: 'bg-green-100 text-green-800' };
+        return { label: 'E-commerce', color: 'success' as const }
       case 'CMS':
-        return { label: 'CMS', color: 'bg-purple-100 text-purple-800' };
+        return { label: 'CMS', color: 'secondary' as const }
       default:
-        return { label: 'N/A', color: 'bg-gray-100 text-gray-800' };
+        return { label: 'N/A', color: 'default' as const }
     }
-  };
+  }, [])
 
-  const formatLastConnection = (date: string | null) => {
-    if (!date) return 'Jamais';
+  const formatLastConnection = useCallback((date: string | null) => {
+    if (!date) return 'Jamais'
     try {
-      return formatDistanceToNow(new Date(date), { addSuffix: true, locale: fr });
+      return formatDistanceToNow(new Date(date), { addSuffix: true, locale: fr })
     } catch {
-      return 'N/A';
+      return 'N/A'
     }
-  };
+  }, [])
 
-  if (isLoading) {
-    return (
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div className="p-8 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement des sites...</p>
-        </div>
-      </div>
-    );
+  // Handle delete with confirmation
+  const handleDelete = useCallback(
+    async (site: SiteListItem) => {
+      if (window.confirm(`Êtes-vous sûr de vouloir supprimer le site "${site.host}" ?`)) {
+        onDelete(site)
+      }
+    },
+    [onDelete]
+  )
+
+  // Column definitions
+  const columns = useMemo<ColumnDef<SiteListItem, any>[]>(
+    () => [
+      columnHelper.accessor('site_id', {
+        id: 'site_id',
+        header: 'ID',
+        cell: ({ row }) => (
+          <Typography variant='body2' className='font-medium'>
+            {row.original.id}
+          </Typography>
+        )
+      }),
+      columnHelper.accessor('host', {
+        id: 'host',
+        header: 'Domaine',
+        cell: ({ row }) => (
+          <div className='flex items-center gap-3'>
+            <div className='flex-shrink-0 w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center'>
+              <span className='text-white font-bold text-sm'>
+                {row.original.host.substring(0, 2).toUpperCase()}
+              </span>
+            </div>
+            <div>
+              <Typography className='font-semibold'>{row.original.host}</Typography>
+              {row.original.is_customer && (
+                <Chip label='Client' size='small' color='success' className='mt-1' />
+              )}
+            </div>
+          </div>
+        )
+      }),
+      columnHelper.accessor('db_name', {
+        id: 'db_name',
+        header: 'Base de données',
+        cell: ({ row }) => (
+          <Typography variant='body2' className='font-mono text-sm'>
+            {row.original.db_name}
+          </Typography>
+        )
+      }),
+      columnHelper.accessor('type', {
+        id: 'type',
+        header: 'Type',
+        cell: ({ row }) => {
+          const typeInfo = getTypeLabel(row.original.type)
+          return <Chip label={typeInfo.label} size='small' color={typeInfo.color} />
+        }
+      }),
+      columnHelper.accessor('company', {
+        id: 'company',
+        header: 'Société',
+        cell: ({ row }) => (
+          <Typography variant='body2'>{row.original.company || '-'}</Typography>
+        )
+      }),
+      columnHelper.accessor('available', {
+        id: 'available',
+        header: 'Statut',
+        cell: ({ row }) =>
+          row.original.available ? (
+            <Chip label='Actif' size='small' color='success' />
+          ) : (
+            <Chip label='Inactif' size='small' color='error' />
+          )
+      }),
+      columnHelper.accessor('last_connection', {
+        id: 'last_connection',
+        header: 'Dernière connexion',
+        cell: ({ row }) => (
+          <Typography variant='body2' color='text.secondary'>
+            {formatLastConnection(row.original.last_connection)}
+          </Typography>
+        )
+      }),
+      columnHelper.display({
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => (
+          <div className='flex items-center gap-0.5'>
+            <IconButton size='small' onClick={() => onView(row.original)} color='info' title='Voir les détails'>
+              <i className='ri-eye-line' />
+            </IconButton>
+            <IconButton size='small' onClick={() => onEdit(row.original)} color='primary' title='Modifier'>
+              <i className='ri-edit-box-line' />
+            </IconButton>
+            <IconButton
+              size='small'
+              onClick={() => onTestConnection(row.original)}
+              color='success'
+              title='Tester la connexion'
+            >
+              <i className='ri-flash-line' />
+            </IconButton>
+            <IconButton size='small' onClick={() => handleDelete(row.original)} color='error' title='Supprimer'>
+              <i className='ri-delete-bin-7-line' />
+            </IconButton>
+          </div>
+        )
+      })
+    ],
+    [getTypeLabel, formatLastConnection, onView, onEdit, onTestConnection, handleDelete]
+  )
+
+  // DataTable configuration
+  const tableConfig: DataTableConfig<SiteListItem> = {
+    columns,
+    data: sites,
+    loading: isLoading,
+    pagination,
+    onPageChange,
+    onPageSizeChange,
+    onSearch,
+    onRefresh,
+    searchPlaceholder: 'Rechercher par domaine, base de données, société...',
+    emptyMessage: 'Aucun site trouvé',
+    rowsPerPageOptions: [10, 15, 25, 50],
+
+    // Actions in toolbar
+    actions: onAdd ? [
+      {
+        label: 'Nouveau Site',
+        icon: 'ri-add-line',
+        color: 'primary',
+        onClick: onAdd
+      }
+    ] : [],
+
+    // Mobile card configuration
+    mobileCard: {
+      renderCard: site => (
+        <StandardMobileCard
+          title={site.host}
+          subtitle={site.company}
+          status={{
+            label: site.available ? 'Actif' : 'Inactif',
+            color: site.available ? 'success' : 'error'
+          }}
+          fields={[
+            {
+              icon: 'ri-database-2-line',
+              label: 'Base de données',
+              value: site.db_name
+            },
+            {
+              icon: 'ri-stack-line',
+              label: 'Type',
+              value: getTypeLabel(site.type).label
+            },
+            {
+              icon: 'ri-building-line',
+              label: 'Société',
+              value: site.company || '-',
+              hidden: !site.company
+            },
+            {
+              icon: 'ri-time-line',
+              label: 'Dernière connexion',
+              value: formatLastConnection(site.last_connection)
+            }
+          ]}
+          actions={[
+            {
+              icon: 'ri-eye-line',
+              color: 'info',
+              onClick: () => onView(site)
+            },
+            {
+              icon: 'ri-edit-box-line',
+              color: 'primary',
+              onClick: () => onEdit(site)
+            },
+            {
+              icon: 'ri-flash-line',
+              color: 'success',
+              onClick: () => onTestConnection(site)
+            },
+            {
+              icon: 'ri-delete-bin-7-line',
+              color: 'error',
+              onClick: () => handleDelete(site)
+            }
+          ]}
+          item={site}
+        />
+      )
+    }
   }
 
-  if (sites.length === 0) {
-    return (
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div className="p-8 text-center">
-          <svg
-            className="mx-auto h-12 w-12 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-            />
-          </svg>
-          <h3 className="mt-2 text-sm font-medium text-gray-900">Aucun site</h3>
-          <p className="mt-1 text-sm text-gray-500">Commencez par créer un nouveau site.</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th scope="col" className="px-6 py-3 text-left">
-                <input
-                  type="checkbox"
-                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                  checked={selectedSites.length === sites.length}
-                  onChange={toggleSelectAll}
-                />
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Domaine
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Base de données
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Type
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Société
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Statut
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Dernière connexion
-              </th>
-              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {sites.map((site) => {
-              const typeInfo = getTypeLabel(site.type);
-              return (
-                <tr key={site.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <input
-                      type="checkbox"
-                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                      checked={selectedSites.includes(site.id)}
-                      onChange={() => toggleSelect(site.id)}
-                    />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">{site.host.substring(0, 2).toUpperCase()}</span>
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{site.host}</div>
-                        {site.is_customer && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                            Client
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{site.db_name}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${typeInfo.color}`}>
-                      {typeInfo.label}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{site.company || '-'}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {site.available ? (
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                        Actif
-                      </span>
-                    ) : (
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                        Inactif
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatLastConnection(site.last_connection)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex items-center justify-end space-x-2">
-                      <button
-                        onClick={() => onView(site)}
-                        className="text-indigo-600 hover:text-indigo-900 transition-colors"
-                        title="Voir les détails"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => onEdit(site)}
-                        className="text-blue-600 hover:text-blue-900 transition-colors"
-                        title="Modifier"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => onTestConnection(site)}
-                        className="text-green-600 hover:text-green-900 transition-colors"
-                        title="Tester la connexion"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => onDelete(site)}
-                        className="text-red-600 hover:text-red-900 transition-colors"
-                        title="Supprimer"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+  return <DataTable {...tableConfig} />
 }
