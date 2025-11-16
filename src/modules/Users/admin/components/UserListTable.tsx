@@ -44,6 +44,8 @@ import type { User } from '../../types/user.types'
 import CustomAvatar from '@core/components/mui/Avatar'
 import UserFunctionsModal from './UserFunctionsModal'
 import UserGroupsModal from './UserGroupsModal'
+import UserAddModal from './UserAddModal'
+import UserEditModal from './UserEditModal'
 
 // Util Imports
 import { getInitials } from '@/utils/getInitials'
@@ -159,6 +161,8 @@ const UserListTable = () => {
   const [sorting, setSorting] = useState<{ column: string; direction: 'asc' | 'desc' } | null>(null)
   const [functionsModalOpen, setFunctionsModalOpen] = useState(false)
   const [groupsModalOpen, setGroupsModalOpen] = useState(false)
+  const [addModalOpen, setAddModalOpen] = useState(false)
+  const [editModalOpen, setEditModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(getInitialColumnVisibility)
   const [columnMenuAnchor, setColumnMenuAnchor] = useState<null | HTMLElement>(null)
@@ -243,6 +247,34 @@ const UserListTable = () => {
     setGroupsModalOpen(false)
     setSelectedUser(null)
   }, [])
+
+  // Handle add modal
+  const handleOpenAddModal = useCallback(() => {
+    setAddModalOpen(true)
+  }, [])
+
+  const handleCloseAddModal = useCallback(() => {
+    setAddModalOpen(false)
+  }, [])
+
+  const handleAddSuccess = useCallback(() => {
+    refresh()
+  }, [refresh])
+
+  // Handle edit modal
+  const handleOpenEditModal = useCallback((user: User) => {
+    setSelectedUser(user)
+    setEditModalOpen(true)
+  }, [])
+
+  const handleCloseEditModal = useCallback(() => {
+    setEditModalOpen(false)
+    setSelectedUser(null)
+  }, [])
+
+  const handleEditSuccess = useCallback(() => {
+    refresh()
+  }, [refresh])
 
   // Handle sorting
   const handleSort = useCallback(
@@ -558,7 +590,7 @@ const UserListTable = () => {
             <IconButton size='small'>
               <i className='ri-eye-line text-textSecondary' />
             </IconButton>
-            <IconButton size='small'>
+            <IconButton size='small' onClick={() => handleOpenEditModal(row.original)}>
               <i className='ri-edit-box-line text-textSecondary' />
             </IconButton>
           </div>
@@ -610,6 +642,16 @@ const UserListTable = () => {
       <Divider />
       <div className='flex justify-between gap-4 p-5 flex-col items-start sm:flex-row sm:items-center'>
         <div className='flex gap-2'>
+          <Button
+            color='primary'
+            variant='contained'
+            startIcon={<i className='ri-user-add-line' />}
+            onClick={handleOpenAddModal}
+            className='max-sm:is-full'
+            disabled={loading}
+          >
+            {t('Add User')}
+          </Button>
           <Button
             color='secondary'
             variant='outlined'
@@ -781,6 +823,12 @@ const UserListTable = () => {
 
       {/* Groups Modal */}
       <UserGroupsModal open={groupsModalOpen} onClose={handleCloseGroupsModal} user={selectedUser} />
+
+      {/* Add User Modal */}
+      <UserAddModal open={addModalOpen} onClose={handleCloseAddModal} onSuccess={handleAddSuccess} />
+
+      {/* Edit User Modal */}
+      <UserEditModal open={editModalOpen} onClose={handleCloseEditModal} onSuccess={handleEditSuccess} user={selectedUser} />
     </Card>
   )
 }

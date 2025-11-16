@@ -105,3 +105,137 @@ export interface UserQueryParams {
     range?: Record<string, { from: string; to: string }>;
   };
 }
+
+/**
+ * Permission in a permission group
+ */
+export interface Permission {
+  id: number;
+  name: string;
+}
+
+/**
+ * Permission group
+ */
+export interface PermissionGroup {
+  id: number;
+  name: string;
+  permissions: Permission[];
+}
+
+/**
+ * User group with permission IDs
+ */
+export interface GroupOption {
+  id: number;
+  name: string;
+  permissions_count: number;
+  permission_ids: number[];
+}
+
+/**
+ * Function option
+ */
+export interface FunctionOption {
+  id: number;
+  name: string;
+}
+
+/**
+ * Profile option
+ */
+export interface ProfileOption {
+  id: number;
+  name: string;
+}
+
+/**
+ * Team option
+ */
+export interface TeamOption {
+  id: number;
+  name: string;
+  manager_id?: number;
+}
+
+/**
+ * Attribution option
+ */
+export interface AttributionOption {
+  id: number;
+  name: string;
+}
+
+/**
+ * Call center option
+ */
+export interface CallCenterOption {
+  id: number;
+  name: string;
+}
+
+/**
+ * User creation options response
+ */
+export interface UserCreationOptions {
+  groups: GroupOption[];
+  permission_groups: PermissionGroup[];
+  functions: FunctionOption[];
+  profiles: ProfileOption[];
+  teams: TeamOption[];
+  attributions: AttributionOption[];
+  callcenters: CallCenterOption[];
+}
+
+/**
+ * User creation payload
+ */
+export interface CreateUserPayload {
+  username: string;
+  password: string;
+  email: string;
+  firstname?: string;
+  lastname?: string;
+  sex?: 'Mr' | 'Ms' | 'Mrs';
+  phone?: string;
+  mobile?: string;
+  birthday?: string;
+  is_active?: 'YES' | 'NO';
+  application: 'admin' | 'frontend';
+  callcenter_id?: number;
+  team_id?: number;
+  company_id?: number;
+  group_ids?: number[];
+  function_ids?: number[];
+  profile_ids?: number[];
+  team_ids?: number[];
+  attribution_ids?: number[];
+  permission_ids?: number[];
+}
+
+/**
+ * User update payload
+ */
+export interface UpdateUserPayload {
+  username?: string;
+  password?: string; // Optional - only if changing password
+  email?: string;
+  firstname?: string;
+  lastname?: string;
+  sex?: 'Mr' | 'Ms' | 'Mrs';
+  phone?: string;
+  mobile?: string;
+  birthday?: string;
+  is_active?: 'YES' | 'NO';
+  is_locked?: 'YES' | 'NO';
+  application?: 'admin' | 'frontend';
+  callcenter_id?: number;
+  team_id?: number;
+  company_id?: number;
+  group_ids?: number[];
+  function_ids?: number[];
+  profile_ids?: number[];
+  team_ids?: number[];
+  attribution_ids?: number[];
+  permission_ids?: number[];
+}

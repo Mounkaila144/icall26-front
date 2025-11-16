@@ -1,6 +1,14 @@
 import { createApiClient } from '@/shared/lib/api-client';
 import type { ApiResponse } from '@/shared/types/api.types';
-import type { User, UserFilters, PaginatedUsersResponse, UserQueryParams } from '../../types/user.types';
+import type {
+  User,
+  UserFilters,
+  PaginatedUsersResponse,
+  UserQueryParams,
+  UserCreationOptions,
+  CreateUserPayload,
+  UpdateUserPayload
+} from '../../types/user.types';
 
 /**
  * User Service
@@ -92,12 +100,28 @@ class UserService {
   }
 
   /**
+   * Get user creation options (groups, functions, profiles, teams, etc.)
+   * @param tenantId - The tenant ID for multi-tenancy
+   * @returns Promise with creation options
+   */
+  async getCreationOptions(tenantId?: string): Promise<UserCreationOptions> {
+    try {
+      const client = createApiClient(tenantId);
+      const response = await client.get<ApiResponse<UserCreationOptions>>('/admin/users/creation-options');
+      return response.data.data;
+    } catch (error) {
+      console.error('Error fetching user creation options:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Create a new user
    * @param userData - The user data to create
    * @param tenantId - The tenant ID for multi-tenancy
    * @returns Promise with created user data
    */
-  async createUser(userData: Partial<User>, tenantId?: string): Promise<User> {
+  async createUser(userData: CreateUserPayload, tenantId?: string): Promise<User> {
     try {
       const client = createApiClient(tenantId);
       const response = await client.post<ApiResponse<User>>('/admin/users', userData);
@@ -115,7 +139,7 @@ class UserService {
    * @param tenantId - The tenant ID for multi-tenancy
    * @returns Promise with updated user data
    */
-  async updateUser(userId: number, userData: Partial<User>, tenantId?: string): Promise<User> {
+  async updateUser(userId: number, userData: UpdateUserPayload, tenantId?: string): Promise<User> {
     try {
       const client = createApiClient(tenantId);
       const response = await client.put<ApiResponse<User>>(`/admin/users/${userId}`, userData);
