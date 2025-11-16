@@ -917,14 +917,14 @@ const UserListTable = () => {
     <Card>
       <CardHeader title={t('Users Management')} className='pbe-4' />
       <Divider />
-      <div className='flex justify-between gap-4 p-5 flex-col items-start sm:flex-row sm:items-center'>
-        <div className='flex gap-2'>
+      <div className='flex justify-between gap-4 p-5 flex-col items-stretch sm:flex-row sm:items-center'>
+        <div className='flex flex-col sm:flex-row gap-2 w-full sm:w-auto'>
           <Button
             color='primary'
             variant='contained'
             startIcon={<i className='ri-user-add-line' />}
             onClick={handleOpenAddModal}
-            className='max-sm:is-full'
+            className='w-full sm:w-auto'
             disabled={loading}
           >
             {t('Add')}
@@ -934,7 +934,7 @@ const UserListTable = () => {
             variant='outlined'
             startIcon={<i className='ri-settings-3-line' />}
             onClick={handleOpenColumnMenu}
-            className='max-sm:is-full'
+            className='w-full sm:w-auto'
           >
             {t('Columns')}
           </Button>
@@ -943,7 +943,7 @@ const UserListTable = () => {
             variant={showFilters ? 'contained' : 'outlined'}
             startIcon={<i className='ri-filter-3-line' />}
             onClick={handleToggleFilters}
-            className='max-sm:is-full'
+            className='w-full sm:w-auto'
           >
             {t('Filters')} {Object.keys(columnFilters).length > 0 && `(${Object.keys(columnFilters).length})`}
           </Button>
@@ -953,20 +953,20 @@ const UserListTable = () => {
               variant='outlined'
               startIcon={<i className='ri-close-line' />}
               onClick={handleClearAllFilters}
-              className='max-sm:is-full'
+              className='w-full sm:w-auto'
               size='small'
             >
               {t('Clear Filters')}
             </Button>
           )}
         </div>
-        <div className='flex items-center gap-x-4 max-sm:gap-y-4 flex-col max-sm:is-full sm:flex-row'>
+        <div className='flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full sm:w-auto'>
           <TextField
             value={globalFilter}
             onChange={e => setGlobalFilter(e.target.value)}
             placeholder={t('Search User')}
             size='small'
-            className='max-sm:is-full'
+            className='w-full sm:w-auto'
             disabled={loading}
           />
           <Button
@@ -974,7 +974,7 @@ const UserListTable = () => {
             startIcon={loading ? <CircularProgress size={20} color='inherit' /> : <i className='ri-refresh-line' />}
             onClick={refresh}
             disabled={loading}
-            className='max-sm:is-full'
+            className='w-full sm:w-auto'
           >
             {loading ? t('Loading...') : t('Refresh')}
           </Button>
