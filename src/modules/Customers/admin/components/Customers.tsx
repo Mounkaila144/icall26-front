@@ -1,501 +1,323 @@
-'use client';
+'use client'
 
-import React, { useEffect, useState } from 'react';
-import { customersService } from '../services/customersService';
-import type { Customer, CustomerFilters, CustomerStatsResponse } from '../../types';
+import { useEffect, useState, useMemo, useCallback } from 'react'
+import { createColumnHelper } from '@tanstack/react-table'
+
+// MUI Imports
+import Typography from '@mui/material/Typography'
+import IconButton from '@mui/material/IconButton'
+import Chip from '@mui/material/Chip'
+
+// Services
+import { customersService } from '../services/customersService'
+
+// Types
+import type { Customer, CustomerFilters } from '../../types'
+import type { ColumnDef } from '@tanstack/react-table'
+
+// Shared Components
+import { DataTable, StandardMobileCard } from '@/components/shared/DataTable'
+import type { DataTableConfig, ColumnConfig } from '@/components/shared/DataTable'
+
+// Column helper
+const columnHelper = createColumnHelper<Customer>()
+
+/**
+ * Available columns configuration
+ */
+const AVAILABLE_COLUMNS: ColumnConfig[] = [
+  { id: 'id', label: 'ID', defaultVisible: true },
+  { id: 'company', label: 'Company/Name', defaultVisible: true },
+  { id: 'email', label: 'Email', defaultVisible: true },
+  { id: 'phone', label: 'Phone/Mobile', defaultVisible: true },
+  { id: 'address', label: 'Address', defaultVisible: false },
+  { id: 'occupation', label: 'Occupation', defaultVisible: false },
+  { id: 'created_at', label: 'Created Date', defaultVisible: true }
+]
+
+const STORAGE_KEY = 'customerListTableColumns'
 
 /**
  * Customers Component
- * Displays a paginated list of customers with search and filtering
+ * Now using the reusable DataTable architecture
  */
 export default function Customers() {
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [stats, setStats] = useState<CustomerStatsResponse['data'] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [search, setSearch] = useState('');
+  // States
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Pagination
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    last_page: 1,
+    per_page: 15,
+    total: 0
+  })
+
+  // Filters
+  const [globalSearch, setGlobalSearch] = useState('')
   const [filters, setFilters] = useState<CustomerFilters>({
     status: 'ACTIVE',
     sort_by: 'created_at',
     sort_order: 'desc',
-    per_page: 15,
-  });
+    per_page: 15
+  })
+
+  // Column visibility
+  const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(() => {
+    if (typeof window === 'undefined') return {}
+
+    const saved = localStorage.getItem(STORAGE_KEY)
+
+    if (saved) {
+      try {
+        return JSON.parse(saved)
+      } catch {
+        return {}
+      }
+    }
+
+    // Default visibility
+    const defaultVisibility: Record<string, boolean> = {}
+
+    AVAILABLE_COLUMNS.forEach(col => {
+      defaultVisibility[col.id] = col.defaultVisible !== false
+    })
+
+    return defaultVisibility
+  })
+
+  // Save column visibility
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(columnVisibility))
+    }
+  }, [columnVisibility])
 
   // Load customers
-  useEffect(() => {
-    loadCustomers();
-  }, [currentPage, filters]);
-
-  // Load stats
-  useEffect(() => {
-    loadStats();
-  }, []);
-
-  const loadCustomers = async () => {
+  const loadCustomers = useCallback(async () => {
     try {
-      setLoading(true);
-      setError(null);
+      setLoading(true)
+      setError(null)
       const response = await customersService.getCustomers({
         ...filters,
-        page: currentPage,
-        search: search || undefined,
-      });
-
-      console.log('🔍 API Response:', response);
-      console.log('🔍 Response data:', response.data);
-      console.log('🔍 Response meta:', response.meta);
+        page: pagination.current_page,
+        search: globalSearch || undefined
+      })
 
       if (response.success) {
-        setCustomers(response.data);
+        setCustomers(response.data)
 
-        // Handle meta - may not exist in current API response
         if (response.meta) {
-          setTotalPages(response.meta.last_page);
-          setTotal(response.meta.total);
-        } else {
-          // Fallback if no meta
-          setTotalPages(1);
-          setTotal(response.data.length);
+          setPagination({
+            current_page: response.meta.current_page || pagination.current_page,
+            last_page: response.meta.last_page || 1,
+            per_page: response.meta.per_page || filters.per_page,
+            total: response.meta.total || 0
+          })
         }
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to load customers');
-      console.error('❌ Error loading customers:', err);
+      setError(err.message || 'Failed to load customers')
+      console.error('Error loading customers:', err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }, [pagination.current_page, filters, globalSearch])
 
-  const loadStats = async () => {
-    try {
-      const response = await customersService.getStats();
-      if (response.success) {
-        setStats(response.data);
-      }
-    } catch (err) {
-      console.error('Error loading stats:', err);
-    }
-  };
+  // Load on mount and when dependencies change
+  useEffect(() => {
+    loadCustomers()
+  }, [loadCustomers])
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCurrentPage(1);
-    loadCustomers();
-  };
-
-  const handleDelete = async (id: number) => {
+  // Handle delete
+  const handleDelete = useCallback(async (id: number) => {
     if (!confirm('Are you sure you want to delete this customer?')) {
-      return;
+      return
     }
 
     try {
-      await customersService.deleteCustomer(id);
-      loadCustomers();
-      loadStats();
+      await customersService.deleteCustomer(id)
+      loadCustomers()
     } catch (err: any) {
-      alert('Error deleting customer: ' + err.message);
+      alert('Error deleting customer: ' + err.message)
     }
-  };
+  }, [loadCustomers])
 
-  return (
-    <div style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
-      {/* Header */}
-      <div style={{ marginBottom: '32px' }}>
-        <h1
-          style={{
-            fontSize: '32px',
-            fontWeight: '700',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            marginBottom: '8px',
+  // Column definitions
+  const columns = useMemo<ColumnDef<Customer, any>[]>(
+    () => [
+      columnHelper.accessor('id', {
+        id: 'id',
+        header: 'ID',
+        cell: ({ row }) => <Typography>{row.original.id}</Typography>
+      }),
+      columnHelper.accessor('display_name', {
+        id: 'company',
+        header: 'Company/Name',
+        cell: ({ row }) => (
+          <div>
+            <Typography className='font-semibold'>{row.original.display_name}</Typography>
+            {row.original.occupation && (
+              <Typography variant='caption' color='text.secondary'>
+                {row.original.occupation}
+              </Typography>
+            )}
+          </div>
+        )
+      }),
+      columnHelper.accessor('email', {
+        id: 'email',
+        header: 'Email',
+        cell: ({ row }) => <Typography>{row.original.email || '-'}</Typography>
+      }),
+      columnHelper.accessor('phone', {
+        id: 'phone',
+        header: 'Phone/Mobile',
+        cell: ({ row }) => (
+          <div>
+            {row.original.phone && (
+              <Typography variant='body2'>📞 {row.original.phone}</Typography>
+            )}
+            {row.original.mobile && (
+              <Typography variant='body2'>📱 {row.original.mobile}</Typography>
+            )}
+            {!row.original.phone && !row.original.mobile && '-'}
+          </div>
+        )
+      }),
+      columnHelper.accessor('primary_address', {
+        id: 'address',
+        header: 'Address',
+        cell: ({ row }) =>
+          row.original.primary_address ? (
+            <Typography variant='body2'>
+              {row.original.primary_address.city}, {row.original.primary_address.postcode}
+            </Typography>
+          ) : (
+            <Typography>-</Typography>
+          )
+      }),
+      columnHelper.accessor('occupation', {
+        id: 'occupation',
+        header: 'Occupation',
+        cell: ({ row }) => <Typography>{row.original.occupation || '-'}</Typography>
+      }),
+      columnHelper.accessor('created_at', {
+        id: 'created_at',
+        header: 'Created Date',
+        cell: ({ row }) => (
+          <Typography variant='body2'>
+            {new Date(row.original.created_at).toLocaleDateString()}
+          </Typography>
+        )
+      }),
+      columnHelper.display({
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => (
+          <div className='flex items-center gap-0.5'>
+            <IconButton size='small' onClick={() => handleDelete(row.original.id)} color='error'>
+              <i className='ri-delete-bin-7-line' />
+            </IconButton>
+            <IconButton size='small'>
+              <i className='ri-eye-line' />
+            </IconButton>
+            <IconButton size='small'>
+              <i className='ri-edit-box-line' />
+            </IconButton>
+          </div>
+        )
+      })
+    ],
+    [handleDelete]
+  )
+
+  // DataTable configuration
+  const tableConfig: DataTableConfig<Customer> = {
+    columns,
+    data: customers,
+    loading,
+    pagination,
+    availableColumns: AVAILABLE_COLUMNS,
+    columnVisibility,
+    onColumnVisibilityChange: setColumnVisibility,
+    onPageChange: page => setPagination(prev => ({ ...prev, current_page: page })),
+    onPageSizeChange: size => {
+      setFilters(prev => ({ ...prev, per_page: size }))
+      setPagination(prev => ({ ...prev, per_page: size, current_page: 1 }))
+    },
+    onSearch: setGlobalSearch,
+    onRefresh: loadCustomers,
+    searchPlaceholder: 'Search customers by name, email, phone...',
+    emptyMessage: 'No customers found',
+    rowsPerPageOptions: [10, 15, 25, 50],
+
+    // Actions in toolbar
+    actions: [
+      {
+        label: 'Add Customer',
+        icon: 'ri-user-add-line',
+        color: 'primary',
+        onClick: () => alert('Add customer functionality')
+      }
+    ],
+
+    // Mobile card configuration
+    mobileCard: {
+      renderCard: customer => (
+        <StandardMobileCard
+          title={customer.display_name}
+          subtitle={customer.occupation}
+          status={{
+            label: 'Active',
+            color: 'success'
           }}
-        >
-          Customers Management
-        </h1>
-        <p style={{ color: '#666', fontSize: '16px' }}>
-          Manage and view all your customers
-        </p>
-      </div>
-
-      {/* Stats Cards */}
-      {stats && (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '16px',
-            marginBottom: '24px',
-          }}
-        >
-          <StatsCard
-            label="Total Customers"
-            value={stats.total_customers}
-            color="#667eea"
-          />
-          <StatsCard
-            label="With Company"
-            value={stats.with_company}
-            color="#48bb78"
-          />
-          <StatsCard
-            label="With Email"
-            value={stats.with_email}
-            color="#ed8936"
-          />
-          <StatsCard
-            label="With Mobile"
-            value={stats.with_mobile}
-            color="#9f7aea"
-          />
-        </div>
-      )}
-
-      {/* Filters */}
-      <div
-        style={{
-          background: 'white',
-          borderRadius: '12px',
-          padding: '20px',
-          marginBottom: '24px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        }}
-      >
-        <form onSubmit={handleSearch} style={{ marginBottom: '16px' }}>
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <input
-              type="text"
-              placeholder="Search by name, email, phone..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              style={{
-                flex: '1 1 300px',
-                padding: '10px 16px',
-                border: '1px solid #e0e0e0',
-                borderRadius: '8px',
-                fontSize: '14px',
-              }}
-            />
-            <button
-              type="submit"
-              style={{
-                padding: '10px 24px',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer',
-              }}
-            >
-              Search
-            </button>
-          </div>
-        </form>
-
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <select
-            value={filters.status}
-            onChange={(e) =>
-              setFilters({ ...filters, status: e.target.value as any })
+          fields={[
+            {
+              icon: 'ri-mail-line',
+              value: customer.email || '-'
+            },
+            {
+              icon: 'ri-phone-line',
+              value: customer.phone || customer.mobile || '-'
+            },
+            {
+              icon: 'ri-map-pin-line',
+              value: customer.primary_address
+                ? `${customer.primary_address.city}, ${customer.primary_address.postcode}`
+                : '-',
+              hidden: !customer.primary_address
+            },
+            {
+              icon: 'ri-calendar-line',
+              label: 'Created',
+              value: new Date(customer.created_at).toLocaleDateString()
             }
-            style={{
-              padding: '8px 12px',
-              border: '1px solid #e0e0e0',
-              borderRadius: '8px',
-              fontSize: '14px',
-            }}
-          >
-            <option value="ACTIVE">Active</option>
-            <option value="DELETE">Deleted</option>
-          </select>
-
-          <select
-            value={filters.sort_by}
-            onChange={(e) => setFilters({ ...filters, sort_by: e.target.value })}
-            style={{
-              padding: '8px 12px',
-              border: '1px solid #e0e0e0',
-              borderRadius: '8px',
-              fontSize: '14px',
-            }}
-          >
-            <option value="created_at">Created Date</option>
-            <option value="firstname">First Name</option>
-            <option value="lastname">Last Name</option>
-            <option value="company">Company</option>
-            <option value="email">Email</option>
-          </select>
-
-          <select
-            value={filters.sort_order}
-            onChange={(e) =>
-              setFilters({ ...filters, sort_order: e.target.value as any })
+          ]}
+          actions={[
+            {
+              icon: 'ri-delete-bin-7-line',
+              color: 'error',
+              onClick: () => handleDelete(customer.id)
+            },
+            {
+              icon: 'ri-eye-line',
+              color: 'default',
+              onClick: () => alert('View customer')
+            },
+            {
+              icon: 'ri-edit-box-line',
+              color: 'primary',
+              onClick: () => alert('Edit customer')
             }
-            style={{
-              padding: '8px 12px',
-              border: '1px solid #e0e0e0',
-              borderRadius: '8px',
-              fontSize: '14px',
-            }}
-          >
-            <option value="asc">Ascending</option>
-            <option value="desc">Descending</option>
-          </select>
+          ]}
+          item={customer}
+        />
+      )
+    }
+  }
 
-          <select
-            value={filters.per_page}
-            onChange={(e) =>
-              setFilters({ ...filters, per_page: parseInt(e.target.value) })
-            }
-            style={{
-              padding: '8px 12px',
-              border: '1px solid #e0e0e0',
-              borderRadius: '8px',
-              fontSize: '14px',
-            }}
-          >
-            <option value="10">10 per page</option>
-            <option value="15">15 per page</option>
-            <option value="25">25 per page</option>
-            <option value="50">50 per page</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Table */}
-      <div
-        style={{
-          background: 'white',
-          borderRadius: '12px',
-          overflow: 'hidden',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        }}
-      >
-        {loading ? (
-          <div style={{ padding: '60px', textAlign: 'center' }}>
-            <div
-              style={{
-                width: '48px',
-                height: '48px',
-                border: '4px solid #f3f3f3',
-                borderTop: '4px solid #667eea',
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite',
-                margin: '0 auto',
-              }}
-            />
-            <p style={{ marginTop: '16px', color: '#666' }}>Loading customers...</p>
-            <style jsx>{`
-              @keyframes spin {
-                0% {
-                  transform: rotate(0deg);
-                }
-                100% {
-                  transform: rotate(360deg);
-                }
-              }
-            `}</style>
-          </div>
-        ) : error ? (
-          <div style={{ padding: '40px', textAlign: 'center' }}>
-            <p style={{ color: '#e53e3e', fontSize: '16px' }}>{error}</p>
-          </div>
-        ) : customers.length === 0 ? (
-          <div style={{ padding: '60px', textAlign: 'center' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
-            <p style={{ color: '#666', fontSize: '16px' }}>No customers found</p>
-          </div>
-        ) : (
-          <>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e0e0e0' }}>
-                    <th style={tableHeaderStyle}>ID</th>
-                    <th style={tableHeaderStyle}>Company/Name</th>
-                    <th style={tableHeaderStyle}>Email</th>
-                    <th style={tableHeaderStyle}>Phone/Mobile</th>
-                    <th style={tableHeaderStyle}>Address</th>
-                    <th style={tableHeaderStyle}>Created</th>
-                    <th style={tableHeaderStyle}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {customers.map((customer) => (
-                    <tr
-                      key={customer.id}
-                      style={{ borderBottom: '1px solid #e0e0e0' }}
-                    >
-                      <td style={tableCellStyle}>{customer.id}</td>
-                      <td style={tableCellStyle}>
-                        <div style={{ fontWeight: '600', marginBottom: '4px' }}>
-                          {customer.display_name}
-                        </div>
-                        {customer.occupation && (
-                          <div style={{ fontSize: '12px', color: '#666' }}>
-                            {customer.occupation}
-                          </div>
-                        )}
-                      </td>
-                      <td style={tableCellStyle}>{customer.email || '-'}</td>
-                      <td style={tableCellStyle}>
-                        {customer.phone && (
-                          <div style={{ fontSize: '13px' }}>📞 {customer.phone}</div>
-                        )}
-                        {customer.mobile && (
-                          <div style={{ fontSize: '13px' }}>📱 {customer.mobile}</div>
-                        )}
-                      </td>
-                      <td style={tableCellStyle}>
-                        {customer.primary_address ? (
-                          <div style={{ fontSize: '13px' }}>
-                            {customer.primary_address.city},{' '}
-                            {customer.primary_address.postcode}
-                          </div>
-                        ) : (
-                          '-'
-                        )}
-                      </td>
-                      <td style={tableCellStyle}>
-                        <div style={{ fontSize: '13px' }}>
-                          {new Date(customer.created_at).toLocaleDateString()}
-                        </div>
-                      </td>
-                      <td style={tableCellStyle}>
-                        <button
-                          onClick={() => handleDelete(customer.id)}
-                          style={{
-                            padding: '6px 12px',
-                            background: '#fee',
-                            color: '#c33',
-                            border: '1px solid #fcc',
-                            borderRadius: '6px',
-                            fontSize: '12px',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            <div
-              style={{
-                padding: '20px',
-                borderTop: '1px solid #e0e0e0',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '16px',
-              }}
-            >
-              <div style={{ color: '#666', fontSize: '14px' }}>
-                Showing {customers.length} of {total} customers
-              </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  style={{
-                    padding: '8px 16px',
-                    border: '1px solid #e0e0e0',
-                    borderRadius: '6px',
-                    background: currentPage === 1 ? '#f5f5f5' : 'white',
-                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                    fontSize: '14px',
-                  }}
-                >
-                  Previous
-                </button>
-                <div
-                  style={{
-                    padding: '8px 16px',
-                    border: '1px solid #e0e0e0',
-                    borderRadius: '6px',
-                    background: '#f9fafb',
-                    fontSize: '14px',
-                  }}
-                >
-                  Page {currentPage} of {totalPages}
-                </div>
-                <button
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  style={{
-                    padding: '8px 16px',
-                    border: '1px solid #e0e0e0',
-                    borderRadius: '6px',
-                    background: currentPage === totalPages ? '#f5f5f5' : 'white',
-                    cursor:
-                      currentPage === totalPages ? 'not-allowed' : 'pointer',
-                    fontSize: '14px',
-                  }}
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// Styles
-const tableHeaderStyle: React.CSSProperties = {
-  padding: '12px 16px',
-  textAlign: 'left',
-  fontSize: '13px',
-  fontWeight: '600',
-  color: '#333',
-  textTransform: 'uppercase',
-  letterSpacing: '0.5px',
-};
-
-const tableCellStyle: React.CSSProperties = {
-  padding: '12px 16px',
-  fontSize: '14px',
-  color: '#333',
-};
-
-// Stats Card Component
-function StatsCard({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: number;
-  color: string;
-}) {
-  return (
-    <div
-      style={{
-        background: 'white',
-        borderRadius: '12px',
-        padding: '20px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        borderLeft: `4px solid ${color}`,
-      }}
-    >
-      <div style={{ fontSize: '13px', color: '#666', marginBottom: '8px' }}>
-        {label}
-      </div>
-      <div style={{ fontSize: '28px', fontWeight: '700', color: color }}>
-        {value.toLocaleString()}
-      </div>
-    </div>
-  );
+  return <DataTable {...tableConfig} />
 }

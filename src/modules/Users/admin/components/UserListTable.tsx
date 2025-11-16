@@ -4,39 +4,13 @@
 import { useEffect, useState, useMemo, useCallback } from 'react'
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import CardHeader from '@mui/material/CardHeader'
-import Divider from '@mui/material/Divider'
-import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import Checkbox from '@mui/material/Checkbox'
 import IconButton from '@mui/material/IconButton'
-import TablePagination from '@mui/material/TablePagination'
-import CircularProgress from '@mui/material/CircularProgress'
-import Box from '@mui/material/Box'
-import Popover from '@mui/material/Popover'
-import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItem'
-import ListItemButton from '@mui/material/ListItemButton'
-import ListItemText from '@mui/material/ListItemText'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Select from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Autocomplete from '@mui/material/Autocomplete'
-import Collapse from '@mui/material/Collapse'
 
 // Third-party Imports
-import classnames from 'classnames'
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  useReactTable
-} from '@tanstack/react-table'
+import { createColumnHelper } from '@tanstack/react-table'
 import type { ColumnDef } from '@tanstack/react-table'
 
 // Translation Imports
@@ -53,8 +27,9 @@ import UserGroupsModal from './UserGroupsModal'
 import UserAddModal from './UserAddModal'
 import UserEditModal from './UserEditModal'
 
-// Util Imports
-import { getInitials } from '@/utils/getInitials'
+// Shared DataTable Components
+import { DataTable, StandardMobileCard } from '@/components/shared/DataTable'
+import type { DataTableConfig, ColumnConfig } from '@/components/shared/DataTable'
 
 // Context Imports
 import { useUsersContext } from './UsersList'
@@ -62,9 +37,6 @@ import { useUsersContext } from './UsersList'
 // Service Imports
 import { userService } from '../services/userService'
 import type { UserCreationOptions } from '../../types/user.types'
-
-// Style Imports
-import tableStyles from '@core/styles/table.module.css'
 
 type UserWithAction = User & {
   action?: string
@@ -86,7 +58,7 @@ const userLockStatusObj: UserStatusType = {
 }
 
 // Available columns configuration
-const AVAILABLE_COLUMNS = [
+const AVAILABLE_COLUMNS: ColumnConfig[] = [
   { id: 'username', label: 'Username', defaultVisible: true },
   { id: 'firstname', label: 'Firstname', defaultVisible: true },
   { id: 'lastname', label: 'Lastname', defaultVisible: true },
@@ -110,7 +82,7 @@ const AVAILABLE_COLUMNS = [
   { id: 'number_of_try', label: 'Number of Tries', defaultVisible: false },
   { id: 'callcenter', label: 'Callcenter', defaultVisible: false },
   { id: 'company', label: 'Company', defaultVisible: false }
-] as const
+]
 
 const STORAGE_KEY = 'userListTableColumns'
 
@@ -120,12 +92,6 @@ const columnHelper = createColumnHelper<UserWithAction>()
 const UserListTable = () => {
   // Translation
   const { t, locale } = useTranslation('Users')
-
-  // Debug: Log current locale
-  useEffect(() => {
-    console.log('📊 [UserListTable] Current locale:', locale);
-    console.log('📊 [UserListTable] Sample translation test:', t('Users Management'));
-  }, [locale, t]);
 
   // Context
   const {
@@ -141,8 +107,15 @@ const UserListTable = () => {
     deleteUser
   } = useUsersContext()
 
-  // Load column visibility from localStorage
-  const getInitialColumnVisibility = () => {
+  // States
+  const [functionsModalOpen, setFunctionsModalOpen] = useState(false)
+  const [groupsModalOpen, setGroupsModalOpen] = useState(false)
+  const [addModalOpen, setAddModalOpen] = useState(false)
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+
+  // Column visibility
+  const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(() => {
     if (typeof window === 'undefined') return {}
 
     const saved = localStorage.getItem(STORAGE_KEY)
@@ -155,33 +128,14 @@ const UserListTable = () => {
       }
     }
 
-    // Default visibility
     const defaultVisibility: Record<string, boolean> = {}
 
     AVAILABLE_COLUMNS.forEach(col => {
-      defaultVisibility[col.id] = col.defaultVisible
+      defaultVisibility[col.id] = col.defaultVisible !== false
     })
 
     return defaultVisibility
-  }
-
-  // States
-  const [rowSelection, setRowSelection] = useState({})
-  const [globalFilter, setGlobalFilter] = useState('')
-  const [sorting, setSorting] = useState<{ column: string; direction: 'asc' | 'desc' } | null>(null)
-  const [functionsModalOpen, setFunctionsModalOpen] = useState(false)
-  const [groupsModalOpen, setGroupsModalOpen] = useState(false)
-  const [addModalOpen, setAddModalOpen] = useState(false)
-  const [editModalOpen, setEditModalOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<User | null>(null)
-  const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(getInitialColumnVisibility)
-  const [columnMenuAnchor, setColumnMenuAnchor] = useState<null | HTMLElement>(null)
-
-  // Column filters state
-  const [showFilters, setShowFilters] = useState(false)
-  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({})
-  const [filterOptions, setFilterOptions] = useState<UserCreationOptions | null>(null)
-  const [loadingOptions, setLoadingOptions] = useState(false)
+  })
 
   // Save column visibility to localStorage
   useEffect(() => {
@@ -190,147 +144,7 @@ const UserListTable = () => {
     }
   }, [columnVisibility])
 
-  // Load filter options (teams, groups, callcenters, etc.)
-  useEffect(() => {
-    const loadFilterOptions = async () => {
-      setLoadingOptions(true)
-      try {
-        const options = await userService.getCreationOptions()
-        setFilterOptions(options)
-      } catch (error) {
-        console.error('Failed to load filter options:', error)
-      } finally {
-        setLoadingOptions(false)
-      }
-    }
-
-    loadFilterOptions()
-  }, [])
-
-  // Handle search with debounce
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSearch(globalFilter)
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [globalFilter, setSearch])
-
-  // Handle column filters with debounce
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      // Build filters for API
-      const equal: Record<string, string | number> = {}
-      const like: Record<string, string> = {}
-
-      Object.entries(columnFilters).forEach(([key, value]) => {
-        if (value && value !== '') {
-          // Use 'equal' for exact match fields (dropdowns, selects)
-          // Use 'like' for text search fields
-          const exactMatchFields = [
-            'is_active',
-            'is_locked',
-            'is_secure_by_code',
-            'status',
-            'application',
-            'callcenter_id',
-            'team_id',
-            'company_id',
-            'sex'
-          ]
-
-          if (exactMatchFields.includes(key)) {
-            equal[key] = value
-          } else {
-            like[key] = value
-          }
-        }
-      })
-
-      // Update params with new filters
-      updateParams({
-        filter: {
-          ...params.filter,
-          search: params.filter?.search, // Preserve global search
-          order: params.filter?.order, // Preserve sorting
-          equal: Object.keys(equal).length > 0 ? equal : undefined,
-          like: Object.keys(like).length > 0 ? like : undefined
-        }
-      })
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [columnFilters, params.filter?.search, params.filter?.order, updateParams])
-
-  // Handle column filter change
-  const handleColumnFilterChange = useCallback((columnId: string, value: string) => {
-    setColumnFilters(prev => {
-      if (value === '' || value === null || value === undefined) {
-        // Remove filter if empty
-        const { [columnId]: _, ...rest } = prev
-        return rest
-      }
-      return {
-        ...prev,
-        [columnId]: value
-      }
-    })
-  }, [])
-
-  // Clear all column filters
-  const handleClearAllFilters = useCallback(() => {
-    setColumnFilters({})
-  }, [])
-
-  // Toggle filters visibility
-  const handleToggleFilters = useCallback(() => {
-    setShowFilters(prev => !prev)
-  }, [])
-
-  // Handle column visibility
-  const handleToggleColumn = useCallback((columnId: string) => {
-    setColumnVisibility(prev => ({
-      ...prev,
-      [columnId]: !prev[columnId]
-    }))
-  }, [])
-
-  const handleOpenColumnMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
-    setColumnMenuAnchor(event.currentTarget)
-  }, [])
-
-  const handleCloseColumnMenu = useCallback(() => {
-    setColumnMenuAnchor(null)
-  }, [])
-
-  const handleShowAllColumns = useCallback(() => {
-    const allVisible: Record<string, boolean> = {}
-
-    AVAILABLE_COLUMNS.forEach(col => {
-      allVisible[col.id] = true
-    })
-    setColumnVisibility(allVisible)
-  }, [])
-
-  const handleHideAllColumns = useCallback(() => {
-    const allHidden: Record<string, boolean> = {}
-
-    AVAILABLE_COLUMNS.forEach(col => {
-      allHidden[col.id] = false
-    })
-    setColumnVisibility(allHidden)
-  }, [])
-
-  const handleResetColumns = useCallback(() => {
-    const defaultVisibility: Record<string, boolean> = {}
-
-    AVAILABLE_COLUMNS.forEach(col => {
-      defaultVisibility[col.id] = col.defaultVisible
-    })
-    setColumnVisibility(defaultVisibility)
-  }, [])
-
-  // Handle functions modal
+  // Handle modals
   const handleOpenFunctionsModal = useCallback((user: User) => {
     setSelectedUser(user)
     setFunctionsModalOpen(true)
@@ -341,7 +155,6 @@ const UserListTable = () => {
     setSelectedUser(null)
   }, [])
 
-  // Handle groups modal
   const handleOpenGroupsModal = useCallback((user: User) => {
     setSelectedUser(user)
     setGroupsModalOpen(true)
@@ -352,7 +165,6 @@ const UserListTable = () => {
     setSelectedUser(null)
   }, [])
 
-  // Handle add modal
   const handleOpenAddModal = useCallback(() => {
     setAddModalOpen(true)
   }, [])
@@ -365,7 +177,6 @@ const UserListTable = () => {
     refresh()
   }, [refresh])
 
-  // Handle edit modal
   const handleOpenEditModal = useCallback((user: User) => {
     setSelectedUser(user)
     setEditModalOpen(true)
@@ -380,238 +191,19 @@ const UserListTable = () => {
     refresh()
   }, [refresh])
 
-  // Handle sorting
-  const handleSort = useCallback(
-    (column: string) => {
-      if (loading) return
+  // Get avatar helper
+  const getAvatar = (params: Pick<User, 'sex' | 'full_name'>) => {
+    const { sex } = params
 
-      let newDirection: 'asc' | 'desc' = 'asc'
+    if (sex === 'MR' || sex === 'Mr') {
+      return <CustomAvatar src='/images/avatars/1.png' skin='light' size={34} />
+    } else {
+      return <CustomAvatar src='/images/avatars/4.png' skin='light' size={34} />
+    }
+  }
 
-      if (sorting?.column === column) {
-        // Toggle direction or clear sorting
-        if (sorting.direction === 'asc') {
-          newDirection = 'desc'
-        } else {
-          // Clear sorting
-          setSorting(null)
-          updateParams({
-            filter: {
-              ...params.filter,
-              order: undefined
-            }
-          })
-          return
-        }
-      }
-
-      setSorting({ column, direction: newDirection })
-      updateParams({
-        filter: {
-          ...params.filter,
-          order: { [column]: newDirection }
-        }
-      })
-    },
-    [loading, sorting, params, updateParams]
-  )
-
-  // Helper to create sortable header
-  const createSortableHeader = useCallback(
-    (label: string, column: string) => {
-      return (
-        <div
-          className='flex items-center gap-2 cursor-pointer select-none'
-          onClick={() => handleSort(column)}
-        >
-          <span>{label}</span>
-          {sorting?.column === column && (
-            <i
-              className={classnames('text-xl', {
-                'ri-arrow-up-s-line': sorting.direction === 'asc',
-                'ri-arrow-down-s-line': sorting.direction === 'desc'
-              })}
-            />
-          )}
-        </div>
-      )
-    },
-    [handleSort, sorting]
-  )
-
-  // Helper to create column filter component
-  const createColumnFilter = useCallback(
-    (columnId: string) => {
-      const value = columnFilters[columnId] || ''
-
-      // Text search filters
-      const textSearchColumns = [
-        'username',
-        'firstname',
-        'lastname',
-        'email',
-        'phone',
-        'mobile',
-        'profiles',
-        'groups_list',
-        'teams_list',
-        'functions_list'
-      ]
-
-      if (textSearchColumns.includes(columnId)) {
-        return (
-          <TextField
-            size='small'
-            value={value}
-            onChange={e => handleColumnFilterChange(columnId, e.target.value)}
-            placeholder={t(`Search`)}
-            fullWidth
-            variant='outlined'
-            disabled={loading}
-            sx={{ minWidth: 120 }}
-          />
-        )
-      }
-
-      // Status filters (is_active)
-      if (columnId === 'is_active') {
-        return (
-          <FormControl size='small' fullWidth sx={{ minWidth: 120 }}>
-            <Select
-              value={value}
-              onChange={e => handleColumnFilterChange(columnId, e.target.value)}
-              displayEmpty
-              disabled={loading}
-            >
-              <MenuItem value=''>{t('All')}</MenuItem>
-              <MenuItem value='YES'>{t('Active')}</MenuItem>
-              <MenuItem value='NO'>{t('Inactive')}</MenuItem>
-            </Select>
-          </FormControl>
-        )
-      }
-
-      // Lock status filters (is_locked)
-      if (columnId === 'is_locked') {
-        return (
-          <FormControl size='small' fullWidth sx={{ minWidth: 120 }}>
-            <Select
-              value={value}
-              onChange={e => handleColumnFilterChange(columnId, e.target.value)}
-              displayEmpty
-              disabled={loading}
-            >
-              <MenuItem value=''>{t('All')}</MenuItem>
-              <MenuItem value='YES'>{t('Locked')}</MenuItem>
-              <MenuItem value='NO'>{t('Unlocked')}</MenuItem>
-            </Select>
-          </FormControl>
-        )
-      }
-
-      // Code by email filter (is_secure_by_code)
-      if (columnId === 'is_secure_by_code') {
-        return (
-          <FormControl size='small' fullWidth sx={{ minWidth: 120 }}>
-            <Select
-              value={value}
-              onChange={e => handleColumnFilterChange(columnId, e.target.value)}
-              displayEmpty
-              disabled={loading}
-            >
-              <MenuItem value=''>{t('All')}</MenuItem>
-              <MenuItem value='YES'>{t('Yes')}</MenuItem>
-              <MenuItem value='NO'>{t('No')}</MenuItem>
-            </Select>
-          </FormControl>
-        )
-      }
-
-      // Sex filter
-      if (columnId === 'sex') {
-        return (
-          <FormControl size='small' fullWidth sx={{ minWidth: 120 }}>
-            <Select
-              value={value}
-              onChange={e => handleColumnFilterChange(columnId, e.target.value)}
-              displayEmpty
-              disabled={loading}
-            >
-              <MenuItem value=''>{t('All')}</MenuItem>
-              <MenuItem value='MR'>{t('Mr')}</MenuItem>
-              <MenuItem value='MS'>{t('Ms')}</MenuItem>
-              <MenuItem value='MRS'>{t('Mrs')}</MenuItem>
-            </Select>
-          </FormControl>
-        )
-      }
-
-      // Application filter
-      if (columnId === 'application') {
-        return (
-          <FormControl size='small' fullWidth sx={{ minWidth: 120 }}>
-            <Select
-              value={value}
-              onChange={e => handleColumnFilterChange(columnId, e.target.value)}
-              displayEmpty
-              disabled={loading}
-            >
-              <MenuItem value=''>{t('All')}</MenuItem>
-              <MenuItem value='admin'>{t('Admin')}</MenuItem>
-              <MenuItem value='frontend'>{t('Frontend')}</MenuItem>
-            </Select>
-          </FormControl>
-        )
-      }
-
-      // Callcenter filter
-      if (columnId === 'callcenter_id' && filterOptions) {
-        return (
-          <FormControl size='small' fullWidth sx={{ minWidth: 150 }}>
-            <Select
-              value={value}
-              onChange={e => handleColumnFilterChange(columnId, e.target.value)}
-              displayEmpty
-              disabled={loading || loadingOptions}
-            >
-              <MenuItem value=''>{t('All')}</MenuItem>
-              {filterOptions.callcenters.map(cc => (
-                <MenuItem key={cc.id} value={cc.id}>
-                  {cc.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )
-      }
-
-      // Team filter
-      if (columnId === 'team_id' && filterOptions) {
-        return (
-          <FormControl size='small' fullWidth sx={{ minWidth: 150 }}>
-            <Select
-              value={value}
-              onChange={e => handleColumnFilterChange(columnId, e.target.value)}
-              displayEmpty
-              disabled={loading || loadingOptions}
-            >
-              <MenuItem value=''>{t('All')}</MenuItem>
-              {filterOptions.teams.map(team => (
-                <MenuItem key={team.id} value={team.id}>
-                  {team.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )
-      }
-
-      // Default: no filter for this column
-      return null
-    },
-    [columnFilters, handleColumnFilterChange, loading, loadingOptions, filterOptions, t]
-  )
-
-  const allColumns = useMemo<ColumnDef<UserWithAction, any>[]>(
+  // Column definitions
+  const columns = useMemo<ColumnDef<UserWithAction, any>[]>(
     () => [
       {
         id: 'select',
@@ -637,12 +229,12 @@ const UserListTable = () => {
       },
       columnHelper.accessor('id', {
         id: 'id',
-        header: () => createSortableHeader('#', 'id'),
+        header: '#',
         cell: ({ row }) => <Typography>{row.original.id || '-'}</Typography>
       }),
       columnHelper.accessor('username', {
         id: 'username',
-        header: () => createSortableHeader(t('Username'), 'username'),
+        header: t('Username'),
         cell: ({ row }) => (
           <div className='flex items-center gap-3'>
             {getAvatar({ sex: row.original.sex, full_name: row.original.full_name })}
@@ -654,17 +246,17 @@ const UserListTable = () => {
       }),
       columnHelper.accessor('firstname', {
         id: 'firstname',
-        header: () => createSortableHeader(t('Firstname'), 'firstname'),
+        header: t('Firstname'),
         cell: ({ row }) => <Typography>{row.original.firstname || '-'}</Typography>
       }),
       columnHelper.accessor('lastname', {
         id: 'lastname',
-        header: () => createSortableHeader(t('Lastname'), 'lastname'),
+        header: t('Lastname'),
         cell: ({ row }) => <Typography>{row.original.lastname || '-'}</Typography>
       }),
       columnHelper.accessor('email', {
         id: 'email',
-        header: () => createSortableHeader(t('Email'), 'email'),
+        header: t('Email'),
         cell: ({ row }) => <Typography>{row.original.email || '-'}</Typography>
       }),
       columnHelper.accessor('is_secure_by_code', {
@@ -780,7 +372,7 @@ const UserListTable = () => {
       }),
       columnHelper.accessor('created_at', {
         id: 'created_at',
-        header: () => createSortableHeader(t('Date Creation'), 'created_at'),
+        header: t('Date Creation'),
         cell: ({ row }) => (
           <Typography>
             {row.original.created_at ? new Date(row.original.created_at).toLocaleString() : '-'}
@@ -789,7 +381,7 @@ const UserListTable = () => {
       }),
       columnHelper.accessor('lastlogin', {
         id: 'lastlogin',
-        header: () => createSortableHeader(t('Last Login'), 'lastlogin'),
+        header: t('Last Login'),
         cell: ({ row }) => (
           <Typography>
             {row.original.lastlogin ? new Date(row.original.lastlogin).toLocaleString() : '-'}
@@ -798,7 +390,7 @@ const UserListTable = () => {
       }),
       columnHelper.accessor('last_password_gen', {
         id: 'last_password_gen',
-        header: () => createSortableHeader(t('Last Password Gen'), 'last_password_gen'),
+        header: t('Last Password Gen'),
         cell: ({ row }) => (
           <Typography>
             {row.original.last_password_gen ? new Date(row.original.last_password_gen).toLocaleString() : '-'}
@@ -875,250 +467,160 @@ const UserListTable = () => {
         enableSorting: false
       })
     ],
-    [t, deleteUser, createSortableHeader, handleOpenFunctionsModal, handleOpenGroupsModal]
+    [t, deleteUser, handleOpenFunctionsModal, handleOpenGroupsModal, handleOpenEditModal]
   )
 
-  // Filter columns based on visibility
-  const columns = useMemo(() => {
-    return allColumns.filter(column => {
-      if (column.id === 'select' || column.id === 'action') return true
-
-      return columnVisibility[column.id as string] !== false
-    })
-  }, [allColumns, columnVisibility])
-
-  const table = useReactTable({
-    data: users as User[],
+  // DataTable configuration
+  const tableConfig: DataTableConfig<User> = {
     columns,
-    state: {
-      rowSelection
-    },
-    pageCount: pagination.last_page,
-    manualPagination: true,
-    manualSorting: true,
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
-    getCoreRowModel: getCoreRowModel()
-  })
+    data: users as User[],
+    loading,
+    pagination,
+    availableColumns: AVAILABLE_COLUMNS,
+    columnVisibility,
+    onColumnVisibilityChange: setColumnVisibility,
+    onPageChange: setPage,
+    onPageSizeChange: setPageSize,
+    onSearch: setSearch,
+    onRefresh: refresh,
+    searchPlaceholder: t('Search User'),
+    emptyMessage: t('No data available'),
+    rowsPerPageOptions: [10, 25, 50, 100],
 
-  const getAvatar = (params: Pick<User, 'sex' | 'full_name'>) => {
-    const { sex, full_name } = params
+    // Actions
+    actions: [
+      {
+        label: t('Add'),
+        icon: 'ri-user-add-line',
+        color: 'primary',
+        onClick: handleOpenAddModal,
+        disabled: loading
+      }
+    ],
 
-    // Determine avatar based on gender
-    // "MR" = homme, sinon (MS, MRS, etc.) = femme
-    if (sex === 'MR' || sex === 'Mr') {
-      return <CustomAvatar src='/images/avatars/1.png' skin='light' size={34} />
-    } else {
-      return <CustomAvatar src='/images/avatars/4.png' skin='light' size={34} />
+    // Mobile card configuration
+    mobileCard: {
+      renderCard: user => {
+        const groupsCount = user.groups.length > 0
+          ? user.groups.length
+          : user.groups_list
+            ? user.groups_list.split(',').filter(Boolean).length
+            : 0
+
+        const functionsCount = user.functions_list
+          ? user.functions_list.split(',').filter(Boolean).length
+          : 0
+
+        return (
+          <StandardMobileCard
+            avatar={
+              user.sex === 'MR' || user.sex === 'Mr' ? (
+                <CustomAvatar src='/images/avatars/1.png' skin='light' size={50} />
+              ) : (
+                <CustomAvatar src='/images/avatars/4.png' skin='light' size={50} />
+              )
+            }
+            title={user.full_name || user.username}
+            subtitle={`@${user.username}`}
+            status={{
+              label: user.is_active === 'YES' ? t('Active') : t('Inactive'),
+              color: user.is_active === 'YES' ? 'success' : 'secondary'
+            }}
+            fields={[
+              {
+                icon: 'ri-mail-line',
+                value: user.email || '-'
+              },
+              user.firstname || user.lastname
+                ? {
+                    icon: 'ri-user-line',
+                    value: `${user.firstname} ${user.lastname}`
+                  }
+                : { icon: '', value: '', hidden: true },
+              groupsCount > 0
+                ? {
+                    icon: 'ri-group-line',
+                    value: (
+                      <Chip
+                        variant='tonal'
+                        label={`${groupsCount} ${groupsCount > 1 ? t('groups') : t('group')}`}
+                        size='small'
+                        color='primary'
+                        onClick={() => handleOpenGroupsModal(user)}
+                        className='cursor-pointer'
+                      />
+                    )
+                  }
+                : { icon: '', value: '', hidden: true },
+              functionsCount > 0
+                ? {
+                    icon: 'ri-function-line',
+                    value: (
+                      <Chip
+                        variant='tonal'
+                        label={`${functionsCount} ${functionsCount > 1 ? t('functions') : t('function')}`}
+                        size='small'
+                        color='info'
+                        onClick={() => handleOpenFunctionsModal(user)}
+                        className='cursor-pointer'
+                      />
+                    )
+                  }
+                : { icon: '', value: '', hidden: true },
+              {
+                icon: 'ri-calendar-line',
+                label: t('Created'),
+                value: user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'
+              },
+              user.lastlogin
+                ? {
+                    icon: 'ri-login-circle-line',
+                    label: t('Last Login'),
+                    value: new Date(user.lastlogin).toLocaleDateString()
+                  }
+                : { icon: '', value: '', hidden: true },
+              user.is_locked === 'YES'
+                ? {
+                    icon: 'ri-lock-line',
+                    value: <Chip variant='tonal' label={t('Locked')} size='small' color='error' />
+                  }
+                : { icon: '', value: '', hidden: true }
+            ]}
+            actions={[
+              {
+                icon: 'ri-delete-bin-7-line',
+                color: 'error',
+                onClick: async () => {
+                  if (confirm(t('Are you sure you want to delete this user?'))) {
+                    try {
+                      await deleteUser(user.id)
+                    } catch (error) {
+                      console.error('Failed to delete user:', error)
+                    }
+                  }
+                }
+              },
+              {
+                icon: 'ri-eye-line',
+                color: 'default',
+                onClick: () => console.log('View user:', user)
+              },
+              {
+                icon: 'ri-edit-box-line',
+                color: 'primary',
+                onClick: () => handleOpenEditModal(user)
+              }
+            ]}
+            item={user}
+          />
+        )
+      }
     }
   }
 
   return (
-    <Card>
-      <CardHeader title={t('Users Management')} className='pbe-4' />
-      <Divider />
-      <div className='flex justify-between gap-4 p-5 flex-col items-stretch sm:flex-row sm:items-center'>
-        <div className='flex flex-col sm:flex-row gap-2 w-full sm:w-auto'>
-          <Button
-            color='primary'
-            variant='contained'
-            startIcon={<i className='ri-user-add-line' />}
-            onClick={handleOpenAddModal}
-            className='w-full sm:w-auto'
-            disabled={loading}
-          >
-            {t('Add')}
-          </Button>
-          <Button
-            color='secondary'
-            variant='outlined'
-            startIcon={<i className='ri-settings-3-line' />}
-            onClick={handleOpenColumnMenu}
-            className='w-full sm:w-auto'
-          >
-            {t('Columns')}
-          </Button>
-          <Button
-            color={showFilters ? 'primary' : 'secondary'}
-            variant={showFilters ? 'contained' : 'outlined'}
-            startIcon={<i className='ri-filter-3-line' />}
-            onClick={handleToggleFilters}
-            className='w-full sm:w-auto'
-          >
-            {t('Filters')} {Object.keys(columnFilters).length > 0 && `(${Object.keys(columnFilters).length})`}
-          </Button>
-          {Object.keys(columnFilters).length > 0 && (
-            <Button
-              color='error'
-              variant='outlined'
-              startIcon={<i className='ri-close-line' />}
-              onClick={handleClearAllFilters}
-              className='w-full sm:w-auto'
-              size='small'
-            >
-              {t('Clear Filters')}
-            </Button>
-          )}
-        </div>
-        <div className='flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full sm:w-auto'>
-          <TextField
-            value={globalFilter}
-            onChange={e => setGlobalFilter(e.target.value)}
-            placeholder={t('Search User')}
-            size='small'
-            className='w-full sm:w-auto'
-            disabled={loading}
-          />
-          <Button
-            variant='contained'
-            startIcon={loading ? <CircularProgress size={20} color='inherit' /> : <i className='ri-refresh-line' />}
-            onClick={refresh}
-            disabled={loading}
-            className='w-full sm:w-auto'
-          >
-            {loading ? t('Loading...') : t('Refresh')}
-          </Button>
-        </div>
-      </div>
-
-      {/* Column Visibility Popover */}
-      <Popover
-        open={Boolean(columnMenuAnchor)}
-        anchorEl={columnMenuAnchor}
-        onClose={handleCloseColumnMenu}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left'
-        }}
-      >
-        <div className='p-4' style={{ width: 300 }}>
-          <div className='flex items-center justify-between mb-4'>
-            <Typography variant='h6'>{t('Show Columns')}</Typography>
-            <IconButton size='small' onClick={handleCloseColumnMenu}>
-              <i className='ri-close-line' />
-            </IconButton>
-          </div>
-          <Divider className='mb-2' />
-          <div className='flex gap-2 mb-4'>
-            <Button size='small' onClick={handleShowAllColumns} variant='outlined'>
-              {t('Show All')}
-            </Button>
-            <Button size='small' onClick={handleHideAllColumns} variant='outlined'>
-              {t('Hide All')}
-            </Button>
-            <Button size='small' onClick={handleResetColumns} variant='outlined'>
-              {t('Reset')}
-            </Button>
-          </div>
-          <Divider className='mb-2' />
-          <List dense className='max-h-96 overflow-y-auto'>
-            {AVAILABLE_COLUMNS.map(column => (
-              <ListItem key={column.id} disablePadding>
-                <ListItemButton onClick={() => handleToggleColumn(column.id)}>
-                  <FormControlLabel
-                    control={<Checkbox checked={columnVisibility[column.id] !== false} />}
-                    label={t(column.label)}
-                    className='w-full m-0'
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </div>
-      </Popover>
-      <div className='overflow-x-auto'>
-        <table className={tableStyles.table}>
-          <thead>
-            {table.getHeaderGroups().map(headerGroup => (
-              <>
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map(header => (
-                    <th key={header.id}>
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                    </th>
-                  ))}
-                </tr>
-                {showFilters && (
-                  <tr key={`${headerGroup.id}-filters`} className='bg-backgroundPaper'>
-                    {headerGroup.headers.map(header => (
-                      <th key={`${header.id}-filter`} className='p-2'>
-                        {header.id === 'select' || header.id === 'action' || header.id === 'id' ? null : (
-                          <Box sx={{ py: 1 }}>{createColumnFilter(header.id)}</Box>
-                        )}
-                      </th>
-                    ))}
-                  </tr>
-                )}
-              </>
-            ))}
-          </thead>
-          {loading ? (
-            <tbody>
-              <tr>
-                <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
-                  <Box className='flex justify-center items-center' sx={{ py: 10 }}>
-                    <CircularProgress />
-                  </Box>
-                </td>
-              </tr>
-            </tbody>
-          ) : users.length === 0 ? (
-            <tbody>
-              <tr>
-                <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
-                  <Box sx={{ py: 6 }}>
-                    <Typography>{t('No data available')}</Typography>
-                  </Box>
-                </td>
-              </tr>
-            </tbody>
-          ) : (
-            <tbody>
-              {table.getRowModel().rows.map(row => {
-                return (
-                  <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
-                    {row.getVisibleCells().map(cell => (
-                      <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                    ))}
-                  </tr>
-                )
-              })}
-            </tbody>
-          )}
-        </table>
-      </div>
-      <TablePagination
-        rowsPerPageOptions={[10, 25, 50, 100]}
-        component='div'
-        className='border-bs'
-        count={pagination.total}
-        rowsPerPage={pagination.per_page}
-        page={pagination.current_page - 1}
-        SelectProps={{
-          inputProps: { 'aria-label': 'rows per page' },
-          disabled: loading
-        }}
-        slotProps={{
-          actions: {
-            nextButton: {
-              disabled: loading || pagination.current_page >= pagination.last_page
-            },
-            previousButton: {
-              disabled: loading || pagination.current_page <= 1
-            }
-          }
-        }}
-        onPageChange={(_, page) => {
-          if (!loading) {
-            setPage(page + 1)
-          }
-        }}
-        onRowsPerPageChange={e => {
-          if (!loading) {
-            setPageSize(Number(e.target.value))
-          }
-        }}
-      />
+    <>
+      <DataTable {...tableConfig} />
 
       {/* Functions Modal */}
       <UserFunctionsModal open={functionsModalOpen} onClose={handleCloseFunctionsModal} user={selectedUser} />
@@ -1131,7 +633,7 @@ const UserListTable = () => {
 
       {/* Edit User Modal */}
       <UserEditModal open={editModalOpen} onClose={handleCloseEditModal} onSuccess={handleEditSuccess} user={selectedUser} />
-    </Card>
+    </>
   )
 }
 
