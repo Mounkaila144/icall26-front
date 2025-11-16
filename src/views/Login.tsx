@@ -80,8 +80,8 @@ const Login = ({ mode }: { mode: Mode }) => {
   } = useForm<FormData>({
     resolver: valibotResolver(schema),
     defaultValues: {
-      username: 'admin',
-      password: 'admin'
+      username: 'superadmin',
+      password: '123'
     }
   })
 
@@ -141,8 +141,8 @@ const Login = ({ mode }: { mode: Mode }) => {
           </div>
           <Alert icon={false} className='bg-[var(--mui-palette-primary-lightOpacity)]'>
             <Typography variant='body2' color='primary.main'>
-              Username: <span className='font-medium'>admin</span> / Pass:{' '}
-              <span className='font-medium'>admin</span>
+              Username: <span className='font-medium'>superadmin</span> / Pass:{' '}
+              <span className='font-medium'>123</span>
             </Typography>
           </Alert>
           {error && (

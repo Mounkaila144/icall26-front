@@ -83,7 +83,7 @@ export const useAuth = (): UseAuthReturn => {
                     console.warn('[useAuth] PermissionsContext not available, skipping permissions extraction');
                 }
 
-                router.push('/admin/customers-contracts/contracts-list1');
+                router.push('/admin/users');
             } else {
                 throw new Error(response.message || 'Login failed');
             }
