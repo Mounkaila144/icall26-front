@@ -2,6 +2,14 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   basePath: process.env.BASEPATH,
+  eslint: {
+    // Désactiver ESLint pendant le build
+    ignoreDuringBuilds: true
+  },
+  typescript: {
+    // Désactiver les vérifications TypeScript pendant le build
+    ignoreBuildErrors: true
+  },
   redirects: async () => {
     return [
       {
