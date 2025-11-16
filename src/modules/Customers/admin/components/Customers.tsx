@@ -7,6 +7,11 @@ import { createColumnHelper } from '@tanstack/react-table'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 import Chip from '@mui/material/Chip'
+import TextField from '@mui/material/TextField'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
+import FormControl from '@mui/material/FormControl'
+import Box from '@mui/material/Box'
 
 // Services
 import { customersService } from '../services/customersService'
@@ -64,6 +69,10 @@ export default function Customers() {
     per_page: 15
   })
 
+  // Column filters state
+  const [showFilters, setShowFilters] = useState(false)
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({})
+
   // Column visibility
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(() => {
     if (typeof window === 'undefined') return {}
@@ -100,10 +109,23 @@ export default function Customers() {
     try {
       setLoading(true)
       setError(null)
+
+      // Build search from column filters
+      let searchQuery = globalSearch
+
+      // If there are column filters, build a search string from them
+      if (Object.keys(columnFilters).length > 0) {
+        const filterValues = Object.values(columnFilters).filter(Boolean).join(' ')
+
+        if (filterValues) {
+          searchQuery = searchQuery ? `${searchQuery} ${filterValues}` : filterValues
+        }
+      }
+
       const response = await customersService.getCustomers({
         ...filters,
         page: pagination.current_page,
-        search: globalSearch || undefined
+        search: searchQuery || undefined
       })
 
       if (response.success) {
@@ -124,7 +146,7 @@ export default function Customers() {
     } finally {
       setLoading(false)
     }
-  }, [pagination.current_page, filters, globalSearch])
+  }, [pagination.current_page, filters, globalSearch, columnFilters])
 
   // Load on mount and when dependencies change
   useEffect(() => {
@@ -144,6 +166,66 @@ export default function Customers() {
       alert('Error deleting customer: ' + err.message)
     }
   }, [loadCustomers])
+
+  // Handle column filter change
+  const handleColumnFilterChange = useCallback((columnId: string, value: string) => {
+    setColumnFilters(prev => {
+      if (value === '' || value === null || value === undefined) {
+        // Remove filter if empty
+        const { [columnId]: _, ...rest } = prev
+        return rest
+      }
+      return {
+        ...prev,
+        [columnId]: value
+      }
+    })
+  }, [])
+
+  // Clear all column filters
+  const handleClearAllFilters = useCallback(() => {
+    setColumnFilters({})
+  }, [])
+
+  // Toggle filters visibility
+  const handleToggleFilters = useCallback(() => {
+    setShowFilters(prev => !prev)
+  }, [])
+
+  // Helper to create column filter component
+  const createColumnFilter = useCallback(
+    (columnId: string) => {
+      const value = columnFilters[columnId] || ''
+
+      // Text search filters for most columns
+      const textSearchColumns = [
+        'company',
+        'email',
+        'phone',
+        'address',
+        'occupation'
+      ]
+
+      if (textSearchColumns.includes(columnId)) {
+        return (
+          <TextField
+            size='small'
+            value={value}
+            onChange={e => handleColumnFilterChange(columnId, e.target.value)}
+            placeholder='Search...'
+            fullWidth
+            variant='outlined'
+            disabled={loading}
+            sx={{ minWidth: 120 }}
+          />
+        )
+      }
+
+      // No filter for id and created_at for now
+      return null
+    },
+    [columnFilters, handleColumnFilterChange, loading]
+  )
 
   // Column definitions
   const columns = useMemo<ColumnDef<Customer, any>[]>(
@@ -253,6 +335,13 @@ export default function Customers() {
     searchPlaceholder: 'Search customers by name, email, phone...',
     emptyMessage: 'No customers found',
     rowsPerPageOptions: [10, 15, 25, 50],
+
+    // Column Filters
+    showColumnFilters: showFilters,
+    onToggleColumnFilters: handleToggleFilters,
+    columnFilters,
+    onClearAllFilters: handleClearAllFilters,
+    createColumnFilter,
 
     // Actions in toolbar
     actions: [

@@ -8,6 +8,11 @@ import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import Checkbox from '@mui/material/Checkbox'
 import IconButton from '@mui/material/IconButton'
+import TextField from '@mui/material/TextField'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
+import FormControl from '@mui/material/FormControl'
+import Box from '@mui/material/Box'
 
 // Third-party Imports
 import { createColumnHelper } from '@tanstack/react-table'
@@ -114,6 +119,12 @@ const UserListTable = () => {
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
+  // Column filters state
+  const [showFilters, setShowFilters] = useState(false)
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({})
+  const [filterOptions, setFilterOptions] = useState<UserCreationOptions | null>(null)
+  const [loadingOptions, setLoadingOptions] = useState(false)
+
   // Column visibility
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(() => {
     if (typeof window === 'undefined') return {}
@@ -190,6 +201,94 @@ const UserListTable = () => {
   const handleEditSuccess = useCallback(() => {
     refresh()
   }, [refresh])
+
+  // Load filter options (teams, groups, callcenters, etc.)
+  useEffect(() => {
+    const loadFilterOptions = async () => {
+      setLoadingOptions(true)
+      try {
+        const options = await userService.getCreationOptions()
+        setFilterOptions(options)
+      } catch (error) {
+        console.error('Failed to load filter options:', error)
+      } finally {
+        setLoadingOptions(false)
+      }
+    }
+
+    loadFilterOptions()
+  }, [])
+
+  // Handle column filters with debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Build filters for API
+      const equal: Record<string, string | number> = {}
+      const like: Record<string, string> = {}
+
+      Object.entries(columnFilters).forEach(([key, value]) => {
+        if (value && value !== '') {
+          // Use 'equal' for exact match fields (dropdowns, selects)
+          // Use 'like' for text search fields
+          const exactMatchFields = [
+            'is_active',
+            'is_locked',
+            'is_secure_by_code',
+            'status',
+            'application',
+            'callcenter_id',
+            'team_id',
+            'company_id',
+            'sex'
+          ]
+
+          if (exactMatchFields.includes(key)) {
+            equal[key] = value
+          } else {
+            like[key] = value
+          }
+        }
+      })
+
+      // Update params with new filters
+      updateParams({
+        filter: {
+          ...params.filter,
+          search: params.filter?.search, // Preserve global search
+          order: params.filter?.order, // Preserve sorting
+          equal: Object.keys(equal).length > 0 ? equal : undefined,
+          like: Object.keys(like).length > 0 ? like : undefined
+        }
+      })
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [columnFilters, params.filter?.search, params.filter?.order, updateParams])
+
+  // Handle column filter change
+  const handleColumnFilterChange = useCallback((columnId: string, value: string) => {
+    setColumnFilters(prev => {
+      if (value === '' || value === null || value === undefined) {
+        // Remove filter if empty
+        const { [columnId]: _, ...rest } = prev
+        return rest
+      }
+      return {
+        ...prev,
+        [columnId]: value
+      }
+    })
+  }, [])
+
+  // Clear all column filters
+  const handleClearAllFilters = useCallback(() => {
+    setColumnFilters({})
+  }, [])
+
+  // Toggle filters visibility
+  const handleToggleFilters = useCallback(() => {
+    setShowFilters(prev => !prev)
+  }, [])
 
   // Get avatar helper
   const getAvatar = (params: Pick<User, 'sex' | 'full_name'>) => {
@@ -470,6 +569,142 @@ const UserListTable = () => {
     [t, deleteUser, handleOpenFunctionsModal, handleOpenGroupsModal, handleOpenEditModal]
   )
 
+  // Helper to create column filter component
+  const createColumnFilter = useCallback(
+    (columnId: string) => {
+      const value = columnFilters[columnId] || ''
+
+      // Text search filters
+      const textSearchColumns = [
+        'username',
+        'firstname',
+        'lastname',
+        'email',
+        'phone',
+        'mobile',
+        'profiles',
+        'groups_list',
+        'teams_list',
+        'functions_list'
+      ]
+
+      if (textSearchColumns.includes(columnId)) {
+        return (
+          <TextField
+            size='small'
+            value={value}
+            onChange={e => handleColumnFilterChange(columnId, e.target.value)}
+            placeholder={t('Search')}
+            fullWidth
+            variant='outlined'
+            disabled={loading}
+            sx={{ minWidth: 120 }}
+          />
+        )
+      }
+
+      // Status filters (is_active)
+      if (columnId === 'is_active' || columnId === 'state') {
+        return (
+          <FormControl size='small' fullWidth sx={{ minWidth: 120 }}>
+            <Select
+              value={value}
+              onChange={e => handleColumnFilterChange('is_active', e.target.value)}
+              displayEmpty
+              disabled={loading}
+            >
+              <MenuItem value=''>{t('All')}</MenuItem>
+              <MenuItem value='YES'>{t('Active')}</MenuItem>
+              <MenuItem value='NO'>{t('Inactive')}</MenuItem>
+            </Select>
+          </FormControl>
+        )
+      }
+
+      // Lock status filters (is_locked)
+      if (columnId === 'is_locked' || columnId === 'locked') {
+        return (
+          <FormControl size='small' fullWidth sx={{ minWidth: 120 }}>
+            <Select
+              value={value}
+              onChange={e => handleColumnFilterChange('is_locked', e.target.value)}
+              displayEmpty
+              disabled={loading}
+            >
+              <MenuItem value=''>{t('All')}</MenuItem>
+              <MenuItem value='YES'>{t('Locked')}</MenuItem>
+              <MenuItem value='NO'>{t('Unlocked')}</MenuItem>
+            </Select>
+          </FormControl>
+        )
+      }
+
+      // Code by email filter (is_secure_by_code)
+      if (columnId === 'is_secure_by_code' || columnId === 'code_by_email') {
+        return (
+          <FormControl size='small' fullWidth sx={{ minWidth: 120 }}>
+            <Select
+              value={value}
+              onChange={e => handleColumnFilterChange('is_secure_by_code', e.target.value)}
+              displayEmpty
+              disabled={loading}
+            >
+              <MenuItem value=''>{t('All')}</MenuItem>
+              <MenuItem value='YES'>{t('Yes')}</MenuItem>
+              <MenuItem value='NO'>{t('No')}</MenuItem>
+            </Select>
+          </FormControl>
+        )
+      }
+
+      // Callcenter filter
+      if ((columnId === 'callcenter_id' || columnId === 'callcenter') && filterOptions) {
+        return (
+          <FormControl size='small' fullWidth sx={{ minWidth: 150 }}>
+            <Select
+              value={value}
+              onChange={e => handleColumnFilterChange('callcenter_id', e.target.value)}
+              displayEmpty
+              disabled={loading || loadingOptions}
+            >
+              <MenuItem value=''>{t('All')}</MenuItem>
+              {filterOptions.callcenters.map(cc => (
+                <MenuItem key={cc.id} value={cc.id}>
+                  {cc.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )
+      }
+
+      // Team filter
+      if ((columnId === 'team_id' || columnId === 'managers_teams') && filterOptions) {
+        return (
+          <FormControl size='small' fullWidth sx={{ minWidth: 150 }}>
+            <Select
+              value={value}
+              onChange={e => handleColumnFilterChange('team_id', e.target.value)}
+              displayEmpty
+              disabled={loading || loadingOptions}
+            >
+              <MenuItem value=''>{t('All')}</MenuItem>
+              {filterOptions.teams.map(team => (
+                <MenuItem key={team.id} value={team.id}>
+                  {team.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )
+      }
+
+      // Default: no filter for this column
+      return null
+    },
+    [columnFilters, handleColumnFilterChange, loading, loadingOptions, filterOptions, t]
+  )
+
   // DataTable configuration
   const tableConfig: DataTableConfig<User> = {
     columns,
@@ -486,6 +721,13 @@ const UserListTable = () => {
     searchPlaceholder: t('Search User'),
     emptyMessage: t('No data available'),
     rowsPerPageOptions: [10, 25, 50, 100],
+
+    // Column Filters
+    showColumnFilters: showFilters,
+    onToggleColumnFilters: handleToggleFilters,
+    columnFilters,
+    onClearAllFilters: handleClearAllFilters,
+    createColumnFilter,
 
     // Actions
     actions: [

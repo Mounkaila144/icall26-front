@@ -44,9 +44,12 @@ export function DataTable<TData extends Record<string, any>>(props: DataTableCon
     columnVisibility: externalColumnVisibility,
     onColumnVisibilityChange,
     actions = [],
-    filters = [],
+    showColumnFilters = false,
+    onToggleColumnFilters,
     columnFilters,
     onColumnFilterChange,
+    onClearAllFilters,
+    createColumnFilter,
     emptyMessage = 'No data available',
     rowsPerPageOptions = [10, 25, 50, 100]
   } = props
@@ -111,9 +114,10 @@ export function DataTable<TData extends Record<string, any>>(props: DataTableCon
         availableColumns={availableColumns}
         columnVisibility={columnVisibility}
         onColumnVisibilityChange={handleColumnVisibilityChange}
-        filters={filters}
+        showColumnFilters={showColumnFilters}
+        onToggleColumnFilters={onToggleColumnFilters}
         columnFilters={columnFilters}
-        onColumnFilterChange={onColumnFilterChange}
+        onClearAllFilters={onClearAllFilters}
       />
 
       {/* Mobile Card View */}
@@ -134,13 +138,26 @@ export function DataTable<TData extends Record<string, any>>(props: DataTableCon
           <table className={tableStyles.table}>
             <thead>
               {table.getHeaderGroups().map(headerGroup => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map(header => (
-                    <th key={header.id}>
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                    </th>
-                  ))}
-                </tr>
+                <>
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map(header => (
+                      <th key={header.id}>
+                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                      </th>
+                    ))}
+                  </tr>
+                  {showColumnFilters && createColumnFilter && (
+                    <tr key={`${headerGroup.id}-filters`} className='bg-backgroundPaper'>
+                      {headerGroup.headers.map(header => (
+                        <th key={`${header.id}-filter`} className='p-2'>
+                          {header.id === 'select' || header.id === 'action' || header.id === 'actions' || header.id === 'id' ? null : (
+                            <Box sx={{ py: 1 }}>{createColumnFilter(header.id)}</Box>
+                          )}
+                        </th>
+                      ))}
+                    </tr>
+                  )}
+                </>
               ))}
             </thead>
             {loading ? (

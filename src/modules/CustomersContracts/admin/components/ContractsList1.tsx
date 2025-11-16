@@ -1,227 +1,92 @@
-// ============================================================================
-// CustomersContracts Module - Main Contracts List Component
-// ============================================================================
+'use client'
 
-'use client';
+import { useState, useMemo, useCallback } from 'react'
+import { createColumnHelper } from '@tanstack/react-table'
+import type { ColumnDef } from '@tanstack/react-table'
 
-import React, { useState } from 'react';
-import { useContracts } from '../hooks/useContracts';
-import { useSidebar } from '@/shared/lib/sidebar-context';
-import { useTranslation } from '@/shared/i18n';
-import CreateContractModal from './CreateContractModal';
-import EditContractModal from './EditContractModal';
-import type { CustomerContract } from '../../types';
-import {Can} from "@/shared/components/permissions";
+// MUI Imports
+import Typography from '@mui/material/Typography'
+import IconButton from '@mui/material/IconButton'
+import Chip from '@mui/material/Chip'
+import TextField from '@mui/material/TextField'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
+import FormControl from '@mui/material/FormControl'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+
+// Hooks
+import { useContracts } from '../hooks/useContracts'
+import { useTranslation } from '@/shared/i18n'
+
+// Components
+import CreateContractModal from './CreateContractModal'
+import EditContractModal from './EditContractModal'
+import { DataTable, StandardMobileCard } from '@/components/shared/DataTable'
+import type { DataTableConfig, ColumnConfig } from '@/components/shared/DataTable'
+
+// Types
+import type { CustomerContract } from '../../types'
+
+// Column helper
+const columnHelper = createColumnHelper<CustomerContract>()
 
 /**
- * StatusBadge Component - Display status with color and icon
+ * Available columns configuration
  */
-interface StatusBadgeProps {
-  name: string;
-  color: string;
-  icon?: string;
-}
+const AVAILABLE_COLUMNS: ColumnConfig[] = [
+  // Client Info
+  { id: 'customer_name', label: 'Nom Prénom', defaultVisible: true },
+  { id: 'customer_phone', label: 'Téléphone', defaultVisible: true },
+  { id: 'customer_city', label: 'Ville', defaultVisible: false },
+  { id: 'customer_postcode', label: 'Code Postal', defaultVisible: false },
 
-const StatusBadge: React.FC<StatusBadgeProps> = ({ name, color, icon }) => {
-  const style: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-    padding: '4px 12px',
-    borderRadius: '20px',
-    backgroundColor: `${color}20`,
-    color: color,
-    fontSize: '13px',
-    fontWeight: '500',
-    border: `1px solid ${color}40`,
-  };
+  // Financier
+  { id: 'date_ouverture', label: 'Date Ouverture', defaultVisible: true },
+  { id: 'montant_ttc', label: 'Montant TTC', defaultVisible: true },
 
-  return (
-    <span style={style}>
-      {icon && <span>{icon}</span>}
-      {name}
-    </span>
-  );
-};
+  // Projet
+  { id: 'regie_callcenter', label: 'Régie/Callcenter', defaultVisible: false },
+  { id: 'acces_1', label: 'Accès 1', defaultVisible: false },
+  { id: 'acces_2', label: 'Accès 2', defaultVisible: false },
+  { id: 'source', label: 'Source', defaultVisible: false },
+  { id: 'periode_cee', label: 'Periode CEE', defaultVisible: false },
+  { id: 'surface_parcelle', label: 'Surface Parcelle', defaultVisible: false },
+  { id: 'societe_porteuse', label: 'Société Porteuse', defaultVisible: false },
 
-/**
- * ActionsDropdown Component - Dropdown menu for contract actions
- */
-interface ActionsDropdownProps {
-  contract: CustomerContract;
-  onEdit: () => void;
-  onDelete: () => void;
-}
+  // Équipe
+  { id: 'createur_id', label: 'Créateur', defaultVisible: false },
+  { id: 'confirmateur_id', label: 'Confirmateur', defaultVisible: false },
+  { id: 'installateur_id', label: 'Installateur', defaultVisible: false },
+  { id: 'equipe_installation', label: 'Équipe Installation', defaultVisible: false },
+  { id: 'sous_traitant_id', label: 'Sous Traitant', defaultVisible: false },
 
-const ActionsDropdown: React.FC<ActionsDropdownProps> = ({ contract, onEdit, onDelete }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  // Statuts
+  { id: 'confirme', label: 'Confirmé', defaultVisible: true },
+  { id: 'facturable', label: 'Facturable', defaultVisible: true },
+  { id: 'bloque', label: 'Bloqué', defaultVisible: false },
 
-  const buttonStyle: React.CSSProperties = {
-    padding: '6px 12px',
-    background: 'rgb(30, 58, 138)',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '13px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    transition: 'all 0.2s',
-  };
+  // Validations
+  { id: 'has_photos', label: 'V Photo', defaultVisible: false },
+  { id: 'has_documents', label: 'V Document', defaultVisible: false },
+  { id: 'controle_qualite_valide', label: 'V Qualité', defaultVisible: false },
 
-  const dropdownContainerStyle: React.CSSProperties = {
-    position: 'relative',
-    display: 'inline-block',
-  };
+  // Rapports
+  { id: 'rapport_temps', label: 'Rapport Temps', defaultVisible: false },
+  { id: 'rapport_admin', label: 'Rapport Admin', defaultVisible: false },
+  { id: 'rapport_attribution', label: 'Rapport Attribution', defaultVisible: false },
+  { id: 'rapport_installation', label: 'Rapport Installation', defaultVisible: false },
 
-  const dropdownMenuStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: '100%',
-    right: 0,
-    marginTop: '4px',
-    background: 'white',
-    border: '1px solid #e0e0e0',
-    borderRadius: '8px',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-    minWidth: '180px',
-    zIndex: 9999,
-    overflow: 'hidden',
-  };
+  // Autres
+  { id: 'campaign_id', label: 'Campaign', defaultVisible: false },
+  { id: 'esclave', label: 'Esclave', defaultVisible: false },
+  { id: 'actif', label: 'Actif', defaultVisible: true }
+]
 
-  const menuItemStyle: React.CSSProperties = {
-    padding: '10px 16px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    cursor: 'pointer',
-    transition: 'background 0.2s',
-    fontSize: '14px',
-    border: 'none',
-    width: '100%',
-    textAlign: 'left',
-    background: 'transparent',
-  };
-
-  const handleAction = (e: React.MouseEvent, action: () => void) => {
-    e.stopPropagation();
-    action();
-    setIsOpen(false);
-  };
-
-  return (
-    <div style={dropdownContainerStyle}>
-      <button
-        style={buttonStyle}
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsOpen(!isOpen);
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'scale(1.05)';
-          e.currentTarget.style.background = 'rgb(23, 45, 107)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.background = 'rgb(30, 58, 138)';
-        }}
-      >
-        <span>⚙️</span>
-        <span>Actions</span>
-        <span style={{
-          transition: 'transform 0.3s',
-          transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-          fontSize: '10px',
-        }}>▼</span>
-      </button>
-
-      {isOpen && (
-        <>
-          {/* Overlay to close dropdown when clicking outside */}
-          <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              zIndex: 9998,
-            }}
-            onClick={() => setIsOpen(false)}
-          />
-
-          <div style={dropdownMenuStyle}>
-            <button
-              style={menuItemStyle}
-              onClick={(e) => handleAction(e, onEdit)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#f5f5ff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
-              }}
-            >
-              <span style={{ fontSize: '16px' }}>✏️</span>
-              <span style={{ color: '#667eea', fontWeight: '500' }}>Modifier</span>
-            </button>
-
-            <button
-              style={menuItemStyle}
-              onClick={(e) => handleAction(e, () => {
-                navigator.clipboard.writeText(contract.reference);
-              })}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#f5f5ff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
-              }}
-            >
-              <span style={{ fontSize: '16px' }}>📋</span>
-              <span style={{ color: '#28a745', fontWeight: '500' }}>Copier Réf</span>
-            </button>
-
-            <button
-              style={menuItemStyle}
-              onClick={(e) => handleAction(e, () => {
-                window.open(`/admin/contracts/${contract.id}`, '_blank');
-              })}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#f5f5ff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
-              }}
-            >
-              <span style={{ fontSize: '16px' }}>👁️</span>
-              <span style={{ color: '#17a2b8', fontWeight: '500' }}>Voir Détails</span>
-            </button>
-
-            <div style={{ height: '1px', background: '#e0e0e0', margin: '4px 0' }} />
-
-            <button
-              style={menuItemStyle}
-              onClick={(e) => handleAction(e, onDelete)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#fee';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
-              }}
-            >
-              <span style={{ fontSize: '16px' }}>🗑️</span>
-              <span style={{ color: '#dc3545', fontWeight: '500' }}>Supprimer</span>
-            </button>
-          </div>
-        </>
-      )}
-    </div>
-  );
-};
+const STORAGE_KEY = 'contractsListTableColumns'
 
 /**
- * Main Contracts List Component
+ * Main Contracts List Component - Refactored with DataTable
  */
 export default function ContractsList1() {
   const {
@@ -240,830 +105,588 @@ export default function ContractsList1() {
     deleteContract,
     createContract,
     updateContract,
-    getContract,
-  } = useContracts();
+    getContract
+  } = useContracts()
 
-  const { isCollapsed } = useSidebar();
-  const { t } = useTranslation('CustomersContracts');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedContractId, setSelectedContractId] = useState<number | null>(null);
+  const { t } = useTranslation('CustomersContracts')
 
-  // Styles
-  const containerStyle: React.CSSProperties = {
-    padding: '24px',
-    width: '100%',
-    maxWidth: isCollapsed ? 'calc(100vw - 120px)' : 'calc(100vw - 280px)', // Ajustement dynamique selon l'état du sidebar
-    margin: '0 auto',
-    overflow: 'hidden',
-    boxSizing: 'border-box',
-    transition: 'max-width 0.3s ease', // Transition fluide lors du toggle
-  };
+  // States
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [selectedContractId, setSelectedContractId] = useState<number | null>(null)
 
-  const headerStyle: React.CSSProperties = {
-    marginBottom: '32px',
-  };
+  // Column filters state
+  const [showFilters, setShowFilters] = useState(false)
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({})
 
-  const titleStyle: React.CSSProperties = {
-    fontSize: '32px',
-    fontWeight: 'bold',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    marginBottom: '8px',
-  };
+  // Column visibility
+  const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(() => {
+    if (typeof window === 'undefined') return {}
 
-  const subtitleStyle: React.CSSProperties = {
-    fontSize: '16px',
-    color: '#666',
-  };
+    const saved = localStorage.getItem(STORAGE_KEY)
 
-  const cardStyle: React.CSSProperties = {
-    background: 'white',
-    padding: '24px',
-    borderRadius: '12px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-    marginBottom: '24px',
-    width: '100%',
-    boxSizing: 'border-box',
-    overflow: 'hidden',
-  };
+    if (saved) {
+      try {
+        return JSON.parse(saved)
+      } catch {
+        return {}
+      }
+    }
 
-  const filtersSectionStyle: React.CSSProperties = {
-    display: 'flex',
-    gap: '12px',
-    flexWrap: 'wrap',
-    padding: '16px',
-    background: '#f8f9fa',
-    borderRadius: '8px',
-    marginTop: '12px',
-  };
+    const defaultVisibility: Record<string, boolean> = {}
 
-  const inputStyle: React.CSSProperties = {
-    padding: '8px 12px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
-    fontSize: '13px',
-    flex: '1',
-    minWidth: '180px',
-    maxWidth: '250px',
-  };
+    AVAILABLE_COLUMNS.forEach(col => {
+      defaultVisibility[col.id] = col.defaultVisible !== false
+    })
 
-  const selectStyle: React.CSSProperties = {
-    padding: '8px 12px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
-    fontSize: '13px',
-    minWidth: '140px',
-    maxWidth: '180px',
-    cursor: 'pointer',
-  };
+    return defaultVisibility
+  })
 
-  const buttonStyle: React.CSSProperties = {
-    padding: '8px 16px',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '13px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'transform 0.2s',
-    whiteSpace: 'nowrap',
-  };
-
-  const secondaryButtonStyle: React.CSSProperties = {
-    ...buttonStyle,
-    background: '#6c757d',
-  };
-
-  const filterToggleButtonStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '10px 16px',
-    background: 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)',
-    color: '#667eea',
-    border: '1px solid #667eea40',
-    borderRadius: '8px',
-    fontSize: '13px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    width: '100%',
-    justifyContent: 'space-between',
-  };
-
-  const tableContainerStyle: React.CSSProperties = {
-    overflowX: 'auto',
-    overflowY: 'auto',
-    maxHeight: '70vh',
-    border: '1px solid #e0e0e0',
-    borderRadius: '8px',
-    position: 'relative',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-    width: '100%',
-  };
-
-  const tableStyle: React.CSSProperties = {
-    width: '100%',
-    borderCollapse: 'separate',
-    borderSpacing: '0',
-    minWidth: 'max-content', // Allow table to be as wide as needed
-  };
-
-  const thStyle: React.CSSProperties = {
-    textAlign: 'left',
-    padding: '12px 10px',
-    background: '#1e40af',
-    color: 'white',
-    fontWeight: '600',
-    fontSize: '12px',
-    position: 'sticky',
-    top: 0,
-    zIndex: 10,
-    borderRight: '1px solid rgba(255,255,255,0.2)',
-    whiteSpace: 'nowrap',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-  };
-
-  const thStickyStyle: React.CSSProperties = {
-    ...thStyle,
-    left: 0,
-    zIndex: 20,
-    boxShadow: '2px 0 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1)',
-    background: '#1e3a8a',
-  };
-
-  const tdStyle: React.CSSProperties = {
-    padding: '10px',
-    borderBottom: '1px solid #f0f0f0',
-    borderRight: '1px solid #f5f5f5',
-    fontSize: '13px',
-    backgroundColor: 'white',
-    whiteSpace: 'nowrap',
-  };
-
-  const tdStickyStyle: React.CSSProperties = {
-    ...tdStyle,
-    position: 'sticky',
-    left: 0,
-    backgroundColor: '#fafafa',
-    fontWeight: '600',
-    zIndex: 9,
-    boxShadow: '2px 0 5px rgba(0,0,0,0.05)',
-  };
-
-  const groupHeaderStyle: React.CSSProperties = {
-    ...thStyle,
-    background: '#2563eb',
-    textAlign: 'center',
-    fontSize: '12px',
-    fontWeight: '700',
-    letterSpacing: '0.5px',
-    textTransform: 'uppercase',
-    boxShadow: '0 3px 6px rgba(0, 0, 0, 0.15)',
-    borderBottom: '2px solid rgba(255, 255, 255, 0.3)',
-  };
-
-  const thSecondRowStyle: React.CSSProperties = {
-    ...thStyle,
-    top: '44px', // Position sous la première ligne (hauteur approximative de la première ligne)
-  };
-
-  const paginationStyle: React.CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: '24px',
-    flexWrap: 'wrap',
-    gap: '16px',
-  };
-
-  const loadingStyle: React.CSSProperties = {
-    textAlign: 'center',
-    padding: '40px',
-    fontSize: '16px',
-    color: '#666',
-  };
-
-  const errorStyle: React.CSSProperties = {
-    background: '#fee',
-    color: '#c33',
-    padding: '16px',
-    borderRadius: '8px',
-    marginBottom: '16px',
-    border: '1px solid #fcc',
-  };
-
-  const emptyStyle: React.CSSProperties = {
-    textAlign: 'center',
-    padding: '60px 20px',
-    color: '#999',
-    fontSize: '16px',
-  };
-
-  const deleteButtonStyle: React.CSSProperties = {
-    padding: '6px 12px',
-    background: '#dc3545',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '13px',
-    cursor: 'pointer',
-    transition: 'background 0.2s',
-  };
-
-  const badgeStyle: React.CSSProperties = {
-    display: 'inline-block',
-    padding: '4px 12px',
-    borderRadius: '20px',
-    fontSize: '13px',
-    fontWeight: '500',
-  };
+  // Save column visibility
+  useState(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(columnVisibility))
+    }
+  })
 
   // Handlers
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateFilter('reference', searchTerm);
-  };
+  const handleDelete = useCallback(
+    async (id: number) => {
+      if (!confirm('Êtes-vous sûr de vouloir supprimer ce contrat ?')) {
+        return
+      }
 
-  const handleDelete = async (id: number) => {
-    await deleteContract(id);
-  };
+      try {
+        await deleteContract(id)
+      } catch (err: any) {
+        alert('Erreur lors de la suppression: ' + err.message)
+      }
+    },
+    [deleteContract]
+  )
 
-  const handleEdit = (contractId: number) => {
-    setSelectedContractId(contractId);
-    setIsEditModalOpen(true);
-  };
+  const handleEdit = useCallback((contractId: number) => {
+    setSelectedContractId(contractId)
+    setIsEditModalOpen(true)
+  }, [])
 
-  const handleRowDoubleClick = (contractId: number) => {
-    handleEdit(contractId);
-  };
+  const handleColumnFilterChange = useCallback((columnId: string, value: string) => {
+    setColumnFilters(prev => {
+      if (value === '' || value === null || value === undefined) {
+        const { [columnId]: _, ...rest } = prev
+        return rest
+      }
 
-  const handleClearFilters = () => {
-    setSearchTerm('');
-    clearFilters();
-  };
+      return {
+        ...prev,
+        [columnId]: value
+      }
+    })
+  }, [])
 
+  const handleClearAllFilters = useCallback(() => {
+    setColumnFilters({})
+    clearFilters()
+  }, [clearFilters])
+
+  const handleToggleFilters = useCallback(() => {
+    setShowFilters(prev => !prev)
+  }, [])
+
+  // Format helpers
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('fr-FR');
-  };
+    if (!dateString) return '-'
+    return new Date(dateString).toLocaleDateString('fr-FR')
+  }
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
-    }).format(price);
-  };
+      currency: 'EUR'
+    }).format(price)
+  }
 
-  return (
-    <div style={containerStyle}>
-      {/* Header with New Contract Button */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '24px',
-      }}>
-        <div style={headerStyle}>
-          <h1 style={titleStyle}>Contracts Management</h1>
-          <p style={subtitleStyle}>Manage and track all customer contracts</p>
-        </div>
+  // Helper to create column filter component
+  const createColumnFilter = useCallback(
+    (columnId: string) => {
+      const value = columnFilters[columnId] || ''
 
-        <button
-          type="button"
-          onClick={() => setIsCreateModalOpen(true)}
-          style={{
-            ...buttonStyle,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            fontSize: '14px',
-            padding: '12px 24px',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.05)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
-        >
-          <span style={{ fontSize: '18px' }}>+</span>
-          <span>Nouveau Contrat</span>
-        </button>
-      </div>
+      // Text search filters
+      const textSearchColumns = [
+        'customer_name',
+        'customer_phone',
+        'customer_city',
+        'customer_postcode',
+        'regie_callcenter',
+        'source',
+        'periode_cee',
+        'societe_porteuse'
+      ]
 
-      {/* Results */}
-      <div style={cardStyle}>
-        {error && <div style={errorStyle}>❌ {error}</div>}
+      if (textSearchColumns.includes(columnId)) {
+        return (
+          <TextField
+            size='small'
+            value={value}
+            onChange={e => handleColumnFilterChange(columnId, e.target.value)}
+            placeholder='Rechercher...'
+            fullWidth
+            variant='outlined'
+            disabled={loading}
+            sx={{ minWidth: 120 }}
+          />
+        )
+      }
 
-        {loading ? (
-          <div style={loadingStyle}>
-            <div
-              style={{
-                display: 'inline-block',
-                width: '40px',
-                height: '40px',
-                border: '4px solid #f3f3f3',
-                borderTop: '4px solid #667eea',
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite',
-              }}
-            />
-            <p style={{ marginTop: '16px' }}>Loading contracts...</p>
-          </div>
-        ) : !Array.isArray(contracts) || contracts.length === 0 ? (
-          <div style={emptyStyle}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
-            <p>No contracts found</p>
-          </div>
-        ) : (
-          <>
-            {/* Filters Toggle Button */}
-            <button
-              type="button"
-              onClick={() => setFiltersOpen(!filtersOpen)}
-              style={filterToggleButtonStyle}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, #667eea25 0%, #764ba225 100%)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)';
+      // Boolean filters (confirme, facturable, bloque, actif)
+      const booleanColumns = ['confirme', 'facturable', 'bloque', 'actif', 'has_photos', 'has_documents', 'controle_qualite_valide']
+
+      if (booleanColumns.includes(columnId)) {
+        return (
+          <FormControl size='small' fullWidth sx={{ minWidth: 100 }}>
+            <Select
+              value={value}
+              onChange={e => handleColumnFilterChange(columnId, e.target.value)}
+              displayEmpty
+              disabled={loading}
+            >
+              <MenuItem value=''>Tous</MenuItem>
+              <MenuItem value='true'>Oui</MenuItem>
+              <MenuItem value='false'>Non</MenuItem>
+            </Select>
+          </FormControl>
+        )
+      }
+
+      return null
+    },
+    [columnFilters, handleColumnFilterChange, loading]
+  )
+
+  // Column definitions
+  const columns = useMemo<ColumnDef<CustomerContract, any>[]>(
+    () => [
+      columnHelper.accessor('id', {
+        id: 'id',
+        header: '#',
+        cell: ({ row }) => (
+          <Typography className='font-semibold' color='primary'>
+            {row.original.id}
+          </Typography>
+        )
+      }),
+
+      // Customer Name
+      columnHelper.accessor('customer', {
+        id: 'customer_name',
+        header: 'Nom Prénom',
+        cell: ({ row }) => (
+          <Typography className='font-medium'>
+            {row.original.customer?.company || row.original.customer?.nom_prenom || '-'}
+          </Typography>
+        )
+      }),
+
+      // Customer Phone
+      columnHelper.accessor('customer', {
+        id: 'customer_phone',
+        header: 'Téléphone',
+        cell: ({ row }) => (
+          <Typography>{row.original.customer?.telephone || row.original.customer?.phone || '-'}</Typography>
+        )
+      }),
+
+      // Customer City
+      columnHelper.accessor('customer', {
+        id: 'customer_city',
+        header: 'Ville',
+        cell: ({ row }) => <Typography>{row.original.customer?.address?.city || '-'}</Typography>
+      }),
+
+      // Customer Postcode
+      columnHelper.accessor('customer', {
+        id: 'customer_postcode',
+        header: 'Code Postal',
+        cell: ({ row }) => <Typography>{row.original.customer?.address?.postcode || '-'}</Typography>
+      }),
+
+      // Date Ouverture
+      columnHelper.accessor('date_ouverture', {
+        id: 'date_ouverture',
+        header: 'Date',
+        cell: ({ row }) => <Typography>{formatDate(row.original.date_ouverture)}</Typography>
+      }),
+
+      // Montant TTC
+      columnHelper.accessor('montant_ttc', {
+        id: 'montant_ttc',
+        header: 'Montant TTC',
+        cell: ({ row }) => (
+          <Typography className='font-semibold' color='success.main'>
+            {formatPrice(row.original.montant_ttc)}
+          </Typography>
+        )
+      }),
+
+      // Projet fields
+      columnHelper.accessor('regie_callcenter', {
+        id: 'regie_callcenter',
+        header: 'Régie/Callcenter',
+        cell: ({ row }) => <Typography>{row.original.regie_callcenter || '-'}</Typography>
+      }),
+
+      columnHelper.accessor('acces_1', {
+        id: 'acces_1',
+        header: 'Accès 1',
+        cell: ({ row }) => <Typography>{row.original.acces_1 || '-'}</Typography>
+      }),
+
+      columnHelper.accessor('acces_2', {
+        id: 'acces_2',
+        header: 'Accès 2',
+        cell: ({ row }) => <Typography>{row.original.acces_2 || '-'}</Typography>
+      }),
+
+      columnHelper.accessor('source', {
+        id: 'source',
+        header: 'Source',
+        cell: ({ row }) => <Typography>{row.original.source || '-'}</Typography>
+      }),
+
+      columnHelper.accessor('periode_cee', {
+        id: 'periode_cee',
+        header: 'Periode CEE',
+        cell: ({ row }) => <Typography>{row.original.periode_cee || '-'}</Typography>
+      }),
+
+      columnHelper.accessor('surface_parcelle', {
+        id: 'surface_parcelle',
+        header: 'Surface Parcelle',
+        cell: ({ row }) => <Typography>{row.original.surface_parcelle || '-'}</Typography>
+      }),
+
+      columnHelper.accessor('societe_porteuse', {
+        id: 'societe_porteuse',
+        header: 'Société Porteuse',
+        cell: ({ row }) => <Typography>{row.original.societe_porteuse || '-'}</Typography>
+      }),
+
+      // Équipe
+      columnHelper.accessor('createur_id', {
+        id: 'createur_id',
+        header: 'Créateur',
+        cell: ({ row }) => <Typography>{row.original.createur_id || '-'}</Typography>
+      }),
+
+      columnHelper.accessor('confirmateur_id', {
+        id: 'confirmateur_id',
+        header: 'Confirmateur',
+        cell: ({ row }) => <Typography>{row.original.confirmateur_id || '-'}</Typography>
+      }),
+
+      columnHelper.accessor('installateur_id', {
+        id: 'installateur_id',
+        header: 'Installateur',
+        cell: ({ row }) => <Typography>{row.original.installateur_id || '-'}</Typography>
+      }),
+
+      columnHelper.accessor('equipe_installation', {
+        id: 'equipe_installation',
+        header: 'Équipe Installation',
+        cell: ({ row }) => <Typography>{row.original.equipe_installation || '-'}</Typography>
+      }),
+
+      columnHelper.accessor('sous_traitant_id', {
+        id: 'sous_traitant_id',
+        header: 'Sous Traitant',
+        cell: ({ row }) => <Typography>{row.original.sous_traitant_id || '-'}</Typography>
+      }),
+
+      // Statuts
+      columnHelper.accessor('confirme', {
+        id: 'confirme',
+        header: 'Confirmé',
+        cell: ({ row }) => (
+          <Chip
+            variant='tonal'
+            label={row.original.confirme ? 'Oui' : 'Non'}
+            size='small'
+            color={row.original.confirme ? 'success' : 'warning'}
+          />
+        )
+      }),
+
+      columnHelper.accessor('facturable', {
+        id: 'facturable',
+        header: 'Facturable',
+        cell: ({ row }) => (
+          <Chip
+            variant='tonal'
+            label={row.original.facturable ? 'Oui' : 'Non'}
+            size='small'
+            color={row.original.facturable ? 'success' : 'error'}
+          />
+        )
+      }),
+
+      columnHelper.accessor('bloque', {
+        id: 'bloque',
+        header: 'Bloqué',
+        cell: ({ row }) => (
+          <Chip
+            variant='tonal'
+            label={row.original.bloque ? 'Oui' : 'Non'}
+            size='small'
+            color={row.original.bloque ? 'error' : 'success'}
+          />
+        )
+      }),
+
+      // Validations
+      columnHelper.accessor('has_photos', {
+        id: 'has_photos',
+        header: 'V Photo',
+        cell: ({ row }) => (
+          <Typography>{row.original.has_photos ? '📷' : '-'}</Typography>
+        )
+      }),
+
+      columnHelper.accessor('has_documents', {
+        id: 'has_documents',
+        header: 'V Document',
+        cell: ({ row }) => (
+          <Typography>{row.original.has_documents ? '📄' : '-'}</Typography>
+        )
+      }),
+
+      columnHelper.accessor('controle_qualite_valide', {
+        id: 'controle_qualite_valide',
+        header: 'V Qualité',
+        cell: ({ row }) => (
+          <Chip
+            variant='tonal'
+            label={row.original.controle_qualite_valide ? 'Validé' : 'En attente'}
+            size='small'
+            color={row.original.controle_qualite_valide ? 'success' : 'default'}
+          />
+        )
+      }),
+
+      // Rapports (showing just icons for brevity)
+      columnHelper.accessor('rapport_temps', {
+        id: 'rapport_temps',
+        header: 'R Temps',
+        cell: ({ row }) => <Typography>{row.original.rapport_temps ? '📊' : '-'}</Typography>
+      }),
+
+      columnHelper.accessor('rapport_admin', {
+        id: 'rapport_admin',
+        header: 'R Admin',
+        cell: ({ row }) => <Typography>{row.original.rapport_admin ? '📊' : '-'}</Typography>
+      }),
+
+      columnHelper.accessor('rapport_attribution', {
+        id: 'rapport_attribution',
+        header: 'R Attribution',
+        cell: ({ row }) => <Typography>{row.original.rapport_attribution ? '📊' : '-'}</Typography>
+      }),
+
+      columnHelper.accessor('rapport_installation', {
+        id: 'rapport_installation',
+        header: 'R Installation',
+        cell: ({ row }) => <Typography>{row.original.rapport_installation ? '📊' : '-'}</Typography>
+      }),
+
+      // Autres
+      columnHelper.accessor('campaign_id', {
+        id: 'campaign_id',
+        header: 'Campaign',
+        cell: ({ row }) => <Typography>{row.original.campaign_id || '-'}</Typography>
+      }),
+
+      columnHelper.accessor('esclave', {
+        id: 'esclave',
+        header: 'Esclave',
+        cell: ({ row }) => <Typography>{row.original.esclave || '-'}</Typography>
+      }),
+
+      columnHelper.accessor('actif', {
+        id: 'actif',
+        header: 'Actif',
+        cell: ({ row }) => (
+          <Chip
+            variant='tonal'
+            label={row.original.actif ? 'Actif' : 'Supprimé'}
+            size='small'
+            color={row.original.actif ? 'success' : 'error'}
+          />
+        )
+      }),
+
+      // Actions column
+      columnHelper.display({
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => (
+          <div className='flex items-center gap-0.5'>
+            <IconButton size='small' onClick={() => handleDelete(row.original.id)} color='error'>
+              <i className='ri-delete-bin-7-line' />
+            </IconButton>
+            <IconButton size='small' onClick={() => window.open(`/admin/contracts/${row.original.id}`, '_blank')}>
+              <i className='ri-eye-line' />
+            </IconButton>
+            <IconButton size='small' onClick={() => handleEdit(row.original.id)} color='primary'>
+              <i className='ri-edit-box-line' />
+            </IconButton>
+            <IconButton
+              size='small'
+              onClick={() => {
+                navigator.clipboard.writeText(row.original.reference)
+                alert('Référence copiée !')
               }}
             >
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span>🔍</span>
-                <span>Filtres et options</span>
-              </span>
-              <span style={{
-                transition: 'transform 0.3s ease',
-                transform: filtersOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                display: 'inline-block'
-              }}>
-                ▼
-              </span>
-            </button>
+              <i className='ri-file-copy-line' />
+            </IconButton>
+          </div>
+        )
+      })
+    ],
+    [handleDelete, handleEdit]
+  )
 
-            {/* Filters - Collapsible */}
-            {filtersOpen && (
-              <form onSubmit={handleSearch}>
-                <div style={filtersSectionStyle}>
-                  <input
-                    type="text"
-                    placeholder="Search by reference..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={inputStyle}
+  // Pagination config
+  const pagination = {
+    current_page: currentPage,
+    last_page: totalPages,
+    per_page: perPage,
+    total: total
+  }
+
+  // DataTable configuration
+  const tableConfig: DataTableConfig<CustomerContract> = {
+    columns,
+    data: Array.isArray(contracts) ? contracts : [],
+    loading,
+    pagination,
+    availableColumns: AVAILABLE_COLUMNS,
+    columnVisibility,
+    onColumnVisibilityChange: setColumnVisibility,
+    onPageChange: setCurrentPage,
+    onPageSizeChange: setPerPage,
+    onSearch: value => updateFilter('reference', value),
+    onRefresh: () => window.location.reload(),
+    searchPlaceholder: 'Rechercher par référence...',
+    emptyMessage: 'Aucun contrat trouvé',
+    rowsPerPageOptions: [10, 15, 25, 50],
+
+    // Column Filters
+    showColumnFilters: showFilters,
+    onToggleColumnFilters: handleToggleFilters,
+    columnFilters,
+    onClearAllFilters: handleClearAllFilters,
+    createColumnFilter,
+
+    // Actions
+    actions: [
+      {
+        label: 'Nouveau Contrat',
+        icon: 'ri-add-line',
+        color: 'primary',
+        onClick: () => setIsCreateModalOpen(true)
+      }
+    ],
+
+    // Mobile card configuration
+    mobileCard: {
+      renderCard: contract => (
+        <StandardMobileCard
+          title={contract.customer?.company || contract.customer?.nom_prenom || `Contrat #${contract.id}`}
+          subtitle={`Réf: ${contract.reference}`}
+          status={{
+            label: contract.actif ? 'Actif' : 'Inactif',
+            color: contract.actif ? 'success' : 'error'
+          }}
+          fields={[
+            {
+              icon: 'ri-money-euro-circle-line',
+              label: 'Montant',
+              value: formatPrice(contract.montant_ttc)
+            },
+            {
+              icon: 'ri-calendar-line',
+              label: 'Date',
+              value: formatDate(contract.date_ouverture)
+            },
+            {
+              icon: 'ri-phone-line',
+              value: contract.customer?.telephone || contract.customer?.phone || '-'
+            },
+            {
+              icon: 'ri-map-pin-line',
+              value: contract.customer?.address?.city || '-',
+              hidden: !contract.customer?.address?.city
+            },
+            {
+              icon: 'ri-checkbox-circle-line',
+              value: (
+                <Box className='flex gap-2'>
+                  <Chip
+                    variant='tonal'
+                    label={contract.confirme ? 'Confirmé' : 'Non confirmé'}
+                    size='small'
+                    color={contract.confirme ? 'success' : 'warning'}
                   />
+                  <Chip
+                    variant='tonal'
+                    label={contract.facturable ? 'Facturable' : 'Non facturable'}
+                    size='small'
+                    color={contract.facturable ? 'success' : 'error'}
+                  />
+                </Box>
+              )
+            }
+          ]}
+          actions={[
+            {
+              icon: 'ri-delete-bin-7-line',
+              color: 'error',
+              onClick: () => handleDelete(contract.id)
+            },
+            {
+              icon: 'ri-eye-line',
+              color: 'default',
+              onClick: () => window.open(`/admin/contracts/${contract.id}`, '_blank')
+            },
+            {
+              icon: 'ri-edit-box-line',
+              color: 'primary',
+              onClick: () => handleEdit(contract.id)
+            }
+          ]}
+          item={contract}
+        />
+      )
+    }
+  }
 
-                  <select
-                    value={filters.actif !== undefined ? (filters.actif ? 'true' : 'false') : 'all'}
-                    onChange={(e) => {
-                      if (e.target.value === 'all') {
-                        updateFilter('actif', undefined);
-                      } else {
-                        updateFilter('actif', e.target.value === 'true');
-                      }
-                    }}
-                    style={selectStyle}
-                  >
-                    <option value="all">All Status</option>
-                    <option value="true">Active</option>
-                    <option value="false">Inactive</option>
-                  </select>
+  return (
+    <>
+      {error && (
+        <Box
+          sx={{
+            background: '#fee',
+            color: '#c33',
+            padding: 2,
+            borderRadius: 2,
+            marginBottom: 2,
+            border: '1px solid #fcc'
+          }}
+        >
+          ❌ {error}
+        </Box>
+      )}
 
-                  <select
-                    value={filters.confirme !== undefined ? (filters.confirme ? 'true' : 'false') : 'all'}
-                    onChange={(e) => {
-                      if (e.target.value === 'all') {
-                        updateFilter('confirme', undefined);
-                      } else {
-                        updateFilter('confirme', e.target.value === 'true');
-                      }
-                    }}
-                    style={selectStyle}
-                  >
-                    <option value="all">All Confirmed</option>
-                    <option value="true">Confirmed</option>
-                    <option value="false">Not Confirmed</option>
-                  </select>
-
-                  <select
-                    value={filters.sort_by || 'created_at'}
-                    onChange={(e) => updateFilter('sort_by', e.target.value)}
-                    style={selectStyle}
-                  >
-                    <option value="created_at">Created Date</option>
-                    <option value="reference">Reference</option>
-                    <option value="date_ouverture">Opened Date</option>
-                    <option value="date_paiement">Payment Date</option>
-                    <option value="montant_ttc">Price TTC</option>
-                  </select>
-
-                  <select
-                    value={filters.sort_order || 'desc'}
-                    onChange={(e) => updateFilter('sort_order', e.target.value as 'asc' | 'desc')}
-                    style={selectStyle}
-                  >
-                    <option value="asc">Ascending</option>
-                    <option value="desc">Descending</option>
-                  </select>
-
-                  <select
-                    value={perPage}
-                    onChange={(e) => setPerPage(Number(e.target.value))}
-                    style={selectStyle}
-                  >
-                    <option value={10}>10 per page</option>
-                    <option value={15}>15 per page</option>
-                    <option value={25}>25 per page</option>
-                    <option value={50}>50 per page</option>
-                  </select>
-
-                  <button type="submit" style={buttonStyle}>
-                    Search
-                  </button>
-
-                  <button type="button" onClick={handleClearFilters} style={secondaryButtonStyle}>
-                    Clear
-                  </button>
-                </div>
-              </form>
-            )}
-
-              <Can credential={[['admin', 'superadmin', 'settings_user_listz']]}>
-                  <h1>{t('Edit User')}</h1>
-              </Can>
-            <div style={tableContainerStyle} className="custom-scroll">
-              <table style={tableStyle}>
-                <thead>
-                  {/* Group Headers Row */}
-                  <tr>
-                    <th style={thStickyStyle} rowSpan={2}>ID</th>
-                    <th style={{...thStyle, background: 'rgb(30, 58, 138)', color: 'white'}} rowSpan={2}>Actions</th>
-                    <th style={groupHeaderStyle} colSpan={4}>📋 INFORMATIONS CLIENT</th>
-                    <th style={groupHeaderStyle} colSpan={2}>💰 FINANCIER</th>
-                    <th style={groupHeaderStyle} colSpan={7}>🏢 PROJET</th>
-                    <th style={groupHeaderStyle} colSpan={5}>👥 ÉQUIPE</th>
-                    <th style={groupHeaderStyle} colSpan={3}>✅ STATUTS</th>
-                    <th style={groupHeaderStyle} colSpan={3}>📸 VALIDATIONS</th>
-                    <th style={groupHeaderStyle} colSpan={4}>📊 RAPPORTS</th>
-                    <th style={groupHeaderStyle} colSpan={3}>🔧 AUTRES</th>
-                  </tr>
-                  {/* Column Headers Row */}
-                  <tr>
-                    {/* Client Info */}
-                    <th style={thSecondRowStyle}>Nom Prénom</th>
-                    <th style={thSecondRowStyle}>Téléphone</th>
-                    <th style={thSecondRowStyle}>Ville</th>
-                    <th style={thSecondRowStyle}>Code Postal</th>
-                    {/* Financier */}
-                    <th style={thSecondRowStyle}>Date</th>
-                    <th style={thSecondRowStyle}>Montant</th>
-                    {/* Projet */}
-                    <th style={thSecondRowStyle}>Régie/callcenter</th>
-                    <th style={thSecondRowStyle}>Accès 1</th>
-                    <th style={thSecondRowStyle}>Accès 2</th>
-                    <th style={thSecondRowStyle}>Source</th>
-                    <th style={thSecondRowStyle}>Periode CEE</th>
-                    <th style={thSecondRowStyle}>Surface parcelle</th>
-                    <th style={thSecondRowStyle}>Société porteuse</th>
-                    {/* Équipe */}
-                    <th style={thSecondRowStyle}>Créateur</th>
-                    <th style={thSecondRowStyle}>Confirmateur</th>
-                    <th style={thSecondRowStyle}>Installateur</th>
-                    <th style={thSecondRowStyle}>Equipe d'installation</th>
-                    <th style={thSecondRowStyle}>Sous Traitant</th>
-                    {/* Statuts */}
-                    <th style={thSecondRowStyle}>Confirmé</th>
-                    <th style={thSecondRowStyle}>Facturable</th>
-                    <th style={thSecondRowStyle}>Bloqué</th>
-                    {/* Validations */}
-                    <th style={thSecondRowStyle}>V Photo</th>
-                    <th style={thSecondRowStyle}>V Document</th>
-                    <th style={thSecondRowStyle}>V Qualité</th>
-                    {/* Rapports */}
-                    <th style={thSecondRowStyle}>Temps</th>
-                    <th style={thSecondRowStyle}>Admin</th>
-                    <th style={thSecondRowStyle}>Attribution</th>
-                    <th style={thSecondRowStyle}>Installation</th>
-                    {/* Autres */}
-                    <th style={thSecondRowStyle}>Campaign</th>
-                    <th style={thSecondRowStyle}>Esclave</th>
-                    <th style={thSecondRowStyle}>Actif</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Array.isArray(contracts) && contracts.map((contract, index) => {
-                    const rowBg = index % 2 === 0 ? 'white' : '#fafafa';
-                    return (
-                    <tr
-                      key={contract.id}
-                      onDoubleClick={() => handleRowDoubleClick(contract.id)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      {/* ID - Sticky */}
-                      <td style={{
-                        ...tdStickyStyle,
-                        backgroundColor: rowBg,
-                      }}>
-                        <strong style={{ color: '#667eea' }}>{contract.id}</strong>
-                      </td>
-
-                      {/* Actions */}
-                      <td style={{
-                        ...tdStyle,
-                        backgroundColor: 'rgba(30, 58, 138, 0.08)',
-                      }}>
-                        <ActionsDropdown
-                          contract={contract}
-                          onEdit={() => handleEdit(contract.id)}
-                          onDelete={() => handleDelete(contract.id)}
-                        />
-                      </td>
-
-                      {/* Nom Prénom */}
-                      <td style={tdStyle}>
-                        {contract.customer ? (
-                          <div style={{ fontWeight: '500' }}>
-                            {contract.customer.company || contract.customer.nom_prenom}
-                          </div>
-                        ) : (
-                          <span style={{ color: '#999' }}>-</span>
-                        )}
-                      </td>
-
-                      {/* Téléphone */}
-                      <td style={tdStyle}>
-                        {contract.customer?.telephone || contract.customer?.phone || '-'}
-                      </td>
-
-                      {/* Ville */}
-                      <td style={tdStyle}>
-                        {contract.customer?.address?.city || '-'}
-                      </td>
-
-                      {/* Code Postal */}
-                      <td style={tdStyle}>
-                        {contract.customer?.address?.postcode || '-'}
-                      </td>
-
-                      {/* Date */}
-                      <td style={tdStyle}>{formatDate(contract.date_ouverture)}</td>
-
-                      {/* Montant */}
-                      <td style={tdStyle}>
-                        <strong>{formatPrice(contract.montant_ttc)}</strong>
-                      </td>
-
-                      {/* Régie/callcenter */}
-                      <td style={tdStyle}>{contract.regie_callcenter || '-'}</td>
-
-                      {/* Accès 1 */}
-                      <td style={tdStyle}>{contract.acces_1 || '-'}</td>
-
-                      {/* Accès 2 */}
-                      <td style={tdStyle}>{contract.acces_2 || '-'}</td>
-
-                      {/* Source */}
-                      <td style={tdStyle}>{contract.source || '-'}</td>
-
-                      {/* Periode CEE */}
-                      <td style={tdStyle}>{contract.periode_cee || '-'}</td>
-
-                      {/* Surface parcelle */}
-                      <td style={tdStyle}>{contract.surface_parcelle || '-'}</td>
-
-                      {/* Société porteuse */}
-                      <td style={tdStyle}>{contract.societe_porteuse || '-'}</td>
-
-                      {/* Créateur */}
-                      <td style={tdStyle}>{contract.createur_id || '-'}</td>
-
-                      {/* Confirmateur */}
-                      <td style={tdStyle}>{contract.confirmateur_id || '-'}</td>
-
-                      {/* Installateur */}
-                      <td style={tdStyle}>{contract.installateur_id || '-'}</td>
-
-                      {/* Equipe d'installation */}
-                      <td style={tdStyle}>{contract.equipe_installation || '-'}</td>
-
-                      {/* Sous Traitant */}
-                      <td style={tdStyle}>{contract.sous_traitant_id || '-'}</td>
-
-                      {/* Confirmé */}
-                      <td style={tdStyle}>
-                        {contract.confirme ? (
-                          <span style={{ color: '#28a745' }}>✅</span>
-                        ) : (
-                          <span style={{ color: '#ffc107' }}>⏳</span>
-                        )}
-                      </td>
-
-                      {/* Facturable */}
-                      <td style={tdStyle}>
-                        {contract.facturable ? (
-                          <span style={{ color: '#28a745' }}>✅</span>
-                        ) : (
-                          <span style={{ color: '#dc3545' }}>❌</span>
-                        )}
-                      </td>
-
-                      {/* Bloqué */}
-                      <td style={tdStyle}>
-                        {contract.bloque ? (
-                          <span style={{ color: '#dc3545' }}>🔒</span>
-                        ) : (
-                          <span style={{ color: '#28a745' }}>🔓</span>
-                        )}
-                      </td>
-
-                      {/* Devis bloq */}
-                      <td style={tdStyle}>
-                        {contract.devis_bloque ? (
-                          <span style={{ color: '#dc3545' }}>🔒</span>
-                        ) : (
-                          <span style={{ color: '#28a745' }}>🔓</span>
-                        )}
-                      </td>
-
-                      {/* V Photo */}
-                      <td style={tdStyle}>
-                        {contract.has_photos ? (
-                          <span style={{ color: '#28a745' }}>📷</span>
-                        ) : (
-                          <span style={{ color: '#999' }}>-</span>
-                        )}
-                      </td>
-
-                      {/* V Document */}
-                      <td style={tdStyle}>
-                        {contract.has_documents ? (
-                          <span style={{ color: '#28a745' }}>📄</span>
-                        ) : (
-                          <span style={{ color: '#999' }}>-</span>
-                        )}
-                      </td>
-
-                      {/* V controle qualité */}
-                      <td style={tdStyle}>
-                        {contract.controle_qualite_valide ? (
-                          <span style={{ color: '#28a745' }}>✅</span>
-                        ) : (
-                          <span style={{ color: '#999' }}>-</span>
-                        )}
-                      </td>
-
-                      {/* Rapport temps */}
-                      <td style={tdStyle}>
-                        {contract.rapport_temps ? (
-                          <span title={contract.rapport_temps}>📊</span>
-                        ) : (
-                          '-'
-                        )}
-                      </td>
-
-                      {/* Rapport Admin. */}
-                      <td style={tdStyle}>
-                        {contract.rapport_admin ? (
-                          <span title={contract.rapport_admin}>📊</span>
-                        ) : (
-                          '-'
-                        )}
-                      </td>
-
-                      {/* Rapport Attribution */}
-                      <td style={tdStyle}>
-                        {contract.rapport_attribution ? (
-                          <span title={contract.rapport_attribution}>📊</span>
-                        ) : (
-                          '-'
-                        )}
-                      </td>
-
-                      {/* Rapport d'installation */}
-                      <td style={tdStyle}>
-                        {contract.rapport_installation ? (
-                          <span title={contract.rapport_installation}>📊</span>
-                        ) : (
-                          '-'
-                        )}
-                      </td>
-
-                      {/* Campaign ID */}
-                      <td style={tdStyle}>{contract.campaign_id || '-'}</td>
-
-                      {/* Esclave */}
-                      <td style={tdStyle}>{contract.esclave || '-'}</td>
-
-                      {/* Actif/Supprimé */}
-                      <td style={tdStyle}>
-                        <span
-                          style={{
-                            ...badgeStyle,
-                            backgroundColor: contract.actif ? '#28a74520' : '#dc354520',
-                            color: contract.actif ? '#28a745' : '#dc3545',
-                          }}
-                        >
-                          {contract.actif ? 'Actif' : 'Supprimé'}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            <div style={paginationStyle}>
-              <div style={{ color: '#666', fontSize: '14px' }}>
-                Showing {(currentPage - 1) * perPage + 1} to{' '}
-                {Math.min(currentPage * perPage, total)} of {total} contracts
-              </div>
-
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <button
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  style={{
-                    ...buttonStyle,
-                    opacity: currentPage === 1 ? 0.5 : 1,
-                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                  }}
-                >
-                  Previous
-                </button>
-
-                <span style={{ padding: '0 16px', color: '#666', fontSize: '14px' }}>
-                  Page {currentPage} of {totalPages}
-                </span>
-
-                <button
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  style={{
-                    ...buttonStyle,
-                    opacity: currentPage === totalPages ? 0.5 : 1,
-                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                  }}
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* CSS Styles */}
-      <style jsx>{`
-        @keyframes spin {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
-        }
-
-        /* Custom Scrollbar */
-        :global(.custom-scroll) {
-          scrollbar-width: thin;
-          scrollbar-color: #667eea #f0f0f0;
-        }
-
-        :global(.custom-scroll::-webkit-scrollbar) {
-          height: 12px;
-          width: 12px;
-        }
-
-        :global(.custom-scroll::-webkit-scrollbar-track) {
-          background: #f0f0f0;
-          border-radius: 10px;
-        }
-
-        :global(.custom-scroll::-webkit-scrollbar-thumb) {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border-radius: 10px;
-          border: 2px solid #f0f0f0;
-        }
-
-        :global(.custom-scroll::-webkit-scrollbar-thumb:hover) {
-          background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-        }
-
-        /* Hover effect on table rows */
-        :global(tbody tr:hover) {
-          background-color: #f5f5ff !important;
-          transition: background-color 0.2s ease;
-        }
-      `}</style>
+      <DataTable {...tableConfig} />
 
       {/* Create Contract Modal */}
       <CreateContractModal
@@ -1076,13 +699,13 @@ export default function ContractsList1() {
       <EditContractModal
         isOpen={isEditModalOpen}
         onClose={() => {
-          setIsEditModalOpen(false);
-          setSelectedContractId(null);
+          setIsEditModalOpen(false)
+          setSelectedContractId(null)
         }}
         onUpdate={updateContract}
         contractId={selectedContractId}
         onFetchContract={getContract}
       />
-    </div>
-  );
+    </>
+  )
 }

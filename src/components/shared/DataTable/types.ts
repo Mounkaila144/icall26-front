@@ -43,10 +43,13 @@ export interface DataTableConfig<TData> {
   // Custom actions
   actions?: DataTableAction[]
 
-  // Filters
-  filters?: FilterConfig[]
+  // Column Filters (inline filters in table headers)
+  showColumnFilters?: boolean
+  onToggleColumnFilters?: () => void
   columnFilters?: Record<string, any>
   onColumnFilterChange?: (columnId: string, value: any) => void
+  onClearAllFilters?: () => void
+  createColumnFilter?: (columnId: string) => ReactNode
 
   // Styling
   emptyMessage?: string

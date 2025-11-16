@@ -25,9 +25,10 @@ interface TableToolbarProps {
   availableColumns?: ColumnConfig[]
   columnVisibility?: Record<string, boolean>
   onColumnVisibilityChange?: (visibility: Record<string, boolean>) => void
-  filters?: FilterConfig[]
+  showColumnFilters?: boolean
+  onToggleColumnFilters?: () => void
   columnFilters?: Record<string, any>
-  onColumnFilterChange?: (columnId: string, value: any) => void
+  onClearAllFilters?: () => void
   title?: string
 }
 
@@ -40,9 +41,10 @@ export function TableToolbar({
   availableColumns,
   columnVisibility,
   onColumnVisibilityChange,
-  filters = [],
+  showColumnFilters = false,
+  onToggleColumnFilters,
   columnFilters,
-  onColumnFilterChange,
+  onClearAllFilters,
   title
 }: TableToolbarProps) {
   const [searchValue, setSearchValue] = useState('')
@@ -96,9 +98,9 @@ export function TableToolbar({
               </Button>
             ))}
 
-          {/* Column visibility button - hide on mobile */}
-          {availableColumns && (
-            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
+          {/* Column visibility and Filters buttons - hide on mobile */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
+            {availableColumns && (
               <Button
                 color='secondary'
                 variant='outlined'
@@ -108,8 +110,31 @@ export function TableToolbar({
               >
                 Columns
               </Button>
-            </Box>
-          )}
+            )}
+            {onToggleColumnFilters && (
+              <Button
+                color={showColumnFilters ? 'primary' : 'secondary'}
+                variant={showColumnFilters ? 'contained' : 'outlined'}
+                startIcon={<i className='ri-filter-3-line' />}
+                onClick={onToggleColumnFilters}
+                className='w-full sm:w-auto'
+              >
+                Filters {columnFilters && Object.keys(columnFilters).length > 0 && `(${Object.keys(columnFilters).length})`}
+              </Button>
+            )}
+            {onClearAllFilters && columnFilters && Object.keys(columnFilters).length > 0 && (
+              <Button
+                color='error'
+                variant='outlined'
+                startIcon={<i className='ri-close-line' />}
+                onClick={onClearAllFilters}
+                className='w-full sm:w-auto'
+                size='small'
+              >
+                Clear Filters
+              </Button>
+            )}
+          </Box>
         </div>
 
         {/* Right side - Search and Refresh */}
