@@ -14,6 +14,11 @@ export interface MenuBadge {
 }
 
 /**
+ * User role types
+ */
+export type UserRole = 'admin' | 'superadmin';
+
+/**
  * Menu configuration interface
  * Use this to define menus in your module's menu.config.ts file
  */
@@ -41,6 +46,9 @@ export interface MenuConfig {
 
   /** Required permission to view this menu (optional) */
   permission?: string;
+
+  /** Allowed user roles for this menu (if not specified, visible to all roles) */
+  roles?: UserRole[];
 
   /** Badge to display on the menu item */
   badge?: MenuBadge;

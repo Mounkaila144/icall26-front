@@ -1,10 +1,10 @@
 'use client'
 
 // React Imports
-import { Fragment } from 'react'
+import { Fragment, useMemo } from 'react'
 
 // Next Imports
-import { useParams } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
 
 // Component Imports
 import { MenuItem, SubMenu } from '@menu/vertical-menu'
@@ -13,7 +13,7 @@ import { MenuItem, SubMenu } from '@menu/vertical-menu'
 import { useConfigMenus } from '@/shared/hooks/useConfigMenus'
 
 // Type Imports
-import type { MenuConfig } from '@/shared/types/menu-config.types'
+import type { MenuConfig, UserRole } from '@/shared/types/menu-config.types'
 
 /**
  * Module Menu Component
@@ -22,8 +22,20 @@ import type { MenuConfig } from '@/shared/types/menu-config.types'
  */
 const ModuleMenu = () => {
   // Hooks
-  const { menus, isLoading } = useConfigMenus({ visibleOnly: true })
   const { lang: locale } = useParams()
+  const pathname = usePathname()
+
+  // Detect current role from URL
+  const currentRole: UserRole | undefined = useMemo(() => {
+    if (pathname?.includes('/superadmin')) {
+      return 'superadmin'
+    } else if (pathname?.includes('/admin')) {
+      return 'admin'
+    }
+    return undefined
+  }, [pathname])
+
+  const { menus, isLoading } = useConfigMenus({ visibleOnly: true, role: currentRole })
 
   // Render loading state
   if (isLoading) {

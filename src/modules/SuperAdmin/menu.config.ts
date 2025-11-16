@@ -1,0 +1,149 @@
+import { ModuleMenuConfig } from '@/shared/types/menu-config.types';
+
+/**
+ * Super Admin Module Menu Configuration
+ *
+ * This file defines all menu items specific to the Super Admin role.
+ * These menus provide system-wide management capabilities.
+ */
+export const superAdminMenuConfig: ModuleMenuConfig = {
+  module: 'SuperAdmin',
+  menus: [
+    {
+      id: 'superadmin-admins',
+      label: 'Admin Management',
+      icon: {
+        type: 'emoji',
+        value: '👨‍💼',
+      },
+      order: 10,
+      module: 'SuperAdmin',
+      roles: ['superadmin'],
+      isVisible: true,
+      isActive: true,
+      children: [
+        {
+          id: 'superadmin-admins-list',
+          label: 'All Admins',
+          route: '/superadmin/admins',
+          order: 1,
+          module: 'SuperAdmin',
+          parentId: 'superadmin-admins',
+          roles: ['superadmin'],
+          isVisible: true,
+          isActive: true,
+        },
+        {
+          id: 'superadmin-admins-create',
+          label: 'Create Admin',
+          route: '/superadmin/admins/create',
+          order: 2,
+          module: 'SuperAdmin',
+          parentId: 'superadmin-admins',
+          roles: ['superadmin'],
+          isVisible: true,
+          isActive: true,
+        },
+      ],
+    },
+    {
+      id: 'superadmin-system',
+      label: 'System Settings',
+      icon: {
+        type: 'emoji',
+        value: '⚙️',
+      },
+      order: 20,
+      module: 'SuperAdmin',
+      roles: ['superadmin'],
+      isVisible: true,
+      isActive: true,
+      children: [
+        {
+          id: 'superadmin-system-config',
+          label: 'Configuration',
+          route: '/superadmin/system/config',
+          order: 1,
+          module: 'SuperAdmin',
+          parentId: 'superadmin-system',
+          roles: ['superadmin'],
+          isVisible: true,
+          isActive: true,
+        },
+        {
+          id: 'superadmin-system-logs',
+          label: 'System Logs',
+          route: '/superadmin/system/logs',
+          order: 2,
+          module: 'SuperAdmin',
+          parentId: 'superadmin-system',
+          roles: ['superadmin'],
+          isVisible: true,
+          isActive: true,
+        },
+        {
+          id: 'superadmin-system-performance',
+          label: 'Performance',
+          route: '/superadmin/system/performance',
+          order: 3,
+          module: 'SuperAdmin',
+          parentId: 'superadmin-system',
+          roles: ['superadmin'],
+          isVisible: true,
+          isActive: true,
+        },
+      ],
+    },
+    {
+      id: 'superadmin-modules',
+      label: 'Module Management',
+      route: '/superadmin/modules',
+      icon: {
+        type: 'emoji',
+        value: '🧩',
+      },
+      order: 30,
+      module: 'SuperAdmin',
+      roles: ['superadmin'],
+      isVisible: true,
+      isActive: true,
+    },
+    {
+      id: 'superadmin-security',
+      label: 'Security',
+      icon: {
+        type: 'emoji',
+        value: '🔒',
+      },
+      order: 40,
+      module: 'SuperAdmin',
+      roles: ['superadmin'],
+      isVisible: true,
+      isActive: true,
+      children: [
+        {
+          id: 'superadmin-security-access',
+          label: 'Access Control',
+          route: '/superadmin/security/access',
+          order: 1,
+          module: 'SuperAdmin',
+          parentId: 'superadmin-security',
+          roles: ['superadmin'],
+          isVisible: true,
+          isActive: true,
+        },
+        {
+          id: 'superadmin-security-audit',
+          label: 'Audit Logs',
+          route: '/superadmin/security/audit',
+          order: 2,
+          module: 'SuperAdmin',
+          parentId: 'superadmin-security',
+          roles: ['superadmin'],
+          isVisible: true,
+          isActive: true,
+        },
+      ],
+    },
+  ],
+};

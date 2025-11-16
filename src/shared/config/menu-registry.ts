@@ -5,13 +5,14 @@
  * and provides a centralized access point for the application.
  */
 
-import { MenuConfig, ModuleMenuConfig } from '@/shared/types/menu-config.types';
+import { MenuConfig, ModuleMenuConfig, UserRole } from '@/shared/types/menu-config.types';
 
 // Import menu configurations from modules
 import { dashboardMenuConfig } from '@/modules/Dashboard/menu.config';
 import { usersGuardMenuConfig } from '@/modules/Users/menu.config';
 import { customersMenuConfig } from '@/modules/Customers/menu.config';
 import { CustomersContractsMenuConfig } from '@/modules/CustomersContracts/menu.config';
+import { superAdminMenuConfig } from '@/modules/SuperAdmin/menu.config';
 
 /**
  * Registry of all module menu configurations
@@ -26,6 +27,7 @@ const moduleMenuConfigs: ModuleMenuConfig[] = [
   usersGuardMenuConfig,
   customersMenuConfig,
   CustomersContractsMenuConfig,
+  superAdminMenuConfig,
   // Add more module menu configs here
 ];
 
@@ -179,4 +181,29 @@ export function getVisibleMenus(): MenuConfig[] {
  */
 export function getRegisteredModules(): string[] {
   return moduleMenuConfigs.map((config) => config.module);
+}
+
+/**
+ * Filter menus by user role
+ */
+export function getMenusByRole(role: UserRole): MenuConfig[] {
+  const allMenus = getAllMenus();
+
+  const filterByRole = (menus: MenuConfig[]): MenuConfig[] => {
+    return menus
+      .filter((menu) => {
+        // If no roles specified, menu is visible to all roles
+        if (!menu.roles || menu.roles.length === 0) {
+          return true;
+        }
+        // Check if the menu is accessible by the current role
+        return menu.roles.includes(role);
+      })
+      .map((menu) => ({
+        ...menu,
+        children: menu.children ? filterByRole(menu.children) : undefined,
+      }));
+  };
+
+  return filterByRole(allMenus);
 }

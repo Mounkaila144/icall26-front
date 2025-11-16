@@ -13,6 +13,7 @@ export const CustomersContractsMenuConfig: ModuleMenuConfig = {
             },
             order: 20,
             module: 'CustomersContracts',
+            roles: ['admin'],
             isVisible: true,
             isActive: true,
         },

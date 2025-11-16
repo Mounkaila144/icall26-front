@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { MenuConfig } from '@/shared/types/menu-config.types';
-import { getAllMenus, getVisibleMenus, getModuleMenus } from '@/shared/config/menu-registry';
+import { MenuConfig, UserRole } from '@/shared/types/menu-config.types';
+import { getAllMenus, getVisibleMenus, getModuleMenus, getMenusByRole } from '@/shared/config/menu-registry';
 
 /**
  * Hook for accessing configuration-based menus
@@ -18,8 +18,10 @@ export function useConfigMenus(options: {
   visibleOnly?: boolean;
   /** Filter by specific module */
   module?: string;
+  /** Filter by user role */
+  role?: UserRole;
 } = {}) {
-  const { visibleOnly = true, module } = options;
+  const { visibleOnly = true, module, role } = options;
 
   const [menus, setMenus] = useState<MenuConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,6 +37,9 @@ export function useConfigMenus(options: {
         if (module) {
           // Get menus for specific module
           loadedMenus = getModuleMenus(module);
+        } else if (role) {
+          // Get menus filtered by role
+          loadedMenus = getMenusByRole(role);
         } else if (visibleOnly) {
           // Get all visible menus
           loadedMenus = getVisibleMenus();
@@ -53,7 +58,7 @@ export function useConfigMenus(options: {
     };
 
     loadMenus();
-  }, [visibleOnly, module]);
+  }, [visibleOnly, module, role]);
 
   /**
    * Check if a menu or its children are active based on current path
