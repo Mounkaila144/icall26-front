@@ -99,10 +99,11 @@ export interface UserQueryParams {
   page?: number;
   nbitemsbypage?: number;
   filter?: {
-    search?: string;
-    equal?: Record<string, string>;
-    order?: Record<string, 'asc' | 'desc'>;
-    range?: Record<string, { from: string; to: string }>;
+    search?: string; // Global search across multiple fields
+    equal?: Record<string, string | number>; // Exact match filters
+    like?: Record<string, string>; // Partial match filters (for column-specific search)
+    order?: Record<string, 'asc' | 'desc'>; // Sorting
+    range?: Record<string, { from: string; to: string }>; // Date/Number ranges
   };
 }
 

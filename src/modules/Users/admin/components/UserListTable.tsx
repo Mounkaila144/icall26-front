@@ -22,6 +22,12 @@ import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import FormControlLabel from '@mui/material/FormControlLabel'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
+import FormControl from '@mui/material/FormControl'
+import InputLabel from '@mui/material/InputLabel'
+import Autocomplete from '@mui/material/Autocomplete'
+import Collapse from '@mui/material/Collapse'
 
 // Third-party Imports
 import classnames from 'classnames'
@@ -52,6 +58,10 @@ import { getInitials } from '@/utils/getInitials'
 
 // Context Imports
 import { useUsersContext } from './UsersList'
+
+// Service Imports
+import { userService } from '../services/userService'
+import type { UserCreationOptions } from '../../types/user.types'
 
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
@@ -167,12 +177,35 @@ const UserListTable = () => {
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(getInitialColumnVisibility)
   const [columnMenuAnchor, setColumnMenuAnchor] = useState<null | HTMLElement>(null)
 
+  // Column filters state
+  const [showFilters, setShowFilters] = useState(false)
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({})
+  const [filterOptions, setFilterOptions] = useState<UserCreationOptions | null>(null)
+  const [loadingOptions, setLoadingOptions] = useState(false)
+
   // Save column visibility to localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(columnVisibility))
     }
   }, [columnVisibility])
+
+  // Load filter options (teams, groups, callcenters, etc.)
+  useEffect(() => {
+    const loadFilterOptions = async () => {
+      setLoadingOptions(true)
+      try {
+        const options = await userService.getCreationOptions()
+        setFilterOptions(options)
+      } catch (error) {
+        console.error('Failed to load filter options:', error)
+      } finally {
+        setLoadingOptions(false)
+      }
+    }
+
+    loadFilterOptions()
+  }, [])
 
   // Handle search with debounce
   useEffect(() => {
@@ -182,6 +215,77 @@ const UserListTable = () => {
 
     return () => clearTimeout(timer)
   }, [globalFilter, setSearch])
+
+  // Handle column filters with debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Build filters for API
+      const equal: Record<string, string | number> = {}
+      const like: Record<string, string> = {}
+
+      Object.entries(columnFilters).forEach(([key, value]) => {
+        if (value && value !== '') {
+          // Use 'equal' for exact match fields (dropdowns, selects)
+          // Use 'like' for text search fields
+          const exactMatchFields = [
+            'is_active',
+            'is_locked',
+            'is_secure_by_code',
+            'status',
+            'application',
+            'callcenter_id',
+            'team_id',
+            'company_id',
+            'sex'
+          ]
+
+          if (exactMatchFields.includes(key)) {
+            equal[key] = value
+          } else {
+            like[key] = value
+          }
+        }
+      })
+
+      // Update params with new filters
+      updateParams({
+        filter: {
+          ...params.filter,
+          search: params.filter?.search, // Preserve global search
+          order: params.filter?.order, // Preserve sorting
+          equal: Object.keys(equal).length > 0 ? equal : undefined,
+          like: Object.keys(like).length > 0 ? like : undefined
+        }
+      })
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [columnFilters, params.filter?.search, params.filter?.order, updateParams])
+
+  // Handle column filter change
+  const handleColumnFilterChange = useCallback((columnId: string, value: string) => {
+    setColumnFilters(prev => {
+      if (value === '' || value === null || value === undefined) {
+        // Remove filter if empty
+        const { [columnId]: _, ...rest } = prev
+        return rest
+      }
+      return {
+        ...prev,
+        [columnId]: value
+      }
+    })
+  }, [])
+
+  // Clear all column filters
+  const handleClearAllFilters = useCallback(() => {
+    setColumnFilters({})
+  }, [])
+
+  // Toggle filters visibility
+  const handleToggleFilters = useCallback(() => {
+    setShowFilters(prev => !prev)
+  }, [])
 
   // Handle column visibility
   const handleToggleColumn = useCallback((columnId: string) => {
@@ -332,6 +436,179 @@ const UserListTable = () => {
       )
     },
     [handleSort, sorting]
+  )
+
+  // Helper to create column filter component
+  const createColumnFilter = useCallback(
+    (columnId: string) => {
+      const value = columnFilters[columnId] || ''
+
+      // Text search filters
+      const textSearchColumns = [
+        'username',
+        'firstname',
+        'lastname',
+        'email',
+        'phone',
+        'mobile',
+        'profiles',
+        'groups_list',
+        'teams_list',
+        'functions_list'
+      ]
+
+      if (textSearchColumns.includes(columnId)) {
+        return (
+          <TextField
+            size='small'
+            value={value}
+            onChange={e => handleColumnFilterChange(columnId, e.target.value)}
+            placeholder={t(`Search`)}
+            fullWidth
+            variant='outlined'
+            disabled={loading}
+            sx={{ minWidth: 120 }}
+          />
+        )
+      }
+
+      // Status filters (is_active)
+      if (columnId === 'is_active') {
+        return (
+          <FormControl size='small' fullWidth sx={{ minWidth: 120 }}>
+            <Select
+              value={value}
+              onChange={e => handleColumnFilterChange(columnId, e.target.value)}
+              displayEmpty
+              disabled={loading}
+            >
+              <MenuItem value=''>{t('All')}</MenuItem>
+              <MenuItem value='YES'>{t('Active')}</MenuItem>
+              <MenuItem value='NO'>{t('Inactive')}</MenuItem>
+            </Select>
+          </FormControl>
+        )
+      }
+
+      // Lock status filters (is_locked)
+      if (columnId === 'is_locked') {
+        return (
+          <FormControl size='small' fullWidth sx={{ minWidth: 120 }}>
+            <Select
+              value={value}
+              onChange={e => handleColumnFilterChange(columnId, e.target.value)}
+              displayEmpty
+              disabled={loading}
+            >
+              <MenuItem value=''>{t('All')}</MenuItem>
+              <MenuItem value='YES'>{t('Locked')}</MenuItem>
+              <MenuItem value='NO'>{t('Unlocked')}</MenuItem>
+            </Select>
+          </FormControl>
+        )
+      }
+
+      // Code by email filter (is_secure_by_code)
+      if (columnId === 'is_secure_by_code') {
+        return (
+          <FormControl size='small' fullWidth sx={{ minWidth: 120 }}>
+            <Select
+              value={value}
+              onChange={e => handleColumnFilterChange(columnId, e.target.value)}
+              displayEmpty
+              disabled={loading}
+            >
+              <MenuItem value=''>{t('All')}</MenuItem>
+              <MenuItem value='YES'>{t('Yes')}</MenuItem>
+              <MenuItem value='NO'>{t('No')}</MenuItem>
+            </Select>
+          </FormControl>
+        )
+      }
+
+      // Sex filter
+      if (columnId === 'sex') {
+        return (
+          <FormControl size='small' fullWidth sx={{ minWidth: 120 }}>
+            <Select
+              value={value}
+              onChange={e => handleColumnFilterChange(columnId, e.target.value)}
+              displayEmpty
+              disabled={loading}
+            >
+              <MenuItem value=''>{t('All')}</MenuItem>
+              <MenuItem value='MR'>{t('Mr')}</MenuItem>
+              <MenuItem value='MS'>{t('Ms')}</MenuItem>
+              <MenuItem value='MRS'>{t('Mrs')}</MenuItem>
+            </Select>
+          </FormControl>
+        )
+      }
+
+      // Application filter
+      if (columnId === 'application') {
+        return (
+          <FormControl size='small' fullWidth sx={{ minWidth: 120 }}>
+            <Select
+              value={value}
+              onChange={e => handleColumnFilterChange(columnId, e.target.value)}
+              displayEmpty
+              disabled={loading}
+            >
+              <MenuItem value=''>{t('All')}</MenuItem>
+              <MenuItem value='admin'>{t('Admin')}</MenuItem>
+              <MenuItem value='frontend'>{t('Frontend')}</MenuItem>
+            </Select>
+          </FormControl>
+        )
+      }
+
+      // Callcenter filter
+      if (columnId === 'callcenter_id' && filterOptions) {
+        return (
+          <FormControl size='small' fullWidth sx={{ minWidth: 150 }}>
+            <Select
+              value={value}
+              onChange={e => handleColumnFilterChange(columnId, e.target.value)}
+              displayEmpty
+              disabled={loading || loadingOptions}
+            >
+              <MenuItem value=''>{t('All')}</MenuItem>
+              {filterOptions.callcenters.map(cc => (
+                <MenuItem key={cc.id} value={cc.id}>
+                  {cc.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )
+      }
+
+      // Team filter
+      if (columnId === 'team_id' && filterOptions) {
+        return (
+          <FormControl size='small' fullWidth sx={{ minWidth: 150 }}>
+            <Select
+              value={value}
+              onChange={e => handleColumnFilterChange(columnId, e.target.value)}
+              displayEmpty
+              disabled={loading || loadingOptions}
+            >
+              <MenuItem value=''>{t('All')}</MenuItem>
+              {filterOptions.teams.map(team => (
+                <MenuItem key={team.id} value={team.id}>
+                  {team.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )
+      }
+
+      // Default: no filter for this column
+      return null
+    },
+    [columnFilters, handleColumnFilterChange, loading, loadingOptions, filterOptions, t]
   )
 
   const allColumns = useMemo<ColumnDef<UserWithAction, any>[]>(
@@ -650,16 +927,7 @@ const UserListTable = () => {
             className='max-sm:is-full'
             disabled={loading}
           >
-            {t('Add User')}
-          </Button>
-          <Button
-            color='secondary'
-            variant='outlined'
-            startIcon={<i className='ri-upload-2-line' />}
-            className='max-sm:is-full'
-            disabled={loading}
-          >
-            {t('Export')}
+            {t('Add')}
           </Button>
           <Button
             color='secondary'
@@ -670,6 +938,27 @@ const UserListTable = () => {
           >
             {t('Columns')}
           </Button>
+          <Button
+            color={showFilters ? 'primary' : 'secondary'}
+            variant={showFilters ? 'contained' : 'outlined'}
+            startIcon={<i className='ri-filter-3-line' />}
+            onClick={handleToggleFilters}
+            className='max-sm:is-full'
+          >
+            {t('Filters')} {Object.keys(columnFilters).length > 0 && `(${Object.keys(columnFilters).length})`}
+          </Button>
+          {Object.keys(columnFilters).length > 0 && (
+            <Button
+              color='error'
+              variant='outlined'
+              startIcon={<i className='ri-close-line' />}
+              onClick={handleClearAllFilters}
+              className='max-sm:is-full'
+              size='small'
+            >
+              {t('Clear Filters')}
+            </Button>
+          )}
         </div>
         <div className='flex items-center gap-x-4 max-sm:gap-y-4 flex-col max-sm:is-full sm:flex-row'>
           <TextField
@@ -741,13 +1030,26 @@ const UserListTable = () => {
         <table className={tableStyles.table}>
           <thead>
             {table.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <th key={header.id}>
-                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                  </th>
-                ))}
-              </tr>
+              <>
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <th key={header.id}>
+                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    </th>
+                  ))}
+                </tr>
+                {showFilters && (
+                  <tr key={`${headerGroup.id}-filters`} className='bg-backgroundPaper'>
+                    {headerGroup.headers.map(header => (
+                      <th key={`${header.id}-filter`} className='p-2'>
+                        {header.id === 'select' || header.id === 'action' || header.id === 'id' ? null : (
+                          <Box sx={{ py: 1 }}>{createColumnFilter(header.id)}</Box>
+                        )}
+                      </th>
+                    ))}
+                  </tr>
+                )}
+              </>
             ))}
           </thead>
           {loading ? (

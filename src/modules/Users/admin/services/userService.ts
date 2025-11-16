@@ -42,30 +42,45 @@ class UserService {
 
       // Add filter params
       if (params?.filter) {
-        // Search filter
+        // Search filter (global search)
         if (params.filter.search) {
           queryParams.append('filter[search]', params.filter.search);
         }
 
-        // Equal filters
+        // Equal filters (exact match for specific columns)
         if (params.filter.equal) {
           Object.entries(params.filter.equal).forEach(([key, value]) => {
-            queryParams.append(`filter[equal][${key}]`, value);
+            if (value !== null && value !== undefined && value !== '') {
+              queryParams.append(`filter[equal][${key}]`, String(value));
+            }
           });
         }
 
-        // Order filters
+        // Like filters (partial match for search in specific columns)
+        if (params.filter.like) {
+          Object.entries(params.filter.like).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== '') {
+              queryParams.append(`filter[like][${key}]`, String(value));
+            }
+          });
+        }
+
+        // Order filters (sorting)
         if (params.filter.order) {
           Object.entries(params.filter.order).forEach(([key, value]) => {
             queryParams.append(`filter[order][${key}]`, value);
           });
         }
 
-        // Range filters
+        // Range filters (date ranges, numeric ranges)
         if (params.filter.range) {
           Object.entries(params.filter.range).forEach(([key, value]) => {
-            queryParams.append(`filter[range][${key}][from]`, value.from);
-            queryParams.append(`filter[range][${key}][to]`, value.to);
+            if (value.from) {
+              queryParams.append(`filter[range][${key}][from]`, value.from);
+            }
+            if (value.to) {
+              queryParams.append(`filter[range][${key}][to]`, value.to);
+            }
           });
         }
       }
