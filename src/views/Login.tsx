@@ -80,8 +80,8 @@ const Login = ({ mode }: { mode: Mode }) => {
   } = useForm<FormData>({
     resolver: valibotResolver(schema),
     defaultValues: {
-      username: 'superadmin',
-      password: '123'
+      username: 'admin',
+      password: 'password'
     }
   })
 
