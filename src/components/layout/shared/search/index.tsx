@@ -32,8 +32,8 @@ import { getLocalizedUrl } from '@/utils/i18n'
 // Style Imports
 import './styles.css'
 
-// Data Imports
-import data from '@/data/searchData'
+// Data - Empty array, add your own search data here
+const data: any[] = []
 
 type Item = {
   id: string

@@ -1,10 +1,25 @@
 {
   "permissions": {
     "allow": [
-      "Bash(powershell -Command \"Get-ChildItem -Path ''C:\\Users\\Mounkaila\\PhpstormProjects\\icall26-front\\src\\modules\\modules'' -Name\")",
-      "Bash(powershell:*)"
+      "Bash",
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
+      "WebFetch",
+      "WebSearch",
+      "Task",
+      "NotebookEdit",
+      "mcp__ide__getDiagnostics",
+      "mcp__chrome-devtools__*"
     ],
-    "deny": [],
-    "ask": []
+    "deny": []
+  },
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["@anthropic/claude-mcp-devtools@latest"]
+    }
   }
 }
