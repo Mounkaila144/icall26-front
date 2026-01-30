@@ -1,12 +1,20 @@
 'use client'
 
-import { useMemo, useCallback } from 'react'
+import { useMemo, useCallback, useState } from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
 
 // MUI Imports
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 import Chip from '@mui/material/Chip'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import Box from '@mui/material/Box'
+import Stack from '@mui/material/Stack'
+
+// Components
+import { DependencyGraph } from '@/modules/SuperAdmin/superadmin/components/modules/DependencyGraph'
 
 // Services & Types
 import type { SiteListItem } from '../../types/site.types'
@@ -28,7 +36,7 @@ interface SitesTableProps {
   isLoading: boolean
   onEdit: (site: SiteListItem) => void
   onDelete: (site: SiteListItem) => void
-  onView: (site: SiteListItem) => void
+  onManageModules: (site: SiteListItem) => void
   onTestConnection: (site: SiteListItem) => void
   onAdd?: () => void
   pagination?: {
@@ -52,7 +60,7 @@ export default function SitesTable({
   isLoading,
   onEdit,
   onDelete,
-  onView,
+  onManageModules,
   onTestConnection,
   onAdd,
   pagination,
@@ -61,6 +69,9 @@ export default function SitesTable({
   onRefresh,
   onSearch
 }: SitesTableProps) {
+  // État pour le dialog du graphe de dépendances
+  const [dependencyGraphOpen, setDependencyGraphOpen] = useState(false)
+
   // Helper functions
   const getTypeLabel = useCallback((type: string | null) => {
     switch (type) {
@@ -173,8 +184,8 @@ export default function SitesTable({
         header: 'Actions',
         cell: ({ row }) => (
           <div className='flex items-center gap-0.5'>
-            <IconButton size='small' onClick={() => onView(row.original)} color='info' title='Voir les détails'>
-              <i className='ri-eye-line' />
+            <IconButton size='small' onClick={() => onManageModules(row.original)} color='info' title='Gérer les modules'>
+              <i className='tabler-puzzle' />
             </IconButton>
             <IconButton size='small' onClick={() => onEdit(row.original)} color='primary' title='Modifier'>
               <i className='ri-edit-box-line' />
@@ -185,7 +196,7 @@ export default function SitesTable({
               color='success'
               title='Tester la connexion'
             >
-              <i className='ri-flash-line' />
+              <i className='ri-lightbulb-flash-line' />
             </IconButton>
             <IconButton size='small' onClick={() => handleDelete(row.original)} color='error' title='Supprimer'>
               <i className='ri-delete-bin-7-line' />
@@ -194,7 +205,7 @@ export default function SitesTable({
         )
       })
     ],
-    [getTypeLabel, formatLastConnection, onView, onEdit, onTestConnection, handleDelete]
+    [getTypeLabel, formatLastConnection, onManageModules, onEdit, onTestConnection, handleDelete]
   )
 
   // DataTable configuration
@@ -212,14 +223,20 @@ export default function SitesTable({
     rowsPerPageOptions: [10, 15, 25, 50],
 
     // Actions in toolbar
-    actions: onAdd ? [
+    actions: [
       {
+        label: 'Graphe Dépendances',
+        icon: 'tabler-topology-star-ring-3',
+        color: 'secondary',
+        onClick: () => setDependencyGraphOpen(true)
+      },
+      ...(onAdd ? [{
         label: 'Nouveau Site',
         icon: 'ri-add-line',
-        color: 'primary',
+        color: 'primary' as const,
         onClick: onAdd
-      }
-    ] : [],
+      }] : [])
+    ],
 
     // Mobile card configuration
     mobileCard: {
@@ -256,9 +273,9 @@ export default function SitesTable({
           ]}
           actions={[
             {
-              icon: 'ri-eye-line',
+              icon: 'tabler-puzzle',
               color: 'info',
-              onClick: () => onView(site)
+              onClick: () => onManageModules(site)
             },
             {
               icon: 'ri-edit-box-line',
@@ -282,5 +299,37 @@ export default function SitesTable({
     }
   }
 
-  return <DataTable {...tableConfig} />
+  return (
+    <>
+      <DataTable {...tableConfig} />
+
+      {/* Dialog du graphe de dépendances */}
+      <Dialog
+        open={dependencyGraphOpen}
+        onClose={() => setDependencyGraphOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: { height: '80vh' }
+        }}
+      >
+        <DialogTitle>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Box>
+              <Typography variant="h6">Graphe des Dépendances</Typography>
+              <Typography variant="caption" color="text.secondary">
+                Visualisation des relations entre les modules
+              </Typography>
+            </Box>
+            <IconButton onClick={() => setDependencyGraphOpen(false)} size="small">
+              <i className="tabler-x" style={{ fontSize: 20 }} />
+            </IconButton>
+          </Stack>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0 }}>
+          <DependencyGraph height="100%" />
+        </DialogContent>
+      </Dialog>
+    </>
+  )
 }

@@ -123,6 +123,20 @@ export const superAdminMenuConfig: ModuleMenuConfig = {
       isActive: true,
     },
     {
+      id: 'superadmin-services',
+      label: 'Services',
+      icon: {
+        type: 'emoji',
+        value: '🔧',
+      },
+      route: '/superadmin/services',
+      order: 35,
+      module: 'SuperAdmin',
+      roles: ['superadmin'],
+      isVisible: true,
+      isActive: true,
+    },
+    {
       id: 'superadmin-security',
       label: 'Security',
       icon: {

@@ -4,13 +4,22 @@
 
 export type SiteType = 'CUST' | 'ECOM' | 'CMS';
 export type YesNo = 'YES' | 'NO';
+export type SslMode = 'DISABLED' | 'PREFERRED' | 'REQUIRED' | 'VERIFY_CA' | 'VERIFY_IDENTITY';
+
+export interface SiteDatabaseSsl {
+  enabled: boolean;
+  mode: SslMode;
+  ca?: string | null;
+}
 
 export interface SiteDatabase {
   name: string;
   host: string;
+  port?: number;
   login?: string;
   password?: string;
   size?: number;
+  ssl?: SiteDatabaseSsl;
 }
 
 export interface SiteThemes {
@@ -71,6 +80,10 @@ export interface CreateSiteData {
   site_host: string;
   site_db_name: string;
   site_db_host: string;
+  site_db_port?: number;
+  site_db_ssl_enabled?: YesNo;
+  site_db_ssl_mode?: SslMode;
+  site_db_ssl_ca?: string;
   site_db_login: string;
   site_db_password?: string;
   site_admin_theme?: string;
@@ -93,6 +106,10 @@ export interface UpdateSiteData {
   site_host?: string;
   site_db_name?: string;
   site_db_host?: string;
+  site_db_port?: number;
+  site_db_ssl_enabled?: YesNo;
+  site_db_ssl_mode?: SslMode;
+  site_db_ssl_ca?: string;
   site_db_login?: string;
   site_db_password?: string;
   site_admin_theme?: string;

@@ -38,6 +38,8 @@
     "@mui/material-nextjs": "6.2.1",
     "@prisma/client": "5.22.0",
     "@reduxjs/toolkit": "2.5.0",
+    "@xyflow/react": "^12.4.4",
+    "dagre": "^0.8.5",
     "@tanstack/match-sorter-utils": "8.19.4",
     "@tanstack/react-table": "8.20.6",
     "@tiptap/extension-color": "^2.10.4",
@@ -78,13 +80,15 @@
     "react-use": "17.6.0",
     "recharts": "2.15.0",
     "server-only": "0.0.1",
-    "valibot": "0.42.1"
+    "valibot": "0.42.1",
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@iconify/json": "2.2.286",
     "@iconify/tools": "4.1.1",
     "@iconify/types": "2.0.0",
     "@iconify/utils": "2.2.1",
+    "@types/dagre": "^0.7.52",
     "@types/fs-extra": "^11.0.4",
     "@types/mapbox-gl": "^3.4.1",
     "@types/negotiator": "^0.6.3",

@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter, usePathname } from 'next/navigation';
 import { Site } from '../../types/site.types';
 
 interface SiteDetailModalProps {
@@ -9,7 +10,18 @@ interface SiteDetailModalProps {
 }
 
 export default function SiteDetailModal({ isOpen, onClose, site }: SiteDetailModalProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+
   if (!isOpen || !site) return null;
+
+  // Extraire la langue depuis le pathname (ex: /fr/superadmin/... -> fr)
+  const lang = pathname.split('/')[1] || 'fr';
+
+  const handleManageModules = () => {
+    router.push(`/${lang}/superadmin/sites/${site.id}/modules`);
+    onClose();
+  };
 
   return (
     <div
@@ -109,9 +121,23 @@ export default function SiteDetailModal({ isOpen, onClose, site }: SiteDetailMod
                   <p className="mt-1 text-sm text-gray-900 font-mono">{site.database.host}</p>
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-gray-500">Port</label>
+                  <p className="mt-1 text-sm text-gray-900 font-mono">{site.database.port || 3306}</p>
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-500">Taille</label>
                   <p className="mt-1 text-sm text-gray-900">
                     {site.database.size ? `${(site.database.size / 1024 / 1024).toFixed(2)} MB` : '-'}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-500">SSL</label>
+                  <p className="mt-1">
+                    <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      site.database.ssl?.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {site.database.ssl?.enabled ? `Activé (${site.database.ssl.mode})` : 'Désactivé'}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -218,7 +244,17 @@ export default function SiteDetailModal({ isOpen, onClose, site }: SiteDetailMod
           </div>
 
           {/* Footer */}
-          <div className="bg-gray-50 px-6 py-4 flex justify-end">
+          <div className="bg-gray-50 px-6 py-4 flex justify-between items-center">
+            <button
+              type="button"
+              onClick={handleManageModules}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center gap-2"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              Gérer les modules
+            </button>
             <button
               type="button"
               onClick={onClose}

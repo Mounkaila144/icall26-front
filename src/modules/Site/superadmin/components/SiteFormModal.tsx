@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Site, CreateSiteData, UpdateSiteData, SiteType, YesNo } from '../../types/site.types';
+import { Site, CreateSiteData, UpdateSiteData, SiteType, YesNo, SslMode } from '../../types/site.types';
 
 interface SiteFormModalProps {
   isOpen: boolean;
@@ -16,6 +16,10 @@ export default function SiteFormModal({ isOpen, onClose, onSubmit, site, mode }:
     site_host: '',
     site_db_name: '',
     site_db_host: 'localhost',
+    site_db_port: '3306',
+    site_db_ssl_enabled: 'NO' as YesNo,
+    site_db_ssl_mode: 'PREFERRED' as SslMode,
+    site_db_ssl_ca: '',
     site_db_login: 'root',
     site_db_password: '',
     site_company: '',
@@ -39,6 +43,10 @@ export default function SiteFormModal({ isOpen, onClose, onSubmit, site, mode }:
         site_host: site.host,
         site_db_name: site.database.name,
         site_db_host: site.database.host,
+        site_db_port: site.database.port?.toString() || '3306',
+        site_db_ssl_enabled: site.database.ssl?.enabled ? 'YES' : 'NO',
+        site_db_ssl_mode: site.database.ssl?.mode || 'PREFERRED',
+        site_db_ssl_ca: site.database.ssl?.ca || '',
         site_db_login: site.database.login || '',
         site_db_password: '', // Toujours vide par défaut, pour ne pas afficher le mot de passe
         site_company: site.company || '',
@@ -56,6 +64,10 @@ export default function SiteFormModal({ isOpen, onClose, onSubmit, site, mode }:
         site_host: '',
         site_db_name: '',
         site_db_host: 'localhost',
+        site_db_port: '3306',
+        site_db_ssl_enabled: 'NO' as YesNo,
+        site_db_ssl_mode: 'PREFERRED' as SslMode,
+        site_db_ssl_ca: '',
         site_db_login: 'root',
         site_db_password: '',
         site_company: '',
@@ -72,7 +84,7 @@ export default function SiteFormModal({ isOpen, onClose, onSubmit, site, mode }:
     }
   }, [mode, site, isOpen]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
 
@@ -93,6 +105,11 @@ export default function SiteFormModal({ isOpen, onClose, onSubmit, site, mode }:
       // Convertir le prix en nombre
       if (submitData.price) {
         submitData.price = parseFloat(submitData.price);
+      }
+
+      // Convertir le port en nombre
+      if (submitData.site_db_port) {
+        submitData.site_db_port = parseInt(submitData.site_db_port, 10);
       }
 
       // En mode édition, ne pas envoyer le mot de passe s'il est vide
@@ -192,6 +209,23 @@ export default function SiteFormModal({ isOpen, onClose, onSubmit, site, mode }:
                   />
                 </div>
 
+                {/* Port DB */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Port de la base de données
+                  </label>
+                  <input
+                    type="number"
+                    name="site_db_port"
+                    value={formData.site_db_port}
+                    onChange={handleChange}
+                    min="1"
+                    max="65535"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="3306"
+                  />
+                </div>
+
                 {/* Login DB */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -224,6 +258,62 @@ export default function SiteFormModal({ isOpen, onClose, onSubmit, site, mode }:
                   />
                 </div>
 
+                {/* SSL Enabled */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    SSL activé
+                  </label>
+                  <select
+                    name="site_db_ssl_enabled"
+                    value={formData.site_db_ssl_enabled}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="NO">Non</option>
+                    <option value="YES">Oui</option>
+                  </select>
+                </div>
+
+                {/* SSL Mode - affiché seulement si SSL activé */}
+                {formData.site_db_ssl_enabled === 'YES' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Mode SSL
+                    </label>
+                    <select
+                      name="site_db_ssl_mode"
+                      value={formData.site_db_ssl_mode}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                    >
+                      <option value="PREFERRED">Préféré</option>
+                      <option value="REQUIRED">Requis</option>
+                      <option value="VERIFY_CA">Vérifier CA</option>
+                      <option value="VERIFY_IDENTITY">Vérifier identité</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              {/* SSL CA Certificate - affiché seulement si SSL activé */}
+              {formData.site_db_ssl_enabled === 'YES' && (
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Certificat CA SSL
+                    <span className="text-xs text-gray-500 ml-2">(contenu du fichier .pem ou chemin vers le fichier)</span>
+                  </label>
+                  <textarea
+                    name="site_db_ssl_ca"
+                    value={formData.site_db_ssl_ca}
+                    onChange={handleChange}
+                    rows={6}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 font-mono text-xs"
+                    placeholder="-----BEGIN CERTIFICATE-----&#10;...&#10;-----END CERTIFICATE-----"
+                  />
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                 {/* Société */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">

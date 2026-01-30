@@ -7,16 +7,15 @@ import {
   StatisticsCards,
   SitesTable,
   SiteFormModal,
-  SiteDetailModal,
   useSite,
   SiteListItem,
   CreateSiteData,
   UpdateSiteData,
-  Site,
   SiteFilters,
   SitePaginationMeta,
   SiteStatistics,
 } from '@/modules/Site';
+import { TenantModulesModal } from '@/modules/SuperAdmin';
 import { siteService } from '@/modules/Site/superadmin/services/siteService';
 import { AxiosError } from 'axios';
 
@@ -61,9 +60,10 @@ export default function SitesManagementPage() {
 
   // Modal states
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isModulesModalOpen, setIsModulesModalOpen] = useState(false);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const [selectedSiteId, setSelectedSiteId] = useState<number | null>(null);
+  const [selectedSiteName, setSelectedSiteName] = useState<string>('');
   const [showConnectionResult, setShowConnectionResult] = useState<{
     show: boolean;
     success: boolean;
@@ -157,10 +157,10 @@ export default function SitesManagementPage() {
     setIsFormModalOpen(true);
   };
 
-  const handleViewClick = async (siteItem: SiteListItem) => {
+  const handleManageModules = (siteItem: SiteListItem) => {
     setSelectedSiteId(siteItem.id);
-    await loadSite(siteItem.id);
-    setIsDetailModalOpen(true);
+    setSelectedSiteName(siteItem.host || siteItem.company || `Site #${siteItem.id}`);
+    setIsModulesModalOpen(true);
   };
 
   const handleDeleteClick = async (siteItem: SiteListItem) => {
@@ -276,7 +276,7 @@ export default function SitesManagementPage() {
         isLoading={loading}
         onEdit={handleEditClick}
         onDelete={handleDeleteClick}
-        onView={handleViewClick}
+        onManageModules={handleManageModules}
         onTestConnection={handleTestConnection}
         onAdd={handleCreateClick}
         pagination={pagination}
@@ -303,15 +303,19 @@ export default function SitesManagementPage() {
         mode={formMode}
       />
 
-      {/* Detail Modal */}
-      <SiteDetailModal
-        isOpen={isDetailModalOpen}
-        onClose={() => {
-          setIsDetailModalOpen(false);
-          setSelectedSiteId(null);
-        }}
-        site={site}
-      />
+      {/* Modules Management Modal */}
+      {selectedSiteId && (
+        <TenantModulesModal
+          isOpen={isModulesModalOpen}
+          onClose={() => {
+            setIsModulesModalOpen(false);
+            setSelectedSiteId(null);
+            setSelectedSiteName('');
+          }}
+          tenantId={selectedSiteId}
+          tenantName={selectedSiteName}
+        />
+      )}
     </div>
   );
 }
