@@ -23,7 +23,6 @@ import type { Theme } from '@mui/material/styles'
 
 // Third Party Components
 import classnames from 'classnames'
-import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // Type Imports
 import type { Locale } from '@configs/i18n'
@@ -48,15 +47,18 @@ export type ShortcutsType = {
 }
 
 const ScrollWrapper = ({ children, hidden }: { children: ReactNode; hidden: boolean }) => {
-  if (hidden) {
-    return <div className='overflow-x-hidden bs-full'>{children}</div>
-  } else {
-    return (
-      <PerfectScrollbar className='bs-full' options={{ wheelPropagation: false, suppressScrollX: true }}>
-        {children}
-      </PerfectScrollbar>
-    )
-  }
+  // Use native scroll for better performance - eliminates PerfectScrollbar forced reflows
+  return (
+    <div
+      className='overflow-x-hidden overflow-y-auto bs-full native-scroll'
+      style={{
+        scrollbarWidth: 'thin',
+        scrollbarColor: 'rgba(var(--mui-palette-text-primaryChannel) / 0.3) transparent'
+      }}
+    >
+      {children}
+    </div>
+  )
 }
 
 const ShortcutsDropdown = ({ shortcuts }: { shortcuts: ShortcutsType[] }) => {

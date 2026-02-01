@@ -22,6 +22,7 @@ export default function SiteFormModal({ isOpen, onClose, onSubmit, site, mode }:
     site_db_ssl_ca: '',
     site_db_login: 'root',
     site_db_password: '',
+    use_db_password: false, // Checkbox pour indiquer si on utilise un mot de passe
     site_company: '',
     site_type: 'CUST' as SiteType,
     site_available: 'YES' as YesNo,
@@ -39,6 +40,9 @@ export default function SiteFormModal({ isOpen, onClose, onSubmit, site, mode }:
 
   useEffect(() => {
     if (mode === 'edit' && site) {
+      // Vérifier si le site a un mot de passe (le backend renvoie has_password)
+      const hasPassword = !!site.database.has_password;
+
       setFormData({
         site_host: site.host,
         site_db_name: site.database.name,
@@ -49,6 +53,7 @@ export default function SiteFormModal({ isOpen, onClose, onSubmit, site, mode }:
         site_db_ssl_ca: site.database.ssl?.ca || '',
         site_db_login: site.database.login || '',
         site_db_password: '', // Toujours vide par défaut, pour ne pas afficher le mot de passe
+        use_db_password: hasPassword, // Coché si le site a un mot de passe
         site_company: site.company || '',
         site_type: site.type || 'CUST',
         site_available: site.availability.site ? 'YES' : 'NO',
@@ -70,6 +75,7 @@ export default function SiteFormModal({ isOpen, onClose, onSubmit, site, mode }:
         site_db_ssl_ca: '',
         site_db_login: 'root',
         site_db_password: '',
+        use_db_password: false, // Par défaut, pas de mot de passe
         site_company: '',
         site_type: 'CUST' as SiteType,
         site_available: 'YES' as YesNo,
@@ -112,10 +118,19 @@ export default function SiteFormModal({ isOpen, onClose, onSubmit, site, mode }:
         submitData.site_db_port = parseInt(submitData.site_db_port, 10);
       }
 
-      // En mode édition, ne pas envoyer le mot de passe s'il est vide
-      if (mode === 'edit' && !submitData.site_db_password) {
+      // Gestion du mot de passe selon la checkbox
+      if (!submitData.use_db_password) {
+        // Si la checkbox n'est pas cochée, on envoie explicitement une chaîne vide
+        // pour indiquer au backend qu'on ne veut pas de mot de passe
+        submitData.site_db_password = '';
+      } else if (mode === 'edit' && !submitData.site_db_password) {
+        // En mode édition, si la checkbox est cochée mais le champ vide,
+        // ne pas envoyer le mot de passe (garder l'existant)
         delete submitData.site_db_password;
       }
+
+      // Supprimer use_db_password car ce n'est pas un champ du backend
+      delete submitData.use_db_password;
 
       await onSubmit(submitData);
       onClose();
@@ -242,21 +257,40 @@ export default function SiteFormModal({ isOpen, onClose, onSubmit, site, mode }:
                   />
                 </div>
 
-                {/* Password DB */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Mot de passe de la base de données
-                    {mode === 'edit' && <span className="text-xs text-gray-500 ml-2">(laisser vide pour ne pas modifier)</span>}
-                  </label>
-                  <input
-                    type="password"
-                    name="site_db_password"
-                    value={formData.site_db_password}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder={mode === 'edit' ? '••••••••' : ''}
-                  />
+                {/* Checkbox utiliser mot de passe */}
+                <div className="flex items-center">
+                  <div className="flex items-center h-full pt-6">
+                    <input
+                      id="use_db_password"
+                      name="use_db_password"
+                      type="checkbox"
+                      checked={formData.use_db_password}
+                      onChange={handleChange}
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="use_db_password" className="ml-2 block text-sm text-gray-900">
+                      La base de données nécessite un mot de passe
+                    </label>
+                  </div>
                 </div>
+
+                {/* Password DB - affiché seulement si use_db_password est coché */}
+                {formData.use_db_password && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Mot de passe de la base de données
+                      {mode === 'edit' && <span className="text-xs text-gray-500 ml-2">(laisser vide pour garder l'existant)</span>}
+                    </label>
+                    <input
+                      type="password"
+                      name="site_db_password"
+                      value={formData.site_db_password}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder={mode === 'edit' ? '••••••••' : 'Mot de passe'}
+                    />
+                  </div>
+                )}
 
                 {/* SSL Enabled */}
                 <div>

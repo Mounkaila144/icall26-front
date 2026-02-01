@@ -2,9 +2,6 @@
 import { forwardRef } from 'react'
 import type { ForwardRefRenderFunction, HTMLAttributes } from 'react'
 
-// Third-party Imports
-import PerfectScrollbar from 'react-perfect-scrollbar'
-
 // Type Imports
 import type { ChildrenType, RootStylesType } from '../../types'
 
@@ -36,14 +33,20 @@ const SubMenuContent: ForwardRefRenderFunction<HTMLDivElement, SubMenuContentPro
       browserScroll={browserScroll}
       {...rest}
     >
-      {/* If browserScroll is false render PerfectScrollbar */}
+      {/* Use native scroll for better performance - eliminates PerfectScrollbar forced reflows */}
       {!browserScroll ? (
-        <PerfectScrollbar
-          options={{ wheelPropagation: false, suppressScrollX: true }}
-          style={{ maxBlockSize: `calc((var(--vh, 1vh) * 100) - ${top}px)` }}
+        <div
+          className="submenu-scroll-container"
+          style={{
+            maxBlockSize: `calc((var(--vh, 1vh) * 100) - ${top}px)`,
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            scrollbarWidth: 'thin',
+            scrollbarColor: 'rgba(var(--mui-palette-text-primaryChannel) / 0.3) transparent'
+          }}
         >
           <ul className={styles.ul}>{children}</ul>
-        </PerfectScrollbar>
+        </div>
       ) : (
         <ul className={styles.ul}>{children}</ul>
       )}

@@ -30,7 +30,7 @@ const noResultData: NoResultData[] = [
   },
   {
     label: 'CRM',
-    href: '/dashboards/crm',
+    href: '/',
     icon: 'ri-pie-chart-2-line'
   }
 ]

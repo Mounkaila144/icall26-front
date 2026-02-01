@@ -17,7 +17,7 @@ export interface SiteDatabase {
   host: string;
   port?: number;
   login?: string;
-  password?: string;
+  has_password?: boolean; // Indicateur si un mot de passe est défini (ne renvoie pas le mot de passe réel)
   size?: number;
   ssl?: SiteDatabaseSsl;
 }

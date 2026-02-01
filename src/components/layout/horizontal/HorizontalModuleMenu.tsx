@@ -7,7 +7,7 @@ import { Fragment, useMemo } from 'react'
 import { useParams, usePathname } from 'next/navigation'
 
 // Component Imports
-import { MenuItem, SubMenu } from '@menu/vertical-menu'
+import { MenuItem, SubMenu } from '@menu/horizontal-menu'
 
 // Hook Imports
 import { useConfigMenus } from '@/shared/hooks/useConfigMenus'
@@ -17,18 +17,15 @@ import { useTranslation } from '@/shared/i18n/use-translation'
 import type { MenuConfig, UserRole } from '@/shared/types/menu-config.types'
 
 /**
- * Module Menu Component
+ * Horizontal Module Menu Component
  *
- * Dynamically renders menu items from module configurations
+ * Dynamically renders menu items from module configurations for horizontal layout
  */
-const ModuleMenu = () => {
+const HorizontalModuleMenu = () => {
   // Hooks
   const { lang: locale } = useParams()
   const pathname = usePathname()
-  const { t, locale: translationLocale } = useTranslation()
-
-  // Debug log
-  console.log('🔧 [ModuleMenu] URL locale:', locale, '| Translation locale:', translationLocale)
+  const { t } = useTranslation()
 
   // Detect current role from URL
   const currentRole: UserRole | undefined = useMemo(() => {
@@ -104,4 +101,4 @@ const ModuleMenu = () => {
   )
 }
 
-export default ModuleMenu
+export default HorizontalModuleMenu

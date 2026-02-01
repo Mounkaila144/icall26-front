@@ -1,9 +1,6 @@
 // React Imports
-import { forwardRef, useEffect, useState } from 'react'
+import { forwardRef, useEffect, useState, useCallback, useRef } from 'react'
 import type { ForwardRefRenderFunction, HTMLAttributes, MutableRefObject } from 'react'
-
-// Third-party Imports
-import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // Type Imports
 import type { VerticalMenuContextProps } from './Menu'
@@ -47,44 +44,68 @@ const SubMenuContent: ForwardRefRenderFunction<HTMLDivElement, SubMenuContentPro
   // States
   const [mounted, setMounted] = useState(false)
 
+  // Use a ref to track the cached height to avoid repeated measurements
+  const cachedHeightRef = useRef<number | null>(null)
+
   // Refs
   const SubMenuContentRef = ref as MutableRefObject<HTMLDivElement>
 
-  useEffect(() => {
-    if (mounted) {
-      if (open || (open && isHovered)) {
-        const target = SubMenuContentRef?.current
+  // Optimized animation using requestAnimationFrame to batch DOM reads/writes
+  const animateOpen = useCallback((target: HTMLDivElement, duration: number) => {
+    // Use requestAnimationFrame to batch layout reads
+    requestAnimationFrame(() => {
+      target.style.display = 'block'
+      target.style.overflow = 'hidden'
+      target.style.blockSize = 'auto'
 
-        if (target) {
-          target.style.display = 'block'
-          target.style.overflow = 'hidden'
-          target.style.blockSize = 'auto'
-          const height = target.offsetHeight
+      // Single layout read
+      const height = target.offsetHeight
+      cachedHeightRef.current = height
 
-          target.style.blockSize = '0px'
-          target.offsetHeight
+      // Batch all writes together
+      requestAnimationFrame(() => {
+        target.style.blockSize = '0px'
 
+        // Force a single reflow, then animate
+        requestAnimationFrame(() => {
           target.style.blockSize = `${height}px`
 
           setTimeout(() => {
             target.style.overflow = 'auto'
             target.style.blockSize = 'auto'
-          }, transitionDuration)
-        }
+          }, duration)
+        })
+      })
+    })
+  }, [])
+
+  const animateClose = useCallback((target: HTMLDivElement, duration: number) => {
+    requestAnimationFrame(() => {
+      target.style.overflow = 'hidden'
+      // Use cached height if available to avoid layout read
+      const height = cachedHeightRef.current ?? target.offsetHeight
+      target.style.blockSize = `${height}px`
+
+      requestAnimationFrame(() => {
+        target.style.blockSize = '0px'
+
+        setTimeout(() => {
+          target.style.overflow = 'auto'
+          target.style.display = 'none'
+        }, duration)
+      })
+    })
+  }, [])
+
+  useEffect(() => {
+    if (mounted) {
+      const target = SubMenuContentRef?.current
+      if (!target) return
+
+      if (open || (open && isHovered)) {
+        animateOpen(target, transitionDuration ?? 300)
       } else {
-        const target = SubMenuContentRef?.current
-
-        if (target) {
-          target.style.overflow = 'hidden'
-          target.style.blockSize = `${target.offsetHeight}px`
-          target.offsetHeight
-          target.style.blockSize = '0px'
-
-          setTimeout(() => {
-            target.style.overflow = 'auto'
-            target.style.display = 'none'
-          }, transitionDuration)
-        }
+        animateClose(target, transitionDuration ?? 300)
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -107,14 +128,20 @@ const SubMenuContent: ForwardRefRenderFunction<HTMLDivElement, SubMenuContentPro
       browserScroll={browserScroll}
       {...rest}
     >
-      {/* If browserScroll is false render PerfectScrollbar */}
+      {/* Use native scroll with CSS styling for better performance */}
       {!browserScroll && level === 0 && isPopoutWhenCollapsed && isCollapsed ? (
-        <PerfectScrollbar
-          options={{ wheelPropagation: false, suppressScrollX: true }}
-          style={{ maxBlockSize: `calc((var(--vh, 1vh) * 100))` }}
+        <div
+          className="submenu-scroll-container"
+          style={{
+            maxBlockSize: `calc((var(--vh, 1vh) * 100))`,
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            scrollbarWidth: 'thin',
+            scrollbarColor: 'rgba(var(--mui-palette-text-primaryChannel) / 0.3) transparent'
+          }}
         >
           <ul className={styles.ul}>{children}</ul>
-        </PerfectScrollbar>
+        </div>
       ) : (
         <ul className={styles.ul}>{children}</ul>
       )}

@@ -1,8 +1,8 @@
+// React Imports
+import { memo, useCallback } from 'react'
+
 // MUI Imports
 import { useTheme } from '@mui/material/styles'
-
-// Third-party Imports
-import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // Type Imports
 import type { getDictionary } from '@/utils/getDictionary'
@@ -35,11 +35,30 @@ type Props = {
   scrollMenu: (container: any, isPerfectScrollbar: boolean) => void
 }
 
-const RenderExpandIcon = ({ open, transitionDuration }: RenderExpandIconProps) => (
+const RenderExpandIcon = memo(({ open, transitionDuration }: RenderExpandIconProps) => (
   <StyledVerticalNavExpandIcon open={open} transitionDuration={transitionDuration}>
     <i className='ri-arrow-right-s-line' />
   </StyledVerticalNavExpandIcon>
-)
+))
+
+RenderExpandIcon.displayName = 'RenderExpandIcon'
+
+// Optimized native scroll wrapper - much faster than PerfectScrollbar
+const NativeScrollWrapper = memo(({ children, onScroll }: { children: React.ReactNode; onScroll?: (e: any) => void }) => (
+  <div
+    className='bs-full overflow-y-auto overflow-x-hidden'
+    onScroll={onScroll}
+    style={{
+      scrollbarWidth: 'thin',
+      scrollbarColor: 'rgba(var(--mui-palette-text-primaryChannel) / 0.3) transparent',
+      willChange: 'scroll-position'
+    }}
+  >
+    {children}
+  </div>
+))
+
+NativeScrollWrapper.displayName = 'NativeScrollWrapper'
 
 const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
   // Hooks
@@ -47,25 +66,16 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
   const verticalNavOptions = useVerticalNav()
 
   // Vars
-  const { isBreakpointReached, transitionDuration } = verticalNavOptions
+  const { transitionDuration } = verticalNavOptions
 
-  const ScrollWrapper = isBreakpointReached ? 'div' : PerfectScrollbar
+  // Memoized scroll handler
+  const handleScroll = useCallback((container: any) => {
+    scrollMenu(container, false)
+  }, [scrollMenu])
 
   return (
-    // eslint-disable-next-line lines-around-comment
-    /* Custom scrollbar instead of browser scroll, remove if you want browser scroll only */
-    <ScrollWrapper
-      {...(isBreakpointReached
-        ? {
-            className: 'bs-full overflow-y-auto overflow-x-hidden',
-            onScroll: container => scrollMenu(container, false)
-          }
-        : {
-            options: { wheelPropagation: false, suppressScrollX: true },
-            onScrollY: container => scrollMenu(container, true)
-          })}
-    >
-      {/* Incase you also want to scroll NavHeader to scroll with Vertical Menu, remove NavHeader from above and paste it below this comment */}
+    // Use native scroll for better performance - eliminates PerfectScrollbar forced reflows
+    <NativeScrollWrapper onScroll={handleScroll}>
       {/* Vertical Menu from Module Configurations */}
       <Menu
         popoutMenuOffset={{ mainAxis: 17 }}
@@ -76,7 +86,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
       >
         <ModuleMenu />
       </Menu>
-    </ScrollWrapper>
+    </NativeScrollWrapper>
   )
 }
 

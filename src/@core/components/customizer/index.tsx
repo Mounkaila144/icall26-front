@@ -21,7 +21,6 @@ import type { Breakpoint } from '@mui/material/styles'
 import classnames from 'classnames'
 import { useDebounce, useMedia } from 'react-use'
 import { HexColorPicker, HexColorInput } from 'react-colorful'
-import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // Type Imports
 import type { Settings } from '@core/contexts/settingsContext'
@@ -142,7 +141,8 @@ const Customizer = ({ breakpoint = 'lg', dir = 'ltr', disableDirection = false }
   const isBelowLgScreen = useMedia('(max-width: 1200px)', false)
   const isColorFromPrimaryConfig = primaryColorConfig.find(item => item.main === settings.primaryColor)
 
-  const ScrollWrapper = isBelowLgScreen ? 'div' : PerfectScrollbar
+  // Use native scroll for better performance
+  const ScrollWrapper = 'div'
 
   const handleToggle = () => {
     setIsOpen(!isOpen)
@@ -195,9 +195,11 @@ const Customizer = ({ breakpoint = 'lg', dir = 'ltr', disableDirection = false }
           </div>
         </div>
         <ScrollWrapper
-          {...(isBelowLgScreen
-            ? { className: 'bs-full overflow-y-auto overflow-x-hidden' }
-            : { options: { wheelPropagation: false, suppressScrollX: true } })}
+          className='bs-full overflow-y-auto overflow-x-hidden native-scroll'
+          style={{
+            scrollbarWidth: 'thin',
+            scrollbarColor: 'rgba(var(--mui-palette-text-primaryChannel) / 0.3) transparent'
+          }}
         >
           <div className={classnames('customizer-body flex flex-col', styles.customizerBody)}>
             <div className='theming-section flex flex-col gap-6'>

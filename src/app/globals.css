@@ -131,3 +131,47 @@ code {
   background-color: rgb(var(--mui-palette-info-mainChannel) / 0.08);
   border: 0;
 }
+
+/* Native scrollbar styling for better performance (replaces PerfectScrollbar) */
+.native-scroll,
+.submenu-scroll-container,
+.bs-full.overflow-y-auto {
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--mui-palette-text-primaryChannel) / 0.3) transparent;
+}
+
+/* WebKit browsers (Chrome, Safari, Edge) */
+.native-scroll::-webkit-scrollbar,
+.submenu-scroll-container::-webkit-scrollbar,
+.bs-full.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.native-scroll::-webkit-scrollbar-track,
+.submenu-scroll-container::-webkit-scrollbar-track,
+.bs-full.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.native-scroll::-webkit-scrollbar-thumb,
+.submenu-scroll-container::-webkit-scrollbar-thumb,
+.bs-full.overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--mui-palette-text-primaryChannel) / 0.3);
+  border-radius: 3px;
+  transition: background-color 0.15s ease;
+}
+
+.native-scroll::-webkit-scrollbar-thumb:hover,
+.submenu-scroll-container::-webkit-scrollbar-thumb:hover,
+.bs-full.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--mui-palette-text-primaryChannel) / 0.5);
+}
+
+/* Performance optimization: use GPU acceleration for scroll containers */
+.native-scroll,
+.submenu-scroll-container {
+  will-change: scroll-position;
+  -webkit-overflow-scrolling: touch;
+}

@@ -8,8 +8,6 @@ import { useParams } from 'next/navigation'
 // MUI Imports
 import { styled } from '@mui/material/styles'
 
-// Third-party Imports
-import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // Type Imports
 import type { ChildrenType } from '@core/types'
@@ -53,13 +51,11 @@ const VerticalNavContent = ({ children }: ChildrenType) => {
   // Refs
   const shadowRef = useRef(null)
 
-  // Vars
-  const ScrollWrapper = isBreakpointReached ? 'div' : PerfectScrollbar
+  // Use native scroll for better performance - eliminates PerfectScrollbar forced reflows
+  const scrollMenu = (container: any) => {
+    const target = container.target
 
-  const scrollMenu = (container: any, isPerfectScrollbar: boolean) => {
-    container = isBreakpointReached || !isPerfectScrollbar ? container.target : container
-
-    if (shadowRef && container.scrollTop > 0) {
+    if (shadowRef && target.scrollTop > 0) {
       // @ts-ignore
       if (!shadowRef.current.classList.contains('scrolled')) {
         // @ts-ignore
@@ -80,19 +76,16 @@ const VerticalNavContent = ({ children }: ChildrenType) => {
         <NavCollapseIcons />
       </NavHeader>
       <StyledBoxForShadow ref={shadowRef} />
-      <ScrollWrapper
-        {...(isBreakpointReached
-          ? {
-              className: 'bs-full overflow-y-auto overflow-x-hidden',
-              onScroll: container => scrollMenu(container, false)
-            }
-          : {
-              options: { wheelPropagation: false, suppressScrollX: true },
-              onScrollY: container => scrollMenu(container, true)
-            })}
+      <div
+        className='bs-full overflow-y-auto overflow-x-hidden native-scroll'
+        onScroll={scrollMenu}
+        style={{
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgba(var(--mui-palette-text-primaryChannel) / 0.3) transparent'
+        }}
       >
         {mapHorizontalToVerticalMenu(children)}
-      </ScrollWrapper>
+      </div>
     </>
   )
 }
