@@ -14,8 +14,6 @@ import type {
  */
 const SERVICE_ENDPOINTS: Record<ServiceType, string> = {
   's3': '/superadmin/config/s3',
-  'redis-cache': '/superadmin/config/redis-cache',
-  'redis-queue': '/superadmin/config/redis-queue',
   'resend': '/superadmin/config/resend',
   'meilisearch': '/superadmin/config/meilisearch',
 };
@@ -78,16 +76,15 @@ class ServiceConfigService {
   /**
    * Teste la connexion à un service
    * @param service - Type de service
-   * @param config - Configuration optionnelle pour tester avant sauvegarde
-   * @returns Résultat du test
+   * @returns Résultat du test (utilise la config sauvegardée en base)
    */
-  async testConnection(service: ServiceType, config?: Partial<ServiceConfig>): Promise<TestResult> {
+  async testConnection(service: ServiceType): Promise<TestResult> {
     try {
       const client = createApiClient();
       const endpoint = `${SERVICE_ENDPOINTS[service]}/test`;
 
-      // Si une config est fournie, on l'envoie pour tester avant sauvegarde
-      const response = await client.post<TestResponse>(endpoint, config || {});
+      // GET - le backend utilise la config sauvegardée en base de données
+      const response = await client.get<TestResponse>(endpoint);
 
       return response.data.data;
     } catch (error: any) {
@@ -121,8 +118,8 @@ class ServiceConfigService {
   /**
    * Teste la connexion S3
    */
-  async testS3Connection(config?: Partial<S3Config>): Promise<TestResult> {
-    return this.testConnection('s3', config);
+  async testS3Connection(): Promise<TestResult> {
+    return this.testConnection('s3');
   }
 }
 

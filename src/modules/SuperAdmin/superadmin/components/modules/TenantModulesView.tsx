@@ -4,7 +4,6 @@ import React, { useState, useMemo } from 'react';
 import {
   Box,
   Typography,
-  Grid,
   Skeleton,
   Alert,
   Button,
@@ -12,12 +11,10 @@ import {
   Divider,
   Paper,
   Chip,
-  Checkbox,
-  FormControlLabel,
   Tooltip,
 } from '@mui/material';
 import { useTenantModules } from '../../hooks/useTenantModules';
-import { TenantModuleCard } from './TenantModuleCard';
+import { TenantModulesTable } from './TenantModulesTable';
 import { ModuleFilters } from './ModuleFilters';
 import { ActivationWizard } from '../activation/ActivationWizard';
 import { BatchActivationWizard } from '../activation/BatchActivationWizard';
@@ -267,7 +264,7 @@ export function TenantModulesView({ tenantId, tenantName }: TenantModulesViewPro
                   variant={batchDeactivationMode ? 'contained' : 'outlined'}
                   color="error"
                   onClick={toggleBatchDeactivationMode}
-                  startIcon={<i className="tabler-packages-off" />}
+                  startIcon={<i className="ri-stack-line" />}
                 >
                   {batchDeactivationMode ? 'Annuler' : 'Batch'}
                 </Button>
@@ -279,8 +276,8 @@ export function TenantModulesView({ tenantId, tenantName }: TenantModulesViewPro
         {/* Barre d'actions batch désactivation */}
         {batchDeactivationMode && (
           <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: 'error.light' }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Stack direction="row" spacing={2} alignItems="center">
+            <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
+              <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
                 <Typography variant="body2" color="error.contrastText">
                   {selectedForDeactivation.size} module(s) sélectionné(s)
                 </Typography>
@@ -298,7 +295,7 @@ export function TenantModulesView({ tenantId, tenantName }: TenantModulesViewPro
                 color="error"
                 disabled={selectedForDeactivation.size === 0}
                 onClick={handleBatchDeactivate}
-                startIcon={<i className="tabler-trash" />}
+                startIcon={<i className="ri-delete-bin-line" />}
               >
                 Désactiver ({selectedForDeactivation.size})
               </Button>
@@ -313,38 +310,18 @@ export function TenantModulesView({ tenantId, tenantName }: TenantModulesViewPro
               : 'Aucun module activé pour ce tenant.'}
           </Alert>
         ) : (
-          <Grid container spacing={3}>
-            {activeModules.map((module) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={module.name}>
-                <Box sx={{ position: 'relative' }}>
-                  {batchDeactivationMode && (
-                    <Checkbox
-                      checked={selectedForDeactivation.has(module.name)}
-                      onChange={() => toggleDeactivationSelection(module.name)}
-                      color="error"
-                      sx={{
-                        position: 'absolute',
-                        top: 8,
-                        left: 8,
-                        zIndex: 10,
-                        bgcolor: 'background.paper',
-                        borderRadius: 1,
-                        '&:hover': { bgcolor: 'background.paper' },
-                      }}
-                    />
-                  )}
-                  <TenantModuleCard
-                    module={module}
-                    onDeactivate={batchDeactivationMode ? undefined : handleDeactivate}
-                    onConfigure={handleConfigure}
-                    onViewDetails={handleViewDetails}
-                    onClick={batchDeactivationMode ? () => toggleDeactivationSelection(module.name) : undefined}
-                    selected={batchDeactivationMode && selectedForDeactivation.has(module.name)}
-                  />
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
+          <TenantModulesTable
+            modules={activeModules}
+            loading={loading}
+            onDeactivate={batchDeactivationMode ? undefined : handleDeactivate}
+            onConfigure={handleConfigure}
+            onViewDetails={handleViewDetails}
+            batchMode={batchDeactivationMode}
+            selectedModules={selectedForDeactivation}
+            onToggleSelection={toggleDeactivationSelection}
+            variant="active"
+            emptyMessage="Aucun module actif"
+          />
         )}
       </Paper>
 
@@ -368,7 +345,7 @@ export function TenantModulesView({ tenantId, tenantName }: TenantModulesViewPro
                   size="small"
                   variant={batchMode ? 'contained' : 'outlined'}
                   onClick={toggleBatchMode}
-                  startIcon={<i className="tabler-packages" />}
+                  startIcon={<i className="ri-stack-line" />}
                 >
                   {batchMode ? 'Annuler' : 'Batch'}
                 </Button>
@@ -380,8 +357,8 @@ export function TenantModulesView({ tenantId, tenantName }: TenantModulesViewPro
         {/* Barre d'actions batch */}
         {batchMode && (
           <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: 'primary.light' }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Stack direction="row" spacing={2} alignItems="center">
+            <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
+              <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
                 <Typography variant="body2" color="primary.contrastText">
                   {selectedForBatch.size} module(s) sélectionné(s)
                 </Typography>
@@ -399,7 +376,7 @@ export function TenantModulesView({ tenantId, tenantName }: TenantModulesViewPro
                 color="success"
                 disabled={selectedForBatch.size === 0}
                 onClick={handleBatchActivate}
-                startIcon={<i className="tabler-player-play" />}
+                startIcon={<i className="ri-play-circle-line" />}
               >
                 Activer ({selectedForBatch.size})
               </Button>
@@ -414,36 +391,17 @@ export function TenantModulesView({ tenantId, tenantName }: TenantModulesViewPro
               : 'Tous les modules sont déjà activés pour ce tenant.'}
           </Alert>
         ) : (
-          <Grid container spacing={3}>
-            {availableModules.map((module) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={module.name}>
-                <Box sx={{ position: 'relative' }}>
-                  {batchMode && (
-                    <Checkbox
-                      checked={selectedForBatch.has(module.name)}
-                      onChange={() => toggleModuleSelection(module.name)}
-                      sx={{
-                        position: 'absolute',
-                        top: 8,
-                        left: 8,
-                        zIndex: 10,
-                        bgcolor: 'background.paper',
-                        borderRadius: 1,
-                        '&:hover': { bgcolor: 'background.paper' },
-                      }}
-                    />
-                  )}
-                  <TenantModuleCard
-                    module={module}
-                    onActivate={batchMode ? undefined : handleActivate}
-                    onViewDetails={handleViewDetails}
-                    onClick={batchMode ? () => toggleModuleSelection(module.name) : undefined}
-                    selected={batchMode && selectedForBatch.has(module.name)}
-                  />
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
+          <TenantModulesTable
+            modules={availableModules}
+            loading={loading}
+            onActivate={batchMode ? undefined : handleActivate}
+            onViewDetails={handleViewDetails}
+            batchMode={batchMode}
+            selectedModules={selectedForBatch}
+            onToggleSelection={toggleModuleSelection}
+            variant="available"
+            emptyMessage="Aucun module disponible"
+          />
         )}
       </Paper>
 

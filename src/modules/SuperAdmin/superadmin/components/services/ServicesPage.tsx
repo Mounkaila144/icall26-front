@@ -24,15 +24,13 @@ import type { ServiceType } from '../../../types/service-config.types';
 /**
  * Liste des services disponibles
  */
-const services: ServiceType[] = ['s3', 'redis-cache', 'redis-queue', 'resend', 'meilisearch'];
+const services: ServiceType[] = ['s3', 'resend', 'meilisearch'];
 
 /**
  * Icônes pour chaque service
  */
 const serviceIcons: Record<ServiceType, string> = {
   's3': 'tabler-cloud',
-  'redis-cache': 'tabler-bolt',
-  'redis-queue': 'tabler-list-check',
   'resend': 'tabler-mail',
   'meilisearch': 'tabler-search',
 };
@@ -42,8 +40,6 @@ const serviceIcons: Record<ServiceType, string> = {
  */
 const serviceColors: Record<ServiceType, string> = {
   's3': '#ff9800',
-  'redis-cache': '#dc3545',
-  'redis-queue': '#28a745',
   'resend': '#9c27b0',
   'meilisearch': '#00bcd4',
 };

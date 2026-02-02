@@ -44,7 +44,7 @@ interface MeilisearchConfigFormProps {
   config: MeilisearchConfig | null;
   onSave: (data: Partial<MeilisearchConfig>) => Promise<boolean>;
   isSaving?: boolean;
-  onTest: (data?: Partial<MeilisearchConfig>) => Promise<void>;
+  onTest: () => Promise<void>;
   isTesting?: boolean;
   testResult: TestResult | null;
   error?: string | null;
@@ -65,7 +65,6 @@ export function MeilisearchConfigForm({
     control,
     handleSubmit,
     reset,
-    getValues,
     formState: { errors, isDirty },
   } = useForm<MeilisearchFormData>({
     resolver: yupResolver(meilisearchSchema),
@@ -101,19 +100,9 @@ export function MeilisearchConfigForm({
     await onSave(submitData);
   };
 
+  // Handler de test - utilise la config sauvegardée en base
   const handleTest = async () => {
-    const data = getValues();
-    const testData: any = {
-      url: data.url,
-      index_prefix: data.index_prefix || undefined,
-    };
-
-    // Toujours envoyer l'API key si elle est fournie et non masquée
-    if (data.api_key && !isMaskedValue(data.api_key)) {
-      testData.api_key = data.api_key;
-    }
-
-    await onTest(testData);
+    await onTest();
   };
 
   const handleCancel = () => {

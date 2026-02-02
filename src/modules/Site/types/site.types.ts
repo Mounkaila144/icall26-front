@@ -165,17 +165,6 @@ export interface SiteResponse {
   message?: string;
 }
 
-export interface SiteStatistics {
-  total: number;
-  available: number;
-  customers: number;
-  by_type?: {
-    CUST?: number;
-    ECOM?: number;
-    CMS?: number;
-  };
-}
-
 export interface ToggleAvailabilityData {
   site_ids: number[];
   available: YesNo;

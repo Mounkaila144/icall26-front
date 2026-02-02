@@ -7,7 +7,6 @@ import {
   SiteFilters,
   SitesListResponse,
   SiteResponse,
-  SiteStatistics,
   ToggleAvailabilityData,
   TestConnectionResult,
 } from '../../types/site.types';

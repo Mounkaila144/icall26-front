@@ -597,7 +597,6 @@ const UserListTable = () => {
             placeholder={t('Search')}
             fullWidth
             variant='outlined'
-            disabled={loading}
             sx={{ minWidth: 120 }}
           />
         )

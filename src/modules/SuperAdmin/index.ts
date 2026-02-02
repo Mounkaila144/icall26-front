@@ -46,10 +46,7 @@ export type {
 export type {
   ServiceType,
   S3Config,
-  RedisCacheConfig,
-  RedisQueueConfig,
-  RedisConfig,
-  SESConfig,
+  ResendConfig,
   MeilisearchConfig,
   ServiceConfig,
   TestResult,
@@ -105,13 +102,12 @@ export { BatchDeactivationWizard } from './superadmin/components/deactivation/Ba
 export { ServiceConfigLayout } from './superadmin/components/services/ServiceConfigLayout';
 export { TestResultAlert } from './superadmin/components/services/TestResultAlert';
 export { S3ConfigForm } from './superadmin/components/services/S3ConfigForm';
-export { RedisConfigForm } from './superadmin/components/services/RedisConfigForm';
 
 // Service Configuration Pages
 export { ServicesPage } from './superadmin/components/services/ServicesPage';
 export { S3ConfigPage } from './superadmin/components/services/S3ConfigPage';
-export { RedisCacheConfigPage } from './superadmin/components/services/RedisCacheConfigPage';
-export { RedisQueueConfigPage } from './superadmin/components/services/RedisQueueConfigPage';
+export { MeilisearchConfigPage } from './superadmin/components/services/MeilisearchConfigPage';
+export { ResendConfigPage } from './superadmin/components/services/ResendConfigPage';
 
 // ============================================================================
 // Utils

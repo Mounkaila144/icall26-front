@@ -7,7 +7,6 @@ import {
   SiteFilters,
   SitesListResponse,
   SiteResponse,
-  SiteStatistics,
   ToggleAvailabilityData,
   TestConnectionResult,
 } from '../../types/site.types';
@@ -103,14 +102,6 @@ class SiteService {
     return response.data.data;
   }
 
-  /**
-   * Récupérer les statistiques des sites
-   */
-  async getStatistics(): Promise<SiteStatistics> {
-    const client = createApiClient();
-    const response = await client.get<ApiResponse<SiteStatistics>>('/superadmin/sites/statistics');
-    return response.data.data;
-  }
 
   /**
    * Activer/désactiver plusieurs sites

@@ -29,6 +29,16 @@ interface ApiTenantModule {
   installedAt: string | null;
   uninstalledAt: string | null;
   config: Record<string, any>;
+  /** Version installée (depuis les mises à jour legacy) */
+  installedVersion?: string | null;
+  /** Historique des versions */
+  versionHistory?: Array<{
+    action: string;
+    from_version: string | null;
+    to_version: string;
+    applied_versions: string[];
+    applied_at: string;
+  }> | null;
 }
 
 /**
@@ -93,6 +103,8 @@ class ModuleService {
         isActive: apiModule.status === 'active',
         installedAt: apiModule.installedAt,
         config: apiModule.config || {},
+        installedVersion: apiModule.installedVersion || null,
+        versionHistory: apiModule.versionHistory || null,
       },
     }));
   }

@@ -71,6 +71,26 @@ export interface ApiResponse<T> {
 }
 
 /**
+ * Entrée dans l'historique des versions d'un module
+ */
+export interface ModuleVersionHistoryEntry {
+  /** Type d'action effectuée */
+  action: 'install' | 'reactivate' | 'upgrade' | 'downgrade';
+
+  /** Version avant l'action */
+  from_version: string | null;
+
+  /** Version après l'action */
+  to_version: string;
+
+  /** Liste des versions appliquées */
+  applied_versions: string[];
+
+  /** Date de l'action (ISO 8601) */
+  applied_at: string;
+}
+
+/**
  * Statut d'un module pour un tenant spécifique
  */
 export interface TenantModuleStatus {
@@ -82,6 +102,12 @@ export interface TenantModuleStatus {
 
   /** Configuration spécifique du module pour ce tenant */
   config: Record<string, any>;
+
+  /** Version installée du module (depuis les mises à jour legacy) */
+  installedVersion?: string | null;
+
+  /** Historique des versions appliquées */
+  versionHistory?: ModuleVersionHistoryEntry[] | null;
 }
 
 /**

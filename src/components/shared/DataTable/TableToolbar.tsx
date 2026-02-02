@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 
 // MUI Imports
 import Box from '@mui/material/Box'
@@ -49,15 +49,36 @@ export function TableToolbar({
 }: TableToolbarProps) {
   const [searchValue, setSearchValue] = useState('')
   const [columnMenuAnchor, setColumnMenuAnchor] = useState<null | HTMLElement>(null)
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Handle search with debounce
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+    }
+  }, [])
+
+  // Handle search with debounce and minimum 3 characters
   const handleSearchChange = useCallback(
     (value: string) => {
       setSearchValue(value)
-      if (onSearch) {
-        // Debounce is handled in the parent component
-        onSearch(value)
+
+      // Clear previous timer
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
       }
+
+      // Debounce the search
+      debounceTimerRef.current = setTimeout(() => {
+        if (onSearch) {
+          // Only search if at least 3 characters or empty (to clear search)
+          if (value.length >= 3 || value.length === 0) {
+            onSearch(value)
+          }
+        }
+      }, 500)
     },
     [onSearch]
   )
@@ -146,7 +167,6 @@ export function TableToolbar({
               placeholder={searchPlaceholder}
               size='small'
               className='w-full sm:w-auto'
-              disabled={loading}
             />
           )}
           {onRefresh && (

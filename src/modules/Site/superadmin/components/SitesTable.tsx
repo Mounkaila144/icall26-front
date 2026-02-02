@@ -185,7 +185,7 @@ export default function SitesTable({
         cell: ({ row }) => (
           <div className='flex items-center gap-0.5'>
             <IconButton size='small' onClick={() => onManageModules(row.original)} color='info' title='Gérer les modules'>
-              <i className='tabler-puzzle' />
+              <i className='tabler-anchor' />
             </IconButton>
             <IconButton size='small' onClick={() => onEdit(row.original)} color='primary' title='Modifier'>
               <i className='ri-edit-box-line' />

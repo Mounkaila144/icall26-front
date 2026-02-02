@@ -50,8 +50,8 @@ interface S3ConfigFormProps {
   onSave: (data: Partial<S3Config>) => Promise<boolean>;
   /** Indique si la sauvegarde est en cours */
   isSaving?: boolean;
-  /** Callback appelé pour tester la connexion */
-  onTest: (data?: Partial<S3Config>) => Promise<void>;
+  /** Callback appelé pour tester la connexion (utilise la config sauvegardée) */
+  onTest: () => Promise<void>;
   /** Indique si le test est en cours */
   isTesting?: boolean;
   /** Résultat du dernier test */
@@ -93,7 +93,6 @@ export function S3ConfigForm({
     control,
     handleSubmit,
     reset,
-    getValues,
     formState: { errors, isDirty, isValid },
   } = useForm<S3FormData>({
     resolver: yupResolver(s3Schema),
@@ -141,23 +140,9 @@ export function S3ConfigForm({
     await onSave(submitData);
   };
 
-  // Handler de test
+  // Handler de test - utilise la config sauvegardée en base
   const handleTest = async () => {
-    const data = getValues();
-    const testData: Partial<S3Config> = {
-      access_key: data.access_key,
-      bucket: data.bucket,
-      region: data.region,
-      endpoint: data.endpoint || undefined,
-      use_path_style: data.use_path_style,
-    };
-
-    // Inclure le secret_key seulement s'il n'est pas masqué
-    if (data.secret_key && !data.secret_key.includes('●')) {
-      testData.secret_key = data.secret_key;
-    }
-
-    await onTest(testData);
+    await onTest();
   };
 
   // Handler pour annuler (reset)

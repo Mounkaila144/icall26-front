@@ -22,20 +22,6 @@ export const dashboardMenuConfig: ModuleMenuConfig = {
       roles: ['admin'],
       isVisible: true,
       isActive: true,
-    },
-    {
-      id: 'dashboard-superadmin',
-      label: 'Dashboard',
-      route: '/superadmin/dashboard',
-      icon: {
-        type: 'emoji',
-        value: '📊',
-      },
-      order: 1,
-      module: 'Dashboard',
-      roles: ['superadmin'],
-      isVisible: true,
-      isActive: true,
-    },
+    }
   ],
 };

@@ -46,7 +46,7 @@ interface ResendConfigFormProps {
   config: ResendConfig | null;
   onSave: (data: Partial<ResendConfig>) => Promise<boolean>;
   isSaving?: boolean;
-  onTest: (data?: Partial<ResendConfig>) => Promise<void>;
+  onTest: () => Promise<void>;
   isTesting?: boolean;
   testResult: TestResult | null;
   error?: string | null;
@@ -69,7 +69,6 @@ export function ResendConfigForm({
     control,
     handleSubmit,
     reset,
-    getValues,
     formState: { errors, isDirty },
   } = useForm<ResendFormData>({
     resolver: yupResolver(resendSchema),
@@ -108,26 +107,9 @@ export function ResendConfigForm({
     await onSave(submitData);
   };
 
+  // Handler de test - utilise la config sauvegardée en base
   const handleTest = async () => {
-    const data = getValues();
-    const testData: any = {
-      from_address: data.from_address,
-      from_name: data.from_name,
-      reply_to: data.reply_to || undefined,
-    };
-
-    // Toujours envoyer l'API key si elle est fournie et non masquée
-    // C'est important pour tester avec une nouvelle clé avant de l'enregistrer
-    if (data.api_key && !isMaskedValue(data.api_key)) {
-      testData.api_key = data.api_key;
-    }
-
-    // Ajouter l'email de test si fourni
-    if (testEmail) {
-      testData.test_email = testEmail;
-    }
-
-    await onTest(testData);
+    await onTest();
   };
 
   const handleCancel = () => {

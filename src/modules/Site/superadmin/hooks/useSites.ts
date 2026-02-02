@@ -6,14 +6,12 @@ import {
   SiteListItem,
   SiteFilters,
   SitePaginationMeta,
-  SiteStatistics,
 } from '../../types/site.types';
 import { AxiosError } from 'axios';
 
 interface UseSitesReturn {
   sites: SiteListItem[];
   meta: SitePaginationMeta | null;
-  statistics: SiteStatistics | null;
   isLoading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
@@ -23,7 +21,6 @@ interface UseSitesReturn {
 export const useSites = (initialFilters?: SiteFilters): UseSitesReturn => {
   const [sites, setSites] = useState<SiteListItem[]>([]);
   const [meta, setMeta] = useState<SitePaginationMeta | null>(null);
-  const [statistics, setStatistics] = useState<SiteStatistics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters] = useState<SiteFilters | undefined>(initialFilters);

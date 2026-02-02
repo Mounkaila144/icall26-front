@@ -7,7 +7,7 @@
  * Types de services configurables
  * Note: La base de données centrale n'est pas configurable via l'interface
  */
-export type ServiceType = 's3' | 'redis-cache' | 'redis-queue' | 'resend' | 'meilisearch';
+export type ServiceType = 's3' | 'resend' | 'meilisearch';
 
 /**
  * Configuration S3/MinIO
@@ -47,53 +47,6 @@ export interface DatabaseConfig {
   collation?: string;
 }
 
-/**
- * Configuration Redis Cache
- */
-export interface RedisCacheConfig {
-  /** Hôte du serveur Redis */
-  host: string;
-  /** Port de connexion */
-  port: number;
-  /** Mot de passe (optionnel) */
-  password?: string;
-  /** Numéro de la base de données Redis (0-15) */
-  database?: number;
-  /** Préfixe des clés */
-  prefix?: string;
-  /** Activer SSL/TLS (pour Upstash, Redis Cloud, etc.) */
-  ssl?: boolean;
-}
-
-/**
- * Configuration Redis Queue
- */
-export interface RedisQueueConfig {
-  /** Hôte du serveur Redis */
-  host: string;
-  /** Port de connexion */
-  port: number;
-  /** Mot de passe (optionnel) */
-  password?: string;
-  /** Numéro de la base de données Redis (0-15) */
-  database?: number;
-  /** Nom de la queue */
-  queue_name?: string;
-  /** Activer SSL/TLS (pour Upstash, Redis Cloud, etc.) */
-  ssl?: boolean;
-}
-
-/**
- * @deprecated Use RedisCacheConfig or RedisQueueConfig instead
- */
-export interface RedisConfig {
-  host: string;
-  port: number;
-  database: number;
-  password?: string;
-  prefix?: string;
-  queue?: string;
-}
 
 /**
  * Configuration Resend (Email)
@@ -124,7 +77,7 @@ export interface MeilisearchConfig {
 /**
  * Union type pour toutes les configurations
  */
-export type ServiceConfig = S3Config | DatabaseConfig | RedisConfig | ResendConfig | MeilisearchConfig;
+export type ServiceConfig = S3Config | DatabaseConfig | ResendConfig | MeilisearchConfig;
 
 /**
  * Résultat d'un test de connexion
@@ -172,8 +125,6 @@ export interface TestResponse {
  */
 export const SERVICE_EDITABLE: Record<ServiceType, boolean> = {
   's3': true,
-  'redis-cache': true,
-  'redis-queue': true,
   'resend': true,
   'meilisearch': true,
 };
@@ -183,8 +134,6 @@ export const SERVICE_EDITABLE: Record<ServiceType, boolean> = {
  */
 export const SERVICE_LABELS: Record<ServiceType, string> = {
   's3': 'Stockage S3 / MinIO',
-  'redis-cache': 'Redis Cache',
-  'redis-queue': 'Redis Queue',
   'resend': 'Resend (Email)',
   'meilisearch': 'Meilisearch',
 };
@@ -194,8 +143,6 @@ export const SERVICE_LABELS: Record<ServiceType, string> = {
  */
 export const SERVICE_DESCRIPTIONS: Record<ServiceType, string> = {
   's3': 'Configuration du stockage de fichiers (AWS S3 ou MinIO)',
-  'redis-cache': 'Configuration du cache Redis pour les sessions et données temporaires',
-  'redis-queue': 'Configuration de la queue Redis pour les jobs en arrière-plan',
   'resend': 'Configuration du service d\'envoi d\'emails Resend',
   'meilisearch': 'Configuration du moteur de recherche Meilisearch',
 };

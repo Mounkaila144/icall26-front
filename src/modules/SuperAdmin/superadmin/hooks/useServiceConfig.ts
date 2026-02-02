@@ -25,8 +25,8 @@ export interface UseServiceConfigReturn<T = ServiceConfig> {
   save: (data: Partial<T>) => Promise<boolean>;
   /** Indique si la sauvegarde est en cours */
   isSaving: boolean;
-  /** Fonction pour tester la connexion */
-  test: (data?: Partial<T>) => Promise<void>;
+  /** Fonction pour tester la connexion (utilise la config sauvegardée) */
+  test: () => Promise<void>;
   /** Indique si le test est en cours */
   isTesting: boolean;
   /** Résultat du dernier test */
@@ -46,15 +46,15 @@ export interface UseServiceConfigReturn<T = ServiceConfig> {
  *
  * @example
  * ```tsx
- * const { config, isLoading, save, test, testResult } = useServiceConfig('s3');
- *
- * // Tester la connexion
- * await test();
+ * const { config, isLoading, save, test, testResult, isEditable } = useServiceConfig('s3');
  *
  * // Sauvegarder si modifiable
  * if (isEditable) {
  *   await save({ bucket: 'new-bucket' });
  * }
+ *
+ * // Tester la connexion (utilise la config sauvegardée en base)
+ * await test();
  * ```
  */
 export function useServiceConfig<T = ServiceConfig>(
@@ -130,15 +130,15 @@ export function useServiceConfig<T = ServiceConfig>(
   );
 
   /**
-   * Tester la connexion
+   * Tester la connexion (utilise la config sauvegardée en base)
    */
   const test = useCallback(
-    async (data?: Partial<T>): Promise<void> => {
+    async (): Promise<void> => {
       setIsTesting(true);
       setTestResult(null);
 
       try {
-        const result = await serviceConfigService.testConnection(service, data as any);
+        const result = await serviceConfigService.testConnection(service);
         setTestResult(result);
       } catch (err: any) {
         // Le service retourne déjà un résultat d'erreur formaté
