@@ -63,8 +63,8 @@
     "keen-slider": "6.8.6",
     "mapbox-gl": "3.9.0",
     "negotiator": "1.0.0",
-    "next": "15.1.2",
-    "next-auth": "4.24.11",
+    "next": "15.5.11",
+    "next-auth": "4.24.13",
     "react": "18.3.1",
     "react-apexcharts": "1.4.1",
     "react-colorful": "5.6.1",
@@ -80,12 +80,12 @@
     "react-use": "17.6.0",
     "recharts": "2.15.0",
     "server-only": "0.0.1",
-    "valibot": "0.42.1",
+    "valibot": "1.2.0",
     "yup": "^1.4.0"
   },
   "devDependencies": {
     "@iconify/json": "2.2.286",
-    "@iconify/tools": "4.1.1",
+    "@iconify/tools": "4.2.0",
     "@iconify/types": "2.0.0",
     "@iconify/utils": "2.2.1",
     "@types/dagre": "^0.7.52",
@@ -101,7 +101,7 @@
     "consola": "3.3.0",
     "dotenv-cli": "7.4.4",
     "eslint": "8.57.1",
-    "eslint-config-next": "15.1.2",
+    "eslint-config-next": "15.5.11",
     "eslint-config-prettier": "9.1.0",
     "eslint-import-resolver-typescript": "3.7.0",
     "eslint-plugin-import": "2.31.0",
@@ -116,7 +116,7 @@
     "stylis-plugin-rtl": "2.1.1",
     "tailwindcss": "3.4.17",
     "tailwindcss-logical": "3.0.1",
-    "tsx": "4.19.2",
+    "tsx": "4.21.0",
     "typescript": "5.5.4"
   },
   "resolutions": {
