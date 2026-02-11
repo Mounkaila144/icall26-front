@@ -10,7 +10,7 @@
  * @module PermissionsContext
  */
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
 import {
   UserPermissions,
   loadPermissionsFromStorage,
@@ -63,6 +63,16 @@ export function PermissionsProvider({ children }: { children: React.ReactNode })
   const [permissions, setPermissionsState] = useState<UserPermissions | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // O(1) lookup Sets - rebuilt only when permissions change
+  const permissionSet = useMemo<Set<string>>(
+    () => new Set(permissions?.permissions ?? []),
+    [permissions]
+  )
+  const groupSet = useMemo<Set<string>>(
+    () => new Set(permissions?.groups ?? []),
+    [permissions]
+  )
+
   // Au montage du composant, charger depuis localStorage
   useEffect(() => {
     const stored = loadPermissionsFromStorage()
@@ -73,55 +83,37 @@ export function PermissionsProvider({ children }: { children: React.ReactNode })
   }, [])
 
   // Sauvegarder dans localStorage à chaque changement
-  const setPermissions = (perms: UserPermissions) => {
+  const setPermissions = useCallback((perms: UserPermissions) => {
     setPermissionsState(perms)
     savePermissionsToStorage(perms)
-  }
+  }, [])
 
   // Effacer les permissions (au logout)
-  const clearPermissions = () => {
+  const clearPermissions = useCallback(() => {
     setPermissionsState(null)
     clearPermissionsFromStorage()
-  }
+  }, [])
 
   /**
    * Vérifie si l'utilisateur a un credential (groupe OU permission) - Style Symfony 1
+   * Uses Set.has() for O(1) lookups instead of Array.includes() O(n)
    *
    * Supporte plusieurs syntaxes :
    * - String simple: hasCredential('admin')
    * - Array simple (OR): hasCredential(['admin', 'superadmin'])
    * - Array imbriqué Symfony (OR): hasCredential([['admin', 'superadmin']])
    * - AND logic: hasCredential(['perm1', 'perm2'], true)
-   *
-   * @param credential Le ou les credentials à vérifier
-   * @param requireAll Si true, tous les credentials doivent être présents (AND logic)
-   * @returns true si l'utilisateur a le(s) credential(s)
-   *
-   * @example
-   * ```typescript
-   * // Vérifier un seul credential (groupe OU permission)
-   * hasCredential('admin') // true si user a le groupe "admin" OU la permission "admin"
-   *
-   * // Vérifier plusieurs credentials (OR logic) - Style Symfony 1
-   * hasCredential([['admin', 'superadmin', 'users.edit']]) // true si AU MOINS UN est présent
-   *
-   * // Vérifier plusieurs credentials (AND logic)
-   * hasCredential(['users.view', 'users.edit'], true) // true si TOUS sont présents
-   * ```
    */
-  const hasCredential = (
+  const hasCredential = useCallback((
     credential: string | string[] | string[][],
     requireAll = false
   ): boolean => {
     if (!permissions) return false
     if (permissions.is_superadmin) return true
 
-    // Helper: vérifier un credential simple (groupe OU permission)
+    // O(1) check: group OR permission
     const checkSingle = (cred: string): boolean => {
-      // D'abord vérifier dans les groupes
-      if (permissions.groups.includes(cred)) return true
-      // Puis dans les permissions
-      return permissions.permissions.includes(cred)
+      return groupSet.has(cred) || permissionSet.has(cred)
     }
 
     // 1. String simple
@@ -139,79 +131,50 @@ export function PermissionsProvider({ children }: { children: React.ReactNode })
     // 3. Array simple
     if (Array.isArray(credential)) {
       if (requireAll) {
-        // AND logic: doit avoir TOUS les credentials
         return credential.every(c => checkSingle(c))
       } else {
-        // OR logic: doit avoir AU MOINS UN credential
         return credential.some(c => checkSingle(c))
       }
     }
 
     return false
-  }
+  }, [permissions, permissionSet, groupSet])
 
   /**
-   * Vérifie si l'utilisateur appartient à un groupe
-   *
-   * @param group Le nom du groupe à vérifier
-   * @returns true si l'utilisateur appartient au groupe
-   *
-   * @example
-   * ```typescript
-   * hasGroup('1-FIDEALIS') // true si user appartient au groupe "1-FIDEALIS"
-   * hasGroup('admin') // true si user appartient au groupe "admin"
-   * ```
+   * Vérifie si l'utilisateur appartient à un groupe - O(1) lookup
    */
-  const hasGroup = (group: string): boolean => {
+  const hasGroup = useCallback((group: string): boolean => {
     if (!permissions) return false
-    return permissions.groups.includes(group)
-  }
+    return groupSet.has(group)
+  }, [permissions, groupSet])
 
   /**
    * Vérifie si l'utilisateur est superadmin
-   *
-   * @returns true si l'utilisateur est superadmin
-   *
-   * @example
-   * ```typescript
-   * if (isSuperadmin()) {
-   *   console.log('User has full access')
-   * }
-   * ```
    */
-  const isSuperadmin = (): boolean => {
+  const isSuperadmin = useCallback((): boolean => {
     return permissions?.is_superadmin ?? false
-  }
+  }, [permissions])
 
   /**
    * Vérifie si l'utilisateur est admin (ou superadmin)
-   *
-   * @returns true si l'utilisateur est admin ou superadmin
-   *
-   * @example
-   * ```typescript
-   * if (isAdmin()) {
-   *   console.log('User has admin access')
-   * }
-   * ```
    */
-  const isAdmin = (): boolean => {
+  const isAdmin = useCallback((): boolean => {
     return permissions?.is_admin ?? false
-  }
+  }, [permissions])
+
+  const contextValue = useMemo(() => ({
+    permissions,
+    loading,
+    hasCredential,
+    hasGroup,
+    isSuperadmin,
+    isAdmin,
+    setPermissions,
+    clearPermissions,
+  }), [permissions, loading, hasCredential, hasGroup, isSuperadmin, isAdmin, setPermissions, clearPermissions])
 
   return (
-    <PermissionsContext.Provider
-      value={{
-        permissions,
-        loading,
-        hasCredential,
-        hasGroup,
-        isSuperadmin,
-        isAdmin,
-        setPermissions,
-        clearPermissions,
-      }}
-    >
+    <PermissionsContext.Provider value={contextValue}>
       {children}
     </PermissionsContext.Provider>
   )

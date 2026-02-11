@@ -255,3 +255,67 @@ The app supports deployment to subdirectories via the `BASEPATH` environment var
 
 ### Translation Removal
 The template includes scripts to remove i18n features if not needed (`pnpm removeI18n`). This modifies packages, layout files, and removes translation-related code.
+
+## Code Quality Standards
+
+These rules come from installed skills (clean-code, typescript-advanced-types, vercel-react-best-practices, vercel-composition-patterns, test-driven-development, architecture-patterns). Apply them automatically to ALL code — never wait for the user to ask.
+
+### Clean Code (skill: clean-code)
+- Intention-revealing names: `getCustomerFullName()` not `getName()`, `permittedColumnIds` not `ids`
+- Functions do ONE thing, max 20 lines. If name has "and", split it
+- Early returns over nested if/else: guard clauses first, happy path last
+- No dead code: delete unused imports, variables, components — don't comment them out
+- Don't comment bad code — rewrite it. Comments explain WHY, not WHAT
+- Small parameter lists: 0-2 ideal, 3+ needs an options object or interface
+- No magic strings: use constants for storage keys, credential names, API endpoints
+- Avoid null returns: use fallback values (`|| '-'`) or optional chaining (`?.`)
+- DRY: 3+ identical patterns → extract helper, 2 similar → leave as-is
+
+### React Best Practices (skills: vercel-react-best-practices, vercel-composition-patterns)
+- Components: max 150 lines. If larger, extract sub-components or custom hooks
+- Extract logic to custom hooks: `useContractListState`, `useContracts`, etc.
+- Memoize expensive computations: `useMemo` for filtered/derived data, `useCallback` for handlers passed as props
+- Never define components inside components — extract to separate files
+- Conditional rendering: prefer early returns and `&&` over ternary nesting
+- Prop drilling max 2 levels — beyond that, use Context or composition
+- Boolean prop proliferation → use compound components or variant prop
+- Co-locate related files: `contracts-list/useContractListState.ts` next to `ContractMobileCard.tsx`
+- Prefer Server Components by default, use `'use client'` only when needed (hooks, event handlers, browser APIs)
+
+### TypeScript Advanced Types (skill: typescript-advanced-types)
+- Always type props with interfaces: `interface ContractColumnConfig extends ColumnConfig`
+- Use `type` imports: `import type { CustomerContract } from '../../types'`
+- Prefer `unknown` over `any` — use type guards instead of `as` assertions
+- Generics for reusable components: `interface PaginatedProps<T> { items: T[]; total: number }`
+- Discriminated unions for state: `type Result<T> = { status: 'success'; data: T } | { status: 'error'; error: string }`
+- Mapped types to avoid duplication: `type EditForm<T> = Partial<T>` for edit versions of create types
+- Use `readonly` for immutable data: `readonly permissions: string[]`
+- Template literal types for string patterns when appropriate
+- API response types must match backend: permission-gated fields use `?` (e.g. `customer?: { phone?: string }`)
+
+### Architecture Patterns (skill: architecture-patterns)
+- Module structure: `types/` (domain) → `hooks/` (logic) → `components/` (UI) → `services/` (API calls)
+- Custom hooks encapsulate all business logic — components only render
+- Services abstract API calls behind typed functions — components never call `fetch` directly
+- Co-locate by feature, not by type: `modules/CustomersContracts/admin/` has its own hooks, components, types
+
+### Test-Driven Development (skill: test-driven-development)
+- RED-GREEN-REFACTOR: write failing test → minimal code to pass → refactor
+- One behavior per test: split tests with "and" in their names
+- Real code in tests, mocks ONLY for API calls and external dependencies
+- Use React Testing Library: test behavior (what user sees), not implementation
+- Run tests with `pnpm test` — never commit code that breaks existing tests
+
+### Permissions Pattern (always apply)
+- Column visibility: `AVAILABLE_COLUMNS` array with `credential` field per column
+- Filter with `useMemo`: `permittedColumns = AVAILABLE_COLUMNS.filter(col => !col.credential || hasCredential(col.credential))`
+- O(1) lookup: `permittedColumnIds = new Set(permittedColumns.map(col => col.id))`
+- Mobile cards must also respect permissions (use `hidden` prop with `hasCredential()`)
+- Backend is source of truth for security — frontend only hides UI (defense in depth)
+- Credential format: `[['superadmin', 'admin', 'specific_permission']]` (OR logic matching Symfony 1)
+
+### API Data Access (always apply)
+- Use backend field names, not legacy Symfony names: `team.name` not `regie_callcenter`
+- Always handle optional fields with `?.` and fallback `|| '-'`
+- Status objects: access `status.value ?? status.name` for i18n display
+- Booleans from API are strings: use helper `isYes(val)` to check "YES"/"NO"/"Y"/"N"

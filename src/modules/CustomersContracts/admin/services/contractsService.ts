@@ -15,6 +15,7 @@ import type {
   ContractFilters,
   CreateContractData,
   UpdateContractData,
+  FilterOptionsResponse,
 } from '../../types';
 
 const CONTRACTS_BASE_URL = '/admin/customerscontracts/contracts';
@@ -33,53 +34,11 @@ export const contractsService = {
     try {
       const params = new URLSearchParams();
 
-      // Search & Basic Filters
-      if (filters?.reference) params.append('reference', filters.reference);
-      if (filters?.customer_id) params.append('customer_id', filters.customer_id.toString());
-      if (filters?.remarques) params.append('remarques', filters.remarques);
-
-      // Status Filters
-      if (filters?.status_contrat_id) params.append('status_contrat_id', filters.status_contrat_id.toString());
-      if (filters?.status_installation_id) params.append('status_installation_id', filters.status_installation_id.toString());
-      if (filters?.status_admin_id) params.append('status_admin_id', filters.status_admin_id.toString());
-      if (filters?.confirme !== undefined) params.append('confirme', filters.confirme ? '1' : '0');
-      if (filters?.actif !== undefined) params.append('actif', filters.actif ? '1' : '0');
-      if (filters?.status) params.append('status', filters.status);
-
-      // Date Range Filters
-      if (filters?.date_ouverture_from) params.append('date_ouverture_from', filters.date_ouverture_from);
-      if (filters?.date_ouverture_to) params.append('date_ouverture_to', filters.date_ouverture_to);
-      if (filters?.date_paiement_from) params.append('date_paiement_from', filters.date_paiement_from);
-      if (filters?.date_paiement_to) params.append('date_paiement_to', filters.date_paiement_to);
-      if (filters?.date_opc_from) params.append('date_opc_from', filters.date_opc_from);
-      if (filters?.date_opc_to) params.append('date_opc_to', filters.date_opc_to);
-
-      // Team & Staff Filters
-      if (filters?.regie_callcenter) params.append('regie_callcenter', filters.regie_callcenter.toString());
-      if (filters?.telepro_id) params.append('telepro_id', filters.telepro_id.toString());
-      if (filters?.commercial_1_id) params.append('commercial_1_id', filters.commercial_1_id.toString());
-      if (filters?.commercial_2_id) params.append('commercial_2_id', filters.commercial_2_id.toString());
-      if (filters?.manager_id) params.append('manager_id', filters.manager_id.toString());
-      if (filters?.assistant_id) params.append('assistant_id', filters.assistant_id.toString());
-      if (filters?.installateur_id) params.append('installateur_id', filters.installateur_id.toString());
-
-      // Financial Filters
-      if (filters?.montant_min) params.append('montant_min', filters.montant_min.toString());
-      if (filters?.montant_max) params.append('montant_max', filters.montant_max.toString());
-
-      // Boolean Filters
-      if (filters?.facturable !== undefined) params.append('facturable', filters.facturable ? '1' : '0');
-      if (filters?.bloque !== undefined) params.append('bloque', filters.bloque ? '1' : '0');
-      if (filters?.has_photos !== undefined) params.append('has_photos', filters.has_photos ? '1' : '0');
-      if (filters?.has_documents !== undefined) params.append('has_documents', filters.has_documents ? '1' : '0');
-
-      // Pagination & Sorting
-      if (filters?.sort_by) params.append('sort_by', filters.sort_by);
-      if (filters?.sort_order) params.append('sort_order', filters.sort_order);
-      if (filters?.per_page) params.append('per_page', filters.per_page.toString());
-      if (filters?.page) params.append('page', filters.page.toString());
-      if (filters?.with_relations !== undefined) {
-        params.append('with_relations', filters.with_relations ? '1' : '0');
+      if (filters) {
+        for (const [key, value] of Object.entries(filters)) {
+          if (value === undefined || value === null || value === '') continue
+          params.append(key, String(value))
+        }
       }
 
       const url = `${CONTRACTS_BASE_URL}${params.toString() ? `?${params.toString()}` : ''}`;
@@ -179,6 +138,22 @@ export const contractsService = {
       return response.data;
     } catch (error) {
       console.error(`Error deleting contract ${id}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get filter dropdown options (statuses, users, teams, partners, etc.)
+   * Matches Symfony's CustomerContractsFormFilter choices.
+   */
+  async getFilterOptions(lang: string = 'fr'): Promise<FilterOptionsResponse> {
+    try {
+      const response = await apiClient.get<FilterOptionsResponse>(
+        `${CONTRACTS_BASE_URL}/filter-options?lang=${lang}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching filter options:', error);
       throw error;
     }
   },

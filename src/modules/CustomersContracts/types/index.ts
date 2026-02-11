@@ -11,6 +11,7 @@ export interface ContractStatus {
   name: string;
   color: string;
   icon: string;
+  value?: string;
 }
 
 export interface ContractAdminStatus {
@@ -18,6 +19,7 @@ export interface ContractAdminStatus {
   name: string;
   color: string;
   icon: string;
+  value?: string;
 }
 
 export interface ContractInstallStatus {
@@ -25,6 +27,12 @@ export interface ContractInstallStatus {
   name: string;
   color: string;
   icon: string;
+  value?: string;
+}
+
+export interface NamedRelation {
+  id: number;
+  name: string;
 }
 
 // ----------------------------------------------------------------------------
@@ -181,6 +189,7 @@ export interface CustomerContract {
   installateur_id?: number | null;
   installer_user_id?: number | null;
   createur_id?: number | null;
+  created_by_id?: number | null;
   confirmateur_id?: number | null;
   equipe_installation?: string | null;
   sous_traitant_id?: number | null;
@@ -198,15 +207,29 @@ export interface CustomerContract {
   status_admin?: ContractAdminStatus | null;
   admin_status_id?: number | null;
   admin_status?: ContractAdminStatus | null;
+  opc_status_id?: number | null;
+  opc_status?: ContractStatus | null;
+  time_state_id?: number | null;
+  time_status?: ContractStatus | null;
 
-  // Boolean Flags
-  confirme: boolean;
-  facturable: boolean;
-  bloque: boolean;
-  devis_bloque: boolean;
-  has_photos: boolean;
-  controle_qualite_valide: boolean;
-  has_documents: boolean;
+  // Boolean Flags (frontend mapped)
+  confirme?: boolean;
+  facturable?: boolean;
+  bloque?: boolean;
+  devis_bloque?: boolean;
+  has_photos?: boolean;
+  controle_qualite_valide?: boolean;
+  has_documents?: boolean;
+
+  // Boolean Flags (API returns string values)
+  is_confirmed?: 'YES' | 'NO';
+  is_hold?: 'YES' | 'NO';
+  is_hold_admin?: 'YES' | 'NO';
+  is_hold_quote?: 'YES' | 'NO';
+  is_billable?: 'YES' | 'NO';
+  is_document?: 'Y' | 'N';
+  is_photo?: 'Y' | 'N';
+  is_quality?: 'Y' | 'N';
 
   // Reports
   rapport_temps: string | null;
@@ -222,14 +245,51 @@ export interface CustomerContract {
   mensuality?: number;
   advance_payment?: number;
 
-  // Other Fields
+  // Campaign
   campaign_id?: number | null;
+  campaign?: NamedRelation | null;
+
+  // Contributors (attributions)
+  contributor_summary?: string | null;
+
+  // Domoprime surfaces (from variables JSON)
+  surface_home?: string | number | null;
+  surface_top?: string | number | null;
+  surface_wall?: string | number | null;
+  surface_floor?: string | number | null;
+  surface_parcel?: string | number | null;
+
+  // Domoprime pricing & class
+  pricing?: string | null;
+  class_energy?: string | null;
+
+  // Other Fields
   esclave?: string | null;
   actif?: boolean;
+  status?: 'ACTIVE' | 'DELETE';
   status_flag?: 'ACTIVE' | 'DELETE';
   remarques?: string;
   remarks?: string;
   sav_at_range_id?: number;
+
+  // Relation objects (from backend ContractListResource)
+  sale1?: NamedRelation | null;
+  sale2?: NamedRelation | null;
+  telepro?: NamedRelation | null;
+  assistant?: NamedRelation | null;
+  team?: NamedRelation | null;
+  financial_partner?: NamedRelation | null;
+  partner_layer?: NamedRelation | null;
+  polluter?: NamedRelation | null;
+  company?: NamedRelation | null;
+  creator?: NamedRelation | null;
+  installer_user?: NamedRelation | null;
+  tax?: { id: number; rate: number } | null;
+
+  // Missing dates (from backend)
+  sav_at?: string | null;
+  pre_meeting_at?: string | null;
+  closed_at?: string | null;
 
   // Relations (optional, loaded on demand)
   products?: ContractProduct[];
@@ -308,48 +368,73 @@ export interface ContractFilters {
   reference?: string;
   customer_id?: number;
   remarques?: string;
+  search_lastname?: string;
+  search_phone?: string;
+  search_city?: string;
+  search_id?: string;
+  postcode?: string;
 
-  // Status Filters
-  status_contrat_id?: number;
-  status_installation_id?: number;
-  status_admin_id?: number;
-  confirme?: boolean;
-  actif?: boolean;
-  status?: 'ACTIVE' | 'DELETE';
+  // Status Filters (backend param names)
+  state_id?: number | string;
+  install_state_id?: number | string;
+  admin_status_id?: number | string;
+  opc_status_id?: number | string;
+  time_state_id?: number | string;
+  status?: string;
+
+  // Team & Staff Filters (backend param names)
+  telepro_id?: number | string;
+  sale_1_id?: number | string;
+  sale_2_id?: number | string;
+  assistant_id?: number | string;
+  created_by_id?: number | string;
+  installer_user_id?: number | string;
+  team_id?: number | string;
+  campaign_id?: number | string;
+
+  // Partner Filters
+  financial_partner_id?: number | string;
+  partner_layer_id?: number | string;
+  polluter_id?: number | string;
+  company_id?: number | string;
+
+  // Boolean Filters (YES/NO, Y/N)
+  is_confirmed?: string;
+  is_hold?: string;
+  is_hold_quote?: string;
+  is_billable?: string;
+  is_document?: string;
+  is_photo?: string;
+  is_quality?: string;
+  is_signed?: string;
 
   // Date Range Filters
-  date_ouverture_from?: string;
-  date_ouverture_to?: string;
-  date_paiement_from?: string;
-  date_paiement_to?: string;
-  date_opc_from?: string;
-  date_opc_to?: string;
-
-  // Team & Staff Filters
-  regie_callcenter?: number;
-  telepro_id?: number;
-  commercial_1_id?: number;
-  commercial_2_id?: number;
-  manager_id?: number;
-  assistant_id?: number;
-  installateur_id?: number;
+  opened_at_from?: string;
+  opened_at_to?: string;
+  opc_at_from?: string;
+  opc_at_to?: string;
+  sav_at_from?: string;
+  sav_at_to?: string;
+  payment_at_from?: string;
+  payment_at_to?: string;
+  signed_at_from?: string;
+  signed_at_to?: string;
+  created_at_from?: string;
+  created_at_to?: string;
 
   // Financial Filters
-  montant_min?: number;
-  montant_max?: number;
-
-  // Boolean Filters
-  facturable?: boolean;
-  bloque?: boolean;
-  has_photos?: boolean;
-  has_documents?: boolean;
+  price_min?: number;
+  price_max?: number;
 
   // Pagination & Sorting
   sort_by?: string;
   sort_order?: 'asc' | 'desc';
   per_page?: number;
   page?: number;
-  with_relations?: boolean;
+  lang?: string;
+
+  // Allow additional dynamic filter params
+  [key: string]: any;
 }
 
 // ----------------------------------------------------------------------------
@@ -485,3 +570,32 @@ export type ContractSortField =
 
 export type ContractStatusType = 'ACTIVE' | 'DELETE';
 export type ContractUserApplication = 'admin' | 'superadmin';
+
+// ----------------------------------------------------------------------------
+// Filter Options (dropdown data from /contracts/filter-options)
+// ----------------------------------------------------------------------------
+
+export interface FilterOption {
+  id: number;
+  name: string;
+}
+
+export interface ContractFilterOptions {
+  contract_statuses: FilterOption[];
+  install_statuses: FilterOption[];
+  admin_statuses: FilterOption[];
+  opc_statuses: FilterOption[];
+  time_statuses: FilterOption[];
+  users: FilterOption[];
+  teams: FilterOption[];
+  companies: FilterOption[];
+  financial_partners: FilterOption[];
+  partner_layers: FilterOption[];
+  polluters: FilterOption[];
+  campaigns: FilterOption[];
+}
+
+export interface FilterOptionsResponse {
+  success: boolean;
+  data: ContractFilterOptions;
+}

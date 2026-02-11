@@ -34,6 +34,9 @@ interface UseContractsReturn {
   // Filters
   filters: ContractFilters;
 
+  // Permission-based field visibility (from backend meta.permitted_fields)
+  permittedFields: Set<string>;
+
   // Actions
   setCurrentPage: (page: number) => void;
   setPerPage: (perPage: number) => void;
@@ -72,6 +75,9 @@ export const useContracts = (initialFilters?: Partial<ContractFilters>): UseCont
   const [totalPages, setTotalPages] = useState<number>(1);
   const [total, setTotal] = useState<number>(0);
   const [perPage, setPerPage] = useState<number>(15);
+
+  // Permitted fields from backend (API-driven column visibility)
+  const [permittedFields, setPermittedFields] = useState<Set<string>>(new Set());
 
   // Filters State
   const [filters, setFilters] = useState<ContractFilters>({
@@ -112,6 +118,11 @@ export const useContracts = (initialFilters?: Partial<ContractFilters>): UseCont
         if (paginationMeta) {
           setTotalPages(paginationMeta.last_page);
           setTotal(paginationMeta.total);
+
+          // Extract permitted fields from backend (single source of truth)
+          if (Array.isArray(paginationMeta.permitted_fields)) {
+            setPermittedFields(new Set(paginationMeta.permitted_fields));
+          }
         }
       } else {
         setError('Failed to load contracts');
@@ -299,6 +310,9 @@ export const useContracts = (initialFilters?: Partial<ContractFilters>): UseCont
 
     // Filters
     filters,
+
+    // Permissions (API-driven)
+    permittedFields,
 
     // Actions
     setCurrentPage,

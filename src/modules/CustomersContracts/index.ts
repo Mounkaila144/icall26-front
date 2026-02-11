@@ -7,8 +7,6 @@
 
 // Admin Layer Components
 export { default as ContractsList1 } from './admin/components/ContractsList1';
-export { default as ContractForm } from './admin/components/ContractForm';
-export { default as ContractDetails } from './admin/components/ContractDetails';
 
 // Admin Layer Services
 export { contractsService } from './admin/services/contractsService';
@@ -16,7 +14,7 @@ export { contractsService } from './admin/services/contractsService';
 // Admin Layer Hooks
 export { useContracts } from './admin/hooks/useContracts';
 export { useContract } from './admin/hooks/useContract';
-export { useContractForm } from './admin/hooks/useContractForm';
+export { useContractTranslations } from './admin/hooks/useContractTranslations';
 
 // Type Exports
 export type {
