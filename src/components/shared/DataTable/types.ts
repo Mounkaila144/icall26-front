@@ -51,6 +51,10 @@ export interface DataTableConfig<TData> {
   onClearAllFilters?: () => void
   createColumnFilter?: (columnId: string) => ReactNode
 
+  // Sticky columns (pinned left/right while the middle scrolls)
+  stickyLeft?: string[]
+  stickyRight?: string[]
+
   // Styling
   emptyMessage?: string
   rowsPerPageOptions?: number[]

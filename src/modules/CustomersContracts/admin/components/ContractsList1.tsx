@@ -51,6 +51,8 @@ export default function ContractsList1() {
     columnFilters,
     onClearAllFilters: handleClearAllFilters,
     createColumnFilter,
+    stickyLeft: ['id'],
+    stickyRight: ['actions'],
     actions: hasCredential([['superadmin', 'admin', 'api2_user_customer_contract_new']]) ? [
       { label: t.newContract, icon: 'ri-add-line', color: 'primary', onClick: () => setIsCreateModalOpen(true) }
     ] : [],
