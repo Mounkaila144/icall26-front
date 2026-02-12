@@ -398,6 +398,13 @@ export interface ContractFilters {
   polluter_id?: number | string;
   company_id?: number | string;
 
+  // Date Range Selects (Symfony template lines 374-395)
+  opc_range_id?: number | string;
+  sav_at_range_id?: number | string;
+
+  // Domoprime status (plugin filter)
+  domoprime_status?: string;
+
   // Boolean Filters (YES/NO, Y/N)
   is_confirmed?: string;
   is_hold?: string;
@@ -576,7 +583,7 @@ export type ContractUserApplication = 'admin' | 'superadmin';
 // ----------------------------------------------------------------------------
 
 export interface FilterOption {
-  id: number;
+  id: number | string;
   name: string;
 }
 
@@ -593,6 +600,15 @@ export interface ContractFilterOptions {
   partner_layers: FilterOption[];
   polluters: FilterOption[];
   campaigns: FilterOption[];
+  date_ranges: FilterOption[];
+  domoprime_statuses: FilterOption[];
+  products: FilterOption[];
+  zones: FilterOption[];
+  energies: FilterOption[];
+  sectors: FilterOption[];
+  classes: FilterOption[];
+  quotation_signed: FilterOption[];
+  document_signed: FilterOption[];
 }
 
 export interface FilterOptionsResponse {

@@ -17,6 +17,15 @@ const EMPTY_OPTIONS: ContractFilterOptions = {
   partner_layers: [],
   polluters: [],
   campaigns: [],
+  date_ranges: [],
+  domoprime_statuses: [],
+  products: [],
+  zones: [],
+  energies: [],
+  sectors: [],
+  classes: [],
+  quotation_signed: [],
+  document_signed: [],
 }
 
 /**

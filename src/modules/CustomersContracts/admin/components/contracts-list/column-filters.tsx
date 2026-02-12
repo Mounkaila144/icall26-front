@@ -1,19 +1,25 @@
 import { useMemo } from 'react'
 import type { ReactNode } from 'react'
 
+import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
 import Autocomplete from '@mui/material/Autocomplete'
 import InputAdornment from '@mui/material/InputAdornment'
+import Typography from '@mui/material/Typography'
+import Checkbox from '@mui/material/Checkbox'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import type { SxProps, Theme } from '@mui/material/styles'
 
 import type { ContractFilterOptions, FilterOption } from '../../../types'
+import type { ContractTranslations } from '../../hooks/useContractTranslations'
 
 // ── Text search columns (free-text input) ──
+// Note: customer_name handled separately (section 7) because it has domoprime_status sub-filter
 export const TEXT_SEARCH_COLUMNS = new Set([
-  'customer_name', 'customer_phone', 'customer_city', 'customer_postcode'
+  'customer_phone', 'customer_city', 'customer_postcode'
 ])
 
 // ── Boolean filter columns (YES/NO or Y/N selects) ──
@@ -53,6 +59,11 @@ const ENTITY_FILTER_MAP: Record<string, keyof ContractFilterOptions> = {
 
 // ── ACTIVE/DELETE status filter ──
 const STATUS_ACTIVE_DELETE = new Set(['status'])
+
+// ── Domoprime sidebar select filters → key in ContractFilterOptions ──
+const DOMOPRIME_FILTER_MAP: Record<string, keyof ContractFilterOptions> = {
+  class_energy: 'classes',
+}
 
 // ── Shared compact styling ──
 const COMPACT_INPUT_SX: SxProps<Theme> = {
@@ -128,6 +139,29 @@ const COMPACT_AUTOCOMPLETE_SX: SxProps<Theme> = {
   },
 }
 
+const COMPACT_DATE_SX: SxProps<Theme> = {
+  '& .MuiOutlinedInput-root': {
+    fontSize: '0.75rem',
+    borderRadius: '6px',
+    backgroundColor: 'var(--mui-palette-background-paper)',
+    '& fieldset': {
+      borderColor: 'var(--mui-palette-divider)',
+    },
+    '&:hover fieldset': {
+      borderColor: 'var(--mui-palette-primary-light)',
+    },
+  },
+  '& .MuiOutlinedInput-input': {
+    padding: '3px 6px',
+    height: '1.4em',
+  },
+}
+
+const COMPACT_CHECKBOX_SX = {
+  '& .MuiCheckbox-root': { padding: '2px' },
+  '& .MuiFormControlLabel-label': { fontSize: '0.7rem' },
+}
+
 // ── Searchable Autocomplete filter (with built-in search bar) ──
 function SearchableSelectFilter({
   value,
@@ -135,12 +169,16 @@ function SearchableSelectFilter({
   onFilterChange,
   columnId,
   loading,
+  labelAll,
+  labelSearch,
 }: {
   value: string
   items: FilterOption[]
   onFilterChange: (columnId: string, value: string) => void
   columnId: string
   loading: boolean
+  labelAll: string
+  labelSearch: string
 }) {
   const selectedOption = useMemo(
     () => (value ? items.find(o => String(o.id) === value) ?? null : null),
@@ -176,10 +214,11 @@ function SearchableSelectFilter({
       renderInput={params => (
         <TextField
           {...params}
-          placeholder='Tous'
+          placeholder={labelAll}
           variant='outlined'
         />
       )}
+      noOptionsText={labelSearch}
     />
   )
 }
@@ -188,7 +227,8 @@ export function createColumnFilterFactory(
   columnFilters: Record<string, string>,
   onFilterChange: (columnId: string, value: string) => void,
   loading: boolean,
-  filterOptions: ContractFilterOptions
+  filterOptions: ContractFilterOptions,
+  t: ContractTranslations
 ): (columnId: string) => ReactNode {
   return (columnId: string) => {
     const value = columnFilters[columnId] || ''
@@ -200,7 +240,7 @@ export function createColumnFilterFactory(
           size='small'
           value={value}
           onChange={e => onFilterChange(columnId, e.target.value)}
-          placeholder='Rechercher...'
+          placeholder={t.filterSearch}
           fullWidth
           variant='outlined'
           disabled={loading}
@@ -231,9 +271,9 @@ export function createColumnFilterFactory(
             disabled={loading}
             variant='outlined'
           >
-            <MenuItem value='' sx={{ fontSize: '0.8125rem' }}>Tous</MenuItem>
-            <MenuItem value={yes} sx={{ fontSize: '0.8125rem' }}>Oui</MenuItem>
-            <MenuItem value={no} sx={{ fontSize: '0.8125rem' }}>Non</MenuItem>
+            <MenuItem value='' sx={{ fontSize: '0.8125rem' }}>{t.filterAll}</MenuItem>
+            <MenuItem value={yes} sx={{ fontSize: '0.8125rem' }}>{t.yes}</MenuItem>
+            <MenuItem value={no} sx={{ fontSize: '0.8125rem' }}>{t.no}</MenuItem>
           </Select>
         </FormControl>
       )
@@ -250,9 +290,9 @@ export function createColumnFilterFactory(
             disabled={loading}
             variant='outlined'
           >
-            <MenuItem value='' sx={{ fontSize: '0.8125rem' }}>Tous</MenuItem>
-            <MenuItem value='ACTIVE' sx={{ fontSize: '0.8125rem' }}>Actif</MenuItem>
-            <MenuItem value='DELETE' sx={{ fontSize: '0.8125rem' }}>Supprimé</MenuItem>
+            <MenuItem value='' sx={{ fontSize: '0.8125rem' }}>{t.filterAll}</MenuItem>
+            <MenuItem value='ACTIVE' sx={{ fontSize: '0.8125rem' }}>{t.statusActive}</MenuItem>
+            <MenuItem value='DELETE' sx={{ fontSize: '0.8125rem' }}>{t.statusDeleted}</MenuItem>
           </Select>
         </FormControl>
       )
@@ -270,6 +310,8 @@ export function createColumnFilterFactory(
           onFilterChange={onFilterChange}
           columnId={columnId}
           loading={loading}
+          labelAll={t.filterAll}
+          labelSearch={t.filterSearch}
         />
       )
     }
@@ -286,7 +328,119 @@ export function createColumnFilterFactory(
           onFilterChange={onFilterChange}
           columnId={columnId}
           loading={loading}
+          labelAll={t.filterAll}
+          labelSearch={t.filterSearch}
         />
+      )
+    }
+
+    // 6. Date column — OPC + SAV range selects only (Symfony lines 374-395)
+    if (columnId === 'date') {
+      const rangeItems: FilterOption[] = filterOptions.date_ranges || []
+      const opcValue = columnFilters['opc_range_id'] || ''
+      const savValue = columnFilters['sav_at_range_id'] || ''
+
+      return (
+        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 0.5, minWidth: 200 }}>
+          <Typography variant='caption' sx={{ fontSize: '0.7rem', whiteSpace: 'nowrap', opacity: 0.7 }}>OPC</Typography>
+          <FormControl size='small' sx={{ ...COMPACT_SELECT_SX, flex: 1, minWidth: 80 }}>
+            <Select
+              value={opcValue}
+              onChange={e => onFilterChange('opc_range_id', e.target.value)}
+              displayEmpty
+              disabled={loading}
+              variant='outlined'
+            >
+              <MenuItem value='' sx={{ fontSize: '0.8125rem' }}>{t.filterAll}</MenuItem>
+              <MenuItem value='IS_NULL' sx={{ fontSize: '0.8125rem' }}>----</MenuItem>
+              {rangeItems.map(item => (
+                <MenuItem key={item.id} value={String(item.id)} sx={{ fontSize: '0.8125rem' }}>{item.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Typography variant='caption' sx={{ fontSize: '0.7rem', whiteSpace: 'nowrap', opacity: 0.7 }}>SAV</Typography>
+          <FormControl size='small' sx={{ ...COMPACT_SELECT_SX, flex: 1, minWidth: 80 }}>
+            <Select
+              value={savValue}
+              onChange={e => onFilterChange('sav_at_range_id', e.target.value)}
+              displayEmpty
+              disabled={loading}
+              variant='outlined'
+            >
+              <MenuItem value='' sx={{ fontSize: '0.8125rem' }}>{t.filterAll}</MenuItem>
+              <MenuItem value='0' sx={{ fontSize: '0.8125rem' }}>----</MenuItem>
+              {rangeItems.map(item => (
+                <MenuItem key={item.id} value={String(item.id)} sx={{ fontSize: '0.8125rem' }}>{item.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+      )
+    }
+
+    // 7. Customer column — domoprime_status (Cumac) select only (Symfony lines 396-409)
+    if (columnId === 'customer_name') {
+      const domoItems: FilterOption[] = filterOptions.domoprime_statuses || []
+
+      if (domoItems.length === 0) return null
+
+      return (
+        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 0.5, minWidth: 130 }}>
+          <Typography variant='caption' sx={{ fontSize: '0.7rem', whiteSpace: 'nowrap', opacity: 0.7 }}>Cumac</Typography>
+          <FormControl size='small' sx={{ ...COMPACT_SELECT_SX, flex: 1, minWidth: 90 }}>
+            <Select
+              value={columnFilters['domoprime_status'] || ''}
+              onChange={e => onFilterChange('domoprime_status', e.target.value)}
+              displayEmpty
+              disabled={loading}
+              variant='outlined'
+            >
+              <MenuItem value='' sx={{ fontSize: '0.8125rem' }}>{t.filterAll}</MenuItem>
+              {domoItems.map(item => (
+                <MenuItem key={item.id} value={String(item.id)} sx={{ fontSize: '0.8125rem' }}>{item.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+      )
+    }
+
+    // 8. Class/Energy column — class_id select (Symfony lines 90-95)
+    if (columnId in DOMOPRIME_FILTER_MAP) {
+      const optionsKey = DOMOPRIME_FILTER_MAP[columnId]
+      const items: FilterOption[] = filterOptions[optionsKey] as FilterOption[] || []
+
+      if (items.length === 0) return null
+
+      return (
+        <SearchableSelectFilter
+          value={columnFilters['class_id'] || ''}
+          items={items}
+          onFilterChange={(_, v) => onFilterChange('class_id', v)}
+          columnId='class_id'
+          loading={loading}
+          labelAll={t.filterAll}
+          labelSearch={t.filterSearch}
+        />
+      )
+    }
+
+    // 9. Surface parcel column — surface_parcel_check checkbox (Symfony lines 96-103)
+    if (columnId === 'surface_parcel') {
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center', ...COMPACT_CHECKBOX_SX }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                size='small'
+                checked={columnFilters['surface_parcel_check'] === 'YES'}
+                onChange={e => onFilterChange('surface_parcel_check', e.target.checked ? 'YES' : '')}
+                disabled={loading}
+              />
+            }
+            label={t.filterSurfaceParcelCheck}
+          />
+        </Box>
       )
     }
 

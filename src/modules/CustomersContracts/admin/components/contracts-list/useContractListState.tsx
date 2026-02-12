@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
 import type { ColumnDef } from '@tanstack/react-table'
 
@@ -19,7 +19,7 @@ const columnHelper = createColumnHelper<CustomerContract>()
  * Maps frontend column IDs to backend filter parameter names.
  * Matches Symfony's CustomerContractsFormFilter field names.
  */
-const COLUMN_TO_BACKEND_FILTER: Record<string, string> = {
+export const COLUMN_TO_BACKEND_FILTER: Record<string, string> = {
   // Text search columns
   customer_name:     'search_lastname',
   customer_phone:    'search_phone',
@@ -53,6 +53,46 @@ const COLUMN_TO_BACKEND_FILTER: Record<string, string> = {
   is_photo:          'is_photo',
   is_quality:        'is_quality',
   status:            'status',
+  // Date column sub-filters (Symfony lines 374-395)
+  opc_range_id:      'opc_range_id',
+  sav_at_range_id:   'sav_at_range_id',
+  // Date range filter (Symfony sidebar lines 3-77)
+  date_from:         'date_from',
+  date_to:           'date_to',
+  date_type:         'date_type',
+  date_null:         'date_null',
+  // Customer column sub-filter (Symfony domoprime_status)
+  domoprime_status:  'domoprime_status',
+  // Domoprime sidebar filters (Symfony lines 78-116)
+  energy_id:         'energy_id',
+  sector_id:         'sector_id',
+  class_id:          'class_id',
+  product_id:        'product_id',
+  zone_id:           'zone_id',
+  quotation_is_signed:  'quotation_is_signed',
+  document_is_signed:   'document_is_signed',
+  surface_parcel_check: 'surface_parcel_check',
+  // Sidebar text search filters
+  sidebar_search:        'search_lastname',
+  sidebar_phone:         'search_phone',
+  sidebar_postcode:      'postcode',
+  sidebar_city:          'search_city',
+  // Sidebar text fields
+  acces_1:               'acces_1',
+  acces_2:               'acces_2',
+  source:                'source',
+  rapport_installation:  'rapport_installation',
+  rapport_attribution:   'rapport_attribution',
+  rapport_temps:         'rapport_temps',
+  rapport_admin:         'rapport_admin',
+  // Sidebar entity selects
+  confirmateur_id:       'confirmateur_id',
+  regie_callcenter:      'regie_callcenter',
+  sidebar_financial_partner: 'financial_partner_id',
+  installer_user_id:     'installer_user_id',
+  sidebar_partner_layer: 'partner_layer_id',
+  sidebar_creator:       'created_by_id',
+  sidebar_company:       'company_id',
 }
 
 interface UseContractListStateParams {
@@ -64,9 +104,11 @@ interface UseContractListStateParams {
   permittedFields: Set<string>
   /** Server-populated filter dropdown options */
   filterOptions: ContractFilterOptions
+  /** Sidebar filters read from URL search params (for persistence) */
+  initialSidebarFilters?: Record<string, string>
 }
 
-export function useContractListState({ loading, deleteContract, updateFilter, clearFilters, permittedFields, filterOptions }: UseContractListStateParams) {
+export function useContractListState({ loading, deleteContract, updateFilter, clearFilters, permittedFields, filterOptions, initialSidebarFilters }: UseContractListStateParams) {
   const { hasCredential } = usePermissions()
   const t = useContractTranslations()
 
@@ -90,8 +132,27 @@ export function useContractListState({ loading, deleteContract, updateFilter, cl
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedContractId, setSelectedContractId] = useState<number | null>(null)
-  const [showFilters, setShowFilters] = useState(false)
-  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({})
+  const [showFilters, setShowFilters] = useState(() => {
+    // Auto-open sidebar if URL has persisted filters
+    return !!initialSidebarFilters && Object.keys(initialSidebarFilters).length > 0
+  })
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>(
+    () => initialSidebarFilters ?? {}
+  )
+
+  // On mount: sync URL-persisted sidebar filters to the backend
+  const hasHydratedRef = useRef(false)
+  useEffect(() => {
+    if (hasHydratedRef.current || !initialSidebarFilters || Object.keys(initialSidebarFilters).length === 0) return
+    hasHydratedRef.current = true
+
+    for (const [columnId, value] of Object.entries(initialSidebarFilters)) {
+      const backendParam = COLUMN_TO_BACKEND_FILTER[columnId]
+      if (backendParam && value) {
+        updateFilter(backendParam, value)
+      }
+    }
+  }, [initialSidebarFilters, updateFilter])
 
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(() => {
     if (typeof window === 'undefined') return {}
@@ -180,8 +241,8 @@ export function useContractListState({ loading, deleteContract, updateFilter, cl
 
   // Column filter factory
   const createColumnFilter = useCallback(
-    createColumnFilterFactory(columnFilters, handleColumnFilterChange, loading, filterOptions),
-    [columnFilters, handleColumnFilterChange, loading, filterOptions]
+    createColumnFilterFactory(columnFilters, handleColumnFilterChange, loading, filterOptions, t),
+    [columnFilters, handleColumnFilterChange, loading, filterOptions, t]
   )
 
   // TanStack Column Definitions
@@ -240,6 +301,7 @@ export function useContractListState({ loading, deleteContract, updateFilter, cl
     handleEdit,
     handleDelete,
     handleCloseCreateModal,
+    handleColumnFilterChange,
     handleCloseEditModal,
     setIsCreateModalOpen,
     createColumnFilter
