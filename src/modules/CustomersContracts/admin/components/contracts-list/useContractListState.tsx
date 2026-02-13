@@ -1,17 +1,19 @@
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef, type SyntheticEvent } from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
 import type { ColumnDef } from '@tanstack/react-table'
 
 import Typography from '@mui/material/Typography'
 
 import { usePermissions } from '@/shared/contexts/PermissionsContext'
-import type { CustomerContract, ContractFilterOptions } from '../../../types'
+import type { CustomerContract, ContractFilterOptions, ContractActionResponse } from '../../../types'
 import { useContractTranslations } from '../../hooks/useContractTranslations'
+import { contractsService } from '../../services/contractsService'
 
 import { getColumnDefs, COLUMN_DEF_IDS, STORAGE_KEY } from './columns'
 import type { ContractColumnDef } from './columns'
 import { createColumnFilterFactory } from './column-filters'
 import ContractActionsCell from './ContractActions'
+import type { ActionType } from './ContractActions'
 
 const columnHelper = createColumnHelper<CustomerContract>()
 
@@ -98,6 +100,8 @@ export const COLUMN_TO_BACKEND_FILTER: Record<string, string> = {
 interface UseContractListStateParams {
   loading: boolean
   deleteContract: (id: number) => Promise<any>
+  updateContract: (id: number, data: Record<string, unknown>) => Promise<void>
+  refreshContracts: () => Promise<void>
   updateFilter: (key: string, value: any) => void
   clearFilters: () => void
   /** API-driven permitted field keys from backend meta.permitted_fields */
@@ -108,7 +112,7 @@ interface UseContractListStateParams {
   initialSidebarFilters?: Record<string, string>
 }
 
-export function useContractListState({ loading, deleteContract, updateFilter, clearFilters, permittedFields, filterOptions, initialSidebarFilters }: UseContractListStateParams) {
+export function useContractListState({ loading, deleteContract, updateContract, refreshContracts, updateFilter, clearFilters, permittedFields, filterOptions, initialSidebarFilters }: UseContractListStateParams) {
   const { hasCredential } = usePermissions()
   const t = useContractTranslations()
 
@@ -139,6 +143,26 @@ export function useContractListState({ loading, deleteContract, updateFilter, cl
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>(
     () => initialSidebarFilters ?? {}
   )
+
+  // Dialog states for SMS, Email, Comment
+  const [smsDialogContractId, setSmsDialogContractId] = useState<number | null>(null)
+  const [emailDialogContractId, setEmailDialogContractId] = useState<number | null>(null)
+  const [commentDialogContractId, setCommentDialogContractId] = useState<number | null>(null)
+
+  // Snackbar notification state
+  const [notification, setNotification] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'warning' | 'info' }>({
+    open: false, message: '', severity: 'success'
+  })
+
+  const showNotification = useCallback((message: string, severity: 'success' | 'error' | 'warning' | 'info' = 'success') => {
+    setNotification({ open: true, message, severity })
+  }, [])
+
+  const handleCloseNotification = useCallback((_event?: SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') return
+
+    setNotification(prev => ({ ...prev, open: false }))
+  }, [])
 
   // On mount: sync URL-persisted sidebar filters to the backend
   const hasHydratedRef = useRef(false)
@@ -183,15 +207,78 @@ export function useContractListState({ loading, deleteContract, updateFilter, cl
 
     try {
       await deleteContract(id)
-    } catch (err: any) {
-      alert(t.deleteError + err.message)
+      showNotification(t.actionSuccess, 'success')
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err)
+
+      showNotification(t.deleteError + errorMessage, 'error')
     }
-  }, [deleteContract, t.confirmDelete, t.deleteError])
+  }, [deleteContract, t.confirmDelete, t.deleteError, t.actionSuccess, showNotification])
 
   const handleEdit = useCallback((id: number) => {
     setSelectedContractId(id)
     setIsEditModalOpen(true)
   }, [])
+
+  /** Dispatch contract actions from the actions menu */
+  const handleAction = useCallback(async (contractId: number, action: ActionType) => {
+    try {
+      let result: ContractActionResponse | undefined
+
+      switch (action) {
+        // State transitions (dedicated endpoints)
+        case 'confirm':      result = await contractsService.confirmContract(contractId); break
+        case 'unconfirm':    result = await contractsService.unconfirmContract(contractId); break
+        case 'cancel':       result = await contractsService.cancelContract(contractId); break
+        case 'uncancel':     result = await contractsService.uncancelContract(contractId); break
+        case 'blowing':      result = await contractsService.blowingContract(contractId); break
+        case 'unblowing':    result = await contractsService.unblowingContract(contractId); break
+        case 'placement':    result = await contractsService.placementContract(contractId); break
+        case 'unplacement':  result = await contractsService.unplacementContract(contractId); break
+
+        // Hold toggles
+        case 'hold':         result = await contractsService.holdContract(contractId); break
+        case 'unhold':       result = await contractsService.unholdContract(contractId); break
+        case 'hold_admin':   result = await contractsService.holdAdminContract(contractId); break
+        case 'unhold_admin': result = await contractsService.unholdAdminContract(contractId); break
+        case 'hold_quote':   result = await contractsService.holdQuoteContract(contractId); break
+        case 'unhold_quote': result = await contractsService.unholdQuoteContract(contractId); break
+
+        // Copy & Products
+        case 'copy_contract':          result = await contractsService.copyContract(contractId); break
+        case 'create_default_products': result = await contractsService.createDefaultProducts(contractId); break
+
+        // Communication (open dialogs instead of calling API directly)
+        case 'send_sms':     setSmsDialogContractId(contractId); return
+        case 'send_email':   setEmailDialogContractId(contractId); return
+        case 'new_comment':  setCommentDialogContractId(contractId); return
+
+        // Documents & Export (placeholders until backend is ready)
+        case 'documents_form':
+        case 'generate_cumac':
+        case 'export_kml':
+        case 'export_pdf':
+        case 'pre_meeting_document':
+        case 'billing':
+          showNotification(t.actionNotImplemented, 'warning')
+
+          return
+
+        default:
+          showNotification(t.actionNotImplemented, 'warning')
+
+          return
+      }
+
+      // Refresh list after successful action
+      await refreshContracts()
+      showNotification(result?.message || t.actionSuccess, 'success')
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err)
+
+      showNotification(t.actionError + errorMessage, 'error')
+    }
+  }, [refreshContracts, t, showNotification])
 
   const handleColumnFilterChange = useCallback((columnId: string, value: string) => {
     setColumnFilters(prev => {
@@ -239,6 +326,10 @@ export function useContractListState({ loading, deleteContract, updateFilter, cl
     setSelectedContractId(null)
   }, [])
 
+  const handleCloseSmsDialog = useCallback(() => setSmsDialogContractId(null), [])
+  const handleCloseEmailDialog = useCallback(() => setEmailDialogContractId(null), [])
+  const handleCloseCommentDialog = useCallback(() => setCommentDialogContractId(null), [])
+
   // Column filter factory
   const createColumnFilter = useCallback(
     createColumnFilterFactory(columnFilters, handleColumnFilterChange, loading, filterOptions, t),
@@ -268,17 +359,18 @@ export function useContractListState({ loading, deleteContract, updateFilter, cl
         header: t.colActions,
         cell: ({ row }) => (
           <ContractActionsCell
-            contractId={row.original.id}
-            reference={row.original.reference}
+            contract={row.original}
+            onAction={handleAction}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            t={t}
           />
         )
       })
     ] : []
 
     return [idCol, ...dataCols, ...actionsCols] as ColumnDef<CustomerContract, any>[]
-  }, [permittedColumns, handleDelete, handleEdit, hasCredential, t.colActions])
+  }, [permittedColumns, handleDelete, handleEdit, handleAction, hasCredential, t])
 
   return {
     // State
@@ -293,6 +385,11 @@ export function useContractListState({ loading, deleteContract, updateFilter, cl
     hasCredential,
     t,
 
+    // Dialog states
+    smsDialogContractId,
+    emailDialogContractId,
+    commentDialogContractId,
+
     // Handlers
     handleColumnVisibilityChange,
     handleClearAllFilters,
@@ -300,10 +397,22 @@ export function useContractListState({ loading, deleteContract, updateFilter, cl
     handleSearch,
     handleEdit,
     handleDelete,
+    handleAction,
     handleCloseCreateModal,
     handleColumnFilterChange,
     handleCloseEditModal,
     setIsCreateModalOpen,
-    createColumnFilter
+    createColumnFilter,
+
+    // Dialog handlers
+    handleCloseSmsDialog,
+    handleCloseEmailDialog,
+    handleCloseCommentDialog,
+    refreshContracts,
+
+    // Notification
+    notification,
+    showNotification,
+    handleCloseNotification,
   }
 }

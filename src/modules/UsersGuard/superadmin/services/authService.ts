@@ -1,16 +1,11 @@
-import { createApiClient } from '@/shared/lib/api-client';
-import { LoginCredentials, LoginResponse, User } from '../../types/auth.types';
-import { ApiResponse } from '@/shared/types/api.types';
+import { createApiClient, storeTokenTimestamp, refreshTokenSilently } from '@/shared/lib/api-client';
+import type { LoginCredentials, LoginResponse, User } from '../../types/auth.types';
+import type { ApiResponse } from '@/shared/types/api.types';
 
 class SuperadminAuthService {
-    /**
-     * Login superadmin user
-     * Le superadmin n'a pas de contexte tenant
-     */
     async login(credentials: LoginCredentials): Promise<LoginResponse> {
         const client = createApiClient();
 
-        // Format exact attendu par le backend
         const response = await client.post<LoginResponse>(
             '/superadmin/auth/login',
             {
@@ -23,6 +18,7 @@ class SuperadminAuthService {
         if (response.data.success && response.data.data.token) {
             localStorage.setItem('superadmin_auth_token', response.data.data.token);
             localStorage.setItem('superadmin_user', JSON.stringify(response.data.data.user));
+            storeTokenTimestamp(true);
         }
 
         return response.data;
@@ -35,19 +31,28 @@ class SuperadminAuthService {
             await client.post('/superadmin/auth/logout');
         } finally {
             localStorage.removeItem('superadmin_auth_token');
+            localStorage.removeItem('superadmin_auth_token_issued_at');
             localStorage.removeItem('superadmin_user');
         }
     }
 
     async getCurrentUser(): Promise<User> {
         const client = createApiClient();
-        const response = await client.get<ApiResponse<{user: User}>>('/superadmin/auth/me');
+        const response = await client.get<ApiResponse<{ user: User }>>('/superadmin/auth/me');
 
         if (response.data.data?.user) {
             localStorage.setItem('superadmin_user', JSON.stringify(response.data.data.user));
         }
 
         return response.data.data.user;
+    }
+
+    /**
+     * Proactively refresh the Sanctum token before it expires.
+     * Returns the new token on success, null on failure.
+     */
+    async refreshToken(): Promise<string | null> {
+        return refreshTokenSilently(true);
     }
 
     getStoredUser(): User | null {

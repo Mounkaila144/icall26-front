@@ -1,16 +1,11 @@
-import { createApiClient } from '@/shared/lib/api-client';
-import { LoginCredentials, LoginResponse, User } from '../../types/auth.types';
-import { ApiResponse } from '@/shared/types/api.types';
+import { createApiClient, storeTokenTimestamp, refreshTokenSilently } from '@/shared/lib/api-client';
+import type { LoginCredentials, LoginResponse, User } from '../../types/auth.types';
+import type { ApiResponse } from '@/shared/types/api.types';
 
 class AdminAuthService {
-    /**
-     * Login admin user
-     * Le domaine est détecté automatiquement par Laravel via le Host header
-     */
     async login(credentials: LoginCredentials): Promise<LoginResponse> {
         const client = createApiClient();
 
-        // Format exact attendu par le backend
         const response = await client.post<LoginResponse>(
             '/admin/auth/login',
             {
@@ -24,6 +19,7 @@ class AdminAuthService {
             localStorage.setItem('auth_token', response.data.data.token);
             localStorage.setItem('user', JSON.stringify(response.data.data.user));
             localStorage.setItem('tenant', JSON.stringify(response.data.data.tenant));
+            storeTokenTimestamp(false);
         }
 
         return response.data;
@@ -36,6 +32,7 @@ class AdminAuthService {
             await client.post('/admin/auth/logout');
         } finally {
             localStorage.removeItem('auth_token');
+            localStorage.removeItem('auth_token_issued_at');
             localStorage.removeItem('user');
             localStorage.removeItem('tenant');
         }
@@ -43,13 +40,21 @@ class AdminAuthService {
 
     async getCurrentUser(): Promise<User> {
         const client = createApiClient();
-        const response = await client.get<ApiResponse<{user: User}>>('/admin/auth/me');
+        const response = await client.get<ApiResponse<{ user: User }>>('/admin/auth/me');
 
         if (response.data.data?.user) {
             localStorage.setItem('user', JSON.stringify(response.data.data.user));
         }
 
         return response.data.data.user;
+    }
+
+    /**
+     * Proactively refresh the Sanctum token before it expires.
+     * Returns the new token on success, null on failure.
+     */
+    async refreshToken(): Promise<string | null> {
+        return refreshTokenSilently(false);
     }
 
     getStoredUser(): User | null {

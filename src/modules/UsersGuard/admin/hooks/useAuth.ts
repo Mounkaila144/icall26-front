@@ -1,13 +1,17 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { adminAuthService } from '../services/authService';
-import { AuthState, LoginCredentials } from '../../types/auth.types';
-import { AxiosError } from 'axios';
+import type { AuthState, LoginCredentials } from '../../types/auth.types';
+import type { AxiosError } from 'axios';
 import { usePermissionsOptional } from '@/shared/contexts/PermissionsContext';
 import { extractPermissionsFromLogin } from '@/shared/lib/permissions/extractPermissions';
+import { isTokenExpiringSoon } from '@/shared/lib/api-client';
+
+/** Check token freshness every 5 minutes */
+const REFRESH_CHECK_INTERVAL_MS = 5 * 60 * 1000;
 
 interface UseAuthReturn extends AuthState {
     login: (credentials: LoginCredentials) => Promise<void>;
@@ -30,6 +34,10 @@ export const useAuth = (): UseAuthReturn => {
 
     const [error, setError] = useState<string | null>(null);
 
+    // Ref to track if proactive refresh is already running
+    const refreshingRef = useRef(false);
+
+    // ── Restore auth state from localStorage on mount ────────────────────
     useEffect(() => {
         const token = adminAuthService.getStoredToken();
         const user = adminAuthService.getStoredUser();
@@ -38,7 +46,7 @@ export const useAuth = (): UseAuthReturn => {
         if (tenantStr) {
             try {
                 tenant = JSON.parse(tenantStr);
-            } catch (e) {
+            } catch {
                 // ignore
             }
         }
@@ -52,6 +60,44 @@ export const useAuth = (): UseAuthReturn => {
         });
     }, []);
 
+    // ── Proactive token refresh ──────────────────────────────────────────
+    const proactiveRefresh = useCallback(async () => {
+        if (refreshingRef.current) return;
+        if (!adminAuthService.getStoredToken()) return;
+        if (!isTokenExpiringSoon(false)) return;
+
+        refreshingRef.current = true;
+        try {
+            const newToken = await adminAuthService.refreshToken();
+            if (newToken) {
+                setState(prev => ({ ...prev, token: newToken }));
+            }
+        } finally {
+            refreshingRef.current = false;
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!state.isAuthenticated) return;
+
+        // Periodic check
+        const intervalId = setInterval(proactiveRefresh, REFRESH_CHECK_INTERVAL_MS);
+
+        // Also refresh when the user returns to the tab
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                proactiveRefresh();
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            clearInterval(intervalId);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [state.isAuthenticated, proactiveRefresh]);
+
+    // ── Login ────────────────────────────────────────────────────────────
     const login = useCallback(async (credentials: LoginCredentials) => {
         setError(null);
         setState(prev => ({ ...prev, isLoading: true }));
@@ -103,6 +149,7 @@ export const useAuth = (): UseAuthReturn => {
         }
     }, [router, permissionsContext]);
 
+    // ── Logout ───────────────────────────────────────────────────────────
     const logout = useCallback(async () => {
         setError(null);
 
@@ -131,6 +178,7 @@ export const useAuth = (): UseAuthReturn => {
         }
     }, [router, permissionsContext]);
 
+    // ── Refresh user data ────────────────────────────────────────────────
     const refreshUser = useCallback(async () => {
         if (!state.isAuthenticated) return;
 

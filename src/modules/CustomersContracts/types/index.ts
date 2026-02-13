@@ -231,6 +231,11 @@ export interface CustomerContract {
   is_photo?: 'Y' | 'N';
   is_quality?: 'Y' | 'N';
 
+  // Computed state flags (from backend based on state_id vs settings)
+  is_cancelled?: boolean;
+  is_blowing?: boolean;
+  is_placement?: boolean;
+
   // Reports
   rapport_temps: string | null;
   rapport_admin: string | null;
@@ -289,7 +294,12 @@ export interface CustomerContract {
   // Missing dates (from backend)
   sav_at?: string | null;
   pre_meeting_at?: string | null;
+  doc_at?: string | null;
   closed_at?: string | null;
+
+  // Additional IDs (from detail endpoint)
+  polluter_id?: number | null;
+  partner_layer_id?: number | null;
 
   // Relations (optional, loaded on demand)
   products?: ContractProduct[];
@@ -357,6 +367,15 @@ export interface ContractStatsResponse {
 export interface ContractHistoryResponse {
   success: boolean;
   data: ContractHistory[];
+}
+
+export interface ContractActionResponse {
+  success: boolean;
+  action: string;
+  id: number;
+  state?: { icon: string; color: string };
+  state_i18n?: string;
+  message: string;
 }
 
 // ----------------------------------------------------------------------------
@@ -465,37 +484,65 @@ export interface CreateContractData {
 
   // Nested customer data (for creating new customer with contract)
   customer?: {
+    gender?: string;
     lastname: string;
     firstname: string;
     phone: string;
+    email?: string;
+    mobile?: string;
+    mobile2?: string;
+    company?: string;
     union_id?: number;
     address: {
       address1: string;
+      address2?: string;
       postcode: string;
       city: string;
     };
   };
 
-  // Additional fields from backend validation
+  // Additional date fields
   sent_at?: string;
   payment_at?: string;
   apf_at?: string;
+  sav_at?: string;
+  pre_meeting_at?: string;
+  doc_at?: string;
+  closed_at?: string;
+
+  // Range IDs
   opened_at_range_id?: number;
   opc_range_id?: number;
+  sav_at_range_id?: number;
+
+  // Status IDs
   state_id?: number;
   install_state_id?: number;
   admin_status_id?: number;
+  opc_status_id?: number;
+  time_state_id?: number;
+
+  // Finance
   total_price_with_taxe?: number;
   total_price_without_taxe?: number;
+  has_tva?: string;
+  mensuality?: number;
+  advance_payment?: number;
   remarks?: string;
   variables?: any;
   is_signed?: 'YES' | 'NO';
+  is_billable?: 'YES' | 'NO';
   status?: 'ACTIVE' | 'DELETE';
+
+  // References
   company_id?: number;
   team_id?: number;
   meeting_id?: number;
   financial_partner_id?: number;
   tax_id?: number;
+  polluter_id?: number;
+  partner_layer_id?: number;
+  campaign_id?: number;
 
   // Access & Source
   acces_1?: string;
@@ -546,7 +593,6 @@ export interface CreateContractData {
   montant_ht?: number;
 
   // Other
-  campaign_id?: number;
   esclave?: string;
   actif?: boolean;
   status_flag?: 'ACTIVE' | 'DELETE';

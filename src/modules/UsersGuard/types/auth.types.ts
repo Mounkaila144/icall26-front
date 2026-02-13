@@ -59,6 +59,14 @@ export interface LoginResponse {
   };
 }
 
+export interface RefreshTokenResponse {
+  success: boolean;
+  data: {
+    token: string;
+    token_type: string;
+  };
+}
+
 export interface AuthState {
   user: User | null;
   token: string | null;

@@ -4,6 +4,8 @@ import { useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 import Box from '@mui/material/Box'
+import Snackbar from '@mui/material/Snackbar'
+import Alert from '@mui/material/Alert'
 
 import { useContracts } from '../hooks/useContracts'
 import { useFilterOptions } from '../hooks/useFilterOptions'
@@ -12,10 +14,13 @@ import { DataTable } from '@/components/shared/DataTable'
 import type { DataTableConfig } from '@/components/shared/DataTable'
 import type { CustomerContract } from '../../types'
 
-import CreateContractModal from './CreateContractModal'
-import EditContractModal from './EditContractModal'
+import CreateContractWizard from './contract-wizard/CreateContractWizard'
+import EditContractDialog from './contract-edit/EditContractDialog'
 import ContractMobileCard from './contracts-list/ContractMobileCard'
 import ContractFilterPanel from './contracts-list/ContractFilterPanel'
+import SendSmsDialog from './dialogs/SendSmsDialog'
+import SendEmailDialog from './dialogs/SendEmailDialog'
+import ContractCommentDialog from './dialogs/ContractCommentDialog'
 import { useContractListState, COLUMN_TO_BACKEND_FILTER } from './contracts-list/useContractListState'
 
 export default function ContractsList1() {
@@ -40,7 +45,7 @@ export default function ContractsList1() {
     contracts, loading, error, currentPage, totalPages, total, perPage,
     permittedFields,
     setCurrentPage, setPerPage, updateFilter, clearFilters,
-    deleteContract, createContract, updateContract, getContract
+    deleteContract, createContract, updateContract, getContract, refreshContracts
   } = useContracts(initialBackendFilters)
 
   const { filterOptions } = useFilterOptions()
@@ -48,10 +53,13 @@ export default function ContractsList1() {
   const {
     columns, permittedColumns, columnVisibility, columnFilters, showFilters,
     isCreateModalOpen, isEditModalOpen, selectedContractId, hasCredential, t,
+    smsDialogContractId, emailDialogContractId, commentDialogContractId,
+    notification, showNotification, handleCloseNotification,
     handleColumnVisibilityChange, handleClearAllFilters, handleToggleFilters,
     handleSearch, handleEdit, handleDelete, handleColumnFilterChange,
-    handleCloseCreateModal, handleCloseEditModal, setIsCreateModalOpen, createColumnFilter
-  } = useContractListState({ loading, deleteContract, updateFilter, clearFilters, permittedFields, filterOptions, initialSidebarFilters })
+    handleCloseCreateModal, handleCloseEditModal, setIsCreateModalOpen, createColumnFilter,
+    handleCloseSmsDialog, handleCloseEmailDialog, handleCloseCommentDialog,
+  } = useContractListState({ loading, deleteContract, updateContract, refreshContracts, updateFilter, clearFilters, permittedFields, filterOptions, initialSidebarFilters })
 
   const tableConfig: DataTableConfig<CustomerContract> = {
     columns,
@@ -116,19 +124,62 @@ export default function ContractsList1() {
         </Box>
       </Box>
 
-      <CreateContractModal
+      <CreateContractWizard
         isOpen={isCreateModalOpen}
         onClose={handleCloseCreateModal}
         onCreate={createContract}
       />
 
-      <EditContractModal
+      <EditContractDialog
         isOpen={isEditModalOpen}
         onClose={handleCloseEditModal}
         onUpdate={updateContract}
         contractId={selectedContractId}
         onFetchContract={getContract}
       />
+
+      <SendSmsDialog
+        open={smsDialogContractId !== null}
+        contractId={smsDialogContractId}
+        onClose={handleCloseSmsDialog}
+        onSuccess={refreshContracts}
+        showNotification={showNotification}
+        t={t}
+      />
+
+      <SendEmailDialog
+        open={emailDialogContractId !== null}
+        contractId={emailDialogContractId}
+        onClose={handleCloseEmailDialog}
+        onSuccess={refreshContracts}
+        showNotification={showNotification}
+        t={t}
+      />
+
+      <ContractCommentDialog
+        open={commentDialogContractId !== null}
+        contractId={commentDialogContractId}
+        onClose={handleCloseCommentDialog}
+        onSuccess={refreshContracts}
+        showNotification={showNotification}
+        t={t}
+      />
+
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={4000}
+        onClose={handleCloseNotification}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={handleCloseNotification}
+          severity={notification.severity}
+          variant='filled'
+          sx={{ width: '100%' }}
+        >
+          {notification.message}
+        </Alert>
+      </Snackbar>
     </>
   )
 }
