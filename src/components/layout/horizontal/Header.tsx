@@ -20,9 +20,8 @@ const Header = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof getDicti
     <>
       <LayoutHeader>
         <Navbar>
-          <NavbarContent />
+          <NavbarContent dictionary={dictionary} />
         </Navbar>
-        {!isBreakpointReached && <Navigation dictionary={dictionary} />}
       </LayoutHeader>
       {isBreakpointReached && <Navigation dictionary={dictionary} />}
     </>

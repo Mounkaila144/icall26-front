@@ -7,11 +7,13 @@ import classnames from 'classnames'
 
 // Type Imports
 import type { Locale } from '@configs/i18n'
+import type { getDictionary } from '@/utils/getDictionary'
 import type { ShortcutsType } from '@components/layout/shared/ShortcutsDropdown'
 import type { NotificationsType } from '@components/layout/shared/NotificationsDropdown'
 
 // Component Imports
 import NavToggle from './NavToggle'
+import HorizontalMenu from './HorizontalMenu'
 import Logo from '@components/layout/shared/Logo'
 import NavSearch from '@components/layout/shared/search'
 import LanguageDropdown from '@components/layout/shared/LanguageDropdown'
@@ -114,7 +116,7 @@ const notifications: NotificationsType[] = [
   }
 ]
 
-const NavbarContent = () => {
+const NavbarContent = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof getDictionary>> }) => {
   // Hooks
   const { isBreakpointReached } = useHorizontalNav()
   const { lang: locale } = useParams()
@@ -123,7 +125,7 @@ const NavbarContent = () => {
     <div
       className={classnames(horizontalLayoutClasses.navbarContent, 'flex items-center justify-between gap-4 is-full')}
     >
-      <div className='flex items-center gap-4'>
+      <div className='flex items-center gap-2'>
         <NavToggle />
         {/* Hide Logo on Smaller screens */}
         {!isBreakpointReached && (
@@ -133,6 +135,13 @@ const NavbarContent = () => {
         )}
       </div>
 
+      {/* Horizontal Menu - integrated in navbar (desktop only) */}
+      {!isBreakpointReached && (
+        <div className='flex-1 flex items-center overflow-hidden'>
+          <HorizontalMenu dictionary={dictionary} />
+        </div>
+      )}
+
       <div className='flex items-center'>
         <NavSearch />
         <LanguageDropdown />
@@ -140,7 +149,6 @@ const NavbarContent = () => {
         <ShortcutsDropdown shortcuts={shortcuts} />
         <NotificationsDropdown notifications={notifications} />
         <UserDropdown />
-        {/* Language Dropdown, Notification Dropdown, quick access menu dropdown, user dropdown will be placed here */}
       </div>
     </div>
   )
