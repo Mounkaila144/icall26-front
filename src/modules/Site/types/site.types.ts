@@ -71,6 +71,9 @@ export interface SiteListItem {
   db_name: string;
   type: SiteType | null;
   available: boolean;
+  is_uptodate: boolean;
+  admin_available: boolean;
+  frontend_available: boolean;
   is_customer: boolean;
   company: string | null;
   last_connection: string | null;

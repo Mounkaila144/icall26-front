@@ -110,6 +110,17 @@ class SiteService {
     const client = createApiClient();
     await client.post('/superadmin/sites/toggle-availability', data);
   }
+
+  /**
+   * Activer un site (exécuter les migrations tenant)
+   */
+  async activateSite(id: number): Promise<{ success: boolean; message: string; output?: string }> {
+    const client = createApiClient();
+    const response = await client.post<{ success: boolean; message: string; data?: Site; output?: string }>(
+      `/superadmin/sites/${id}/activate`
+    );
+    return response.data;
+  }
 }
 
 export const siteService = new SiteService();

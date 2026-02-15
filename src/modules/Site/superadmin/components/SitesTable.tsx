@@ -7,6 +7,8 @@ import { createColumnHelper } from '@tanstack/react-table'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 import Chip from '@mui/material/Chip'
+import Tooltip from '@mui/material/Tooltip'
+import CircularProgress from '@mui/material/CircularProgress'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
@@ -38,6 +40,8 @@ interface SitesTableProps {
   onDelete: (site: SiteListItem) => void
   onManageModules: (site: SiteListItem) => void
   onTestConnection: (site: SiteListItem) => void
+  onActivate: (site: SiteListItem) => void
+  activatingId: number | null
   onAdd?: () => void
   pagination?: {
     current_page: number
@@ -62,6 +66,8 @@ export default function SitesTable({
   onDelete,
   onManageModules,
   onTestConnection,
+  onActivate,
+  activatingId,
   onAdd,
   pagination,
   onPageChange,
@@ -182,30 +188,61 @@ export default function SitesTable({
       columnHelper.display({
         id: 'actions',
         header: 'Actions',
-        cell: ({ row }) => (
-          <div className='flex items-center gap-0.5'>
-            <IconButton size='small' onClick={() => onManageModules(row.original)} color='info' title='Gérer les modules'>
-              <i className='tabler-anchor' />
-            </IconButton>
-            <IconButton size='small' onClick={() => onEdit(row.original)} color='primary' title='Modifier'>
-              <i className='ri-edit-box-line' />
-            </IconButton>
-            <IconButton
-              size='small'
-              onClick={() => onTestConnection(row.original)}
-              color='success'
-              title='Tester la connexion'
-            >
-              <i className='ri-lightbulb-flash-line' />
-            </IconButton>
-            <IconButton size='small' onClick={() => handleDelete(row.original)} color='error' title='Supprimer'>
-              <i className='ri-delete-bin-7-line' />
-            </IconButton>
-          </div>
-        )
+        cell: ({ row }) => {
+          const isActivating = activatingId === row.original.id
+          const isUptodate = row.original.is_uptodate
+
+          return (
+            <div className='flex items-center gap-0.5'>
+              {!isUptodate ? (
+                <Tooltip title='Activer le site (exécuter les migrations)'>
+                  <span>
+                    <IconButton
+                      size='small'
+                      onClick={() => onActivate(row.original)}
+                      color='warning'
+                      disabled={isActivating}
+                    >
+                      {isActivating ? (
+                        <CircularProgress size={16} color='warning' />
+                      ) : (
+                        <i className='ri-play-circle-line' />
+                      )}
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              ) : (
+                <Tooltip title='Site activé (migrations à jour)'>
+                  <span>
+                    <IconButton size='small' color='success' disabled>
+                      <i className='ri-checkbox-circle-line' />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              )}
+              <IconButton size='small' onClick={() => onManageModules(row.original)} color='info' title='Gérer les modules'>
+                <i className='tabler-anchor' />
+              </IconButton>
+              <IconButton size='small' onClick={() => onEdit(row.original)} color='primary' title='Modifier'>
+                <i className='ri-edit-box-line' />
+              </IconButton>
+              <IconButton
+                size='small'
+                onClick={() => onTestConnection(row.original)}
+                color='success'
+                title='Tester la connexion'
+              >
+                <i className='ri-lightbulb-flash-line' />
+              </IconButton>
+              <IconButton size='small' onClick={() => handleDelete(row.original)} color='error' title='Supprimer'>
+                <i className='ri-delete-bin-7-line' />
+              </IconButton>
+            </div>
+          )
+        }
       })
     ],
-    [getTypeLabel, formatLastConnection, onManageModules, onEdit, onTestConnection, handleDelete]
+    [getTypeLabel, formatLastConnection, onManageModules, onEdit, onTestConnection, handleDelete, onActivate, activatingId]
   )
 
   // DataTable configuration
@@ -272,24 +309,29 @@ export default function SitesTable({
             }
           ]}
           actions={[
+            ...(!site.is_uptodate ? [{
+              icon: activatingId === site.id ? 'ri-loader-4-line' : 'ri-play-circle-line',
+              color: 'warning' as const,
+              onClick: () => onActivate(site)
+            }] : []),
             {
               icon: 'tabler-puzzle',
-              color: 'info',
+              color: 'info' as const,
               onClick: () => onManageModules(site)
             },
             {
               icon: 'ri-edit-box-line',
-              color: 'primary',
+              color: 'primary' as const,
               onClick: () => onEdit(site)
             },
             {
               icon: 'ri-flash-line',
-              color: 'success',
+              color: 'success' as const,
               onClick: () => onTestConnection(site)
             },
             {
               icon: 'ri-delete-bin-7-line',
-              color: 'error',
+              color: 'error' as const,
               onClick: () => handleDelete(site)
             }
           ]}

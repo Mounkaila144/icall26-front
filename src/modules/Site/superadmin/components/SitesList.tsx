@@ -103,6 +103,9 @@ export const SitesList = () => {
   const [selectedSiteId, setSelectedSiteId] = useState<number | null>(null)
   const [selectedSiteName, setSelectedSiteName] = useState<string>('')
 
+  // Activation state
+  const [activatingId, setActivatingId] = useState<number | null>(null)
+
   // Connection result notification
   const [connectionResult, setConnectionResult] = useState<{
     show: boolean
@@ -221,6 +224,36 @@ export const SitesList = () => {
     }
   }, [testConnection])
 
+  const handleActivate = useCallback(async (siteItem: SiteListItem) => {
+    if (!window.confirm(`Voulez-vous activer le site "${siteItem.host}" ? Cela va exécuter les migrations de la base de données.`)) {
+      return
+    }
+
+    try {
+      setActivatingId(siteItem.id)
+      const result = await siteService.activateSite(siteItem.id)
+
+      setConnectionResult({
+        show: true,
+        success: result.success,
+        message: result.success
+          ? 'Site activé avec succès ! Migrations exécutées.'
+          : result.message || 'Échec de l\'activation'
+      })
+
+      await loadSites()
+    } catch (err: unknown) {
+      const axiosError = err as AxiosError<{ message: string }>
+      setConnectionResult({
+        show: true,
+        success: false,
+        message: axiosError.response?.data?.message || 'Erreur lors de l\'activation du site'
+      })
+    } finally {
+      setActivatingId(null)
+    }
+  }, [loadSites])
+
   const handleFormSubmit = useCallback(async (data: CreateSiteData | UpdateSiteData) => {
     try {
       if (formMode === 'create') {
@@ -287,6 +320,8 @@ export const SitesList = () => {
             onDelete={handleDeleteClick}
             onManageModules={handleManageModules}
             onTestConnection={handleTestConnection}
+            onActivate={handleActivate}
+            activatingId={activatingId}
             onAdd={handleCreateClick}
             pagination={pagination}
             onPageChange={setPage}
