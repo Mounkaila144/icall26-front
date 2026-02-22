@@ -73,6 +73,7 @@ export default function ContractsList1() {
     onPageSizeChange: setPerPage,
     onSearch: handleSearch,
     onRefresh: () => window.location.reload(),
+    onRowDoubleClick: (contract) => handleEdit(contract.id),
     searchPlaceholder: t.searchPlaceholder,
     emptyMessage: t.emptyMessage,
     rowsPerPageOptions: [10, 15, 25, 50],

@@ -11,7 +11,10 @@ const SUPERADMIN_TOKEN_KEY = 'superadmin_auth_token';
 const TOKEN_ISSUED_KEY = 'auth_token_issued_at';
 const SUPERADMIN_TOKEN_ISSUED_KEY = 'superadmin_auth_token_issued_at';
 
-/** Sanctum token lifetime is 60 min — refresh proactively at 50 min */
+/** Sanctum token lifetime is 60 min */
+const TOKEN_LIFETIME_MS = 60 * 60 * 1000;
+
+/** Refresh proactively at 50 min */
 const TOKEN_REFRESH_THRESHOLD_MS = 50 * 60 * 1000;
 
 // ---------------------------------------------------------------------------
@@ -65,6 +68,17 @@ const getTokenIssuedAt = (): number => {
     const key = isSuperadminContext() ? SUPERADMIN_TOKEN_ISSUED_KEY : TOKEN_ISSUED_KEY;
     const val = localStorage.getItem(key);
     return val ? parseInt(val, 10) : 0;
+};
+
+/** True when the token has exceeded the Sanctum lifetime (60 min) */
+export const isTokenExpired = (superadmin?: boolean): boolean => {
+    if (typeof window === 'undefined') return false;
+    const contextIsSuperadmin = superadmin ?? isSuperadminContext();
+    const key = contextIsSuperadmin ? SUPERADMIN_TOKEN_ISSUED_KEY : TOKEN_ISSUED_KEY;
+    const val = localStorage.getItem(key);
+    if (!val) return true; // No timestamp → treat as expired
+    const issuedAt = parseInt(val, 10);
+    return Date.now() - issuedAt > TOKEN_LIFETIME_MS;
 };
 
 /** True when the token will expire in the next ~10 minutes */

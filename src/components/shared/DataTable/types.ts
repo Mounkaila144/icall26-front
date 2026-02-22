@@ -27,6 +27,7 @@ export interface DataTableConfig<TData> {
   onPageChange?: (page: number) => void
   onPageSizeChange?: (size: number) => void
   onRefresh?: () => void
+  onRowDoubleClick?: (row: TData) => void
 
   // Search
   searchPlaceholder?: string

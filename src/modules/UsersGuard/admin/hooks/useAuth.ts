@@ -8,7 +8,7 @@ import type { AuthState, LoginCredentials } from '../../types/auth.types';
 import type { AxiosError } from 'axios';
 import { usePermissionsOptional } from '@/shared/contexts/PermissionsContext';
 import { extractPermissionsFromLogin } from '@/shared/lib/permissions/extractPermissions';
-import { isTokenExpiringSoon } from '@/shared/lib/api-client';
+import { isTokenExpired, isTokenExpiringSoon } from '@/shared/lib/api-client';
 
 /** Check token freshness every 5 minutes */
 const REFRESH_CHECK_INTERVAL_MS = 5 * 60 * 1000;
@@ -40,6 +40,25 @@ export const useAuth = (): UseAuthReturn => {
     // ── Restore auth state from localStorage on mount ────────────────────
     useEffect(() => {
         const token = adminAuthService.getStoredToken();
+
+        // Token exists but has expired → clear auth data, treat as unauthenticated
+        if (token && isTokenExpired(false)) {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('auth_token_issued_at');
+            localStorage.removeItem('user');
+            localStorage.removeItem('tenant');
+
+            setState({
+                user: null,
+                token: null,
+                tenant: null,
+                isAuthenticated: false,
+                isLoading: false,
+            });
+
+            return;
+        }
+
         const user = adminAuthService.getStoredUser();
         const tenantStr = localStorage.getItem('tenant');
         let tenant = null;

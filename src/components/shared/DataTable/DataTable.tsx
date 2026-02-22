@@ -60,6 +60,7 @@ export function DataTable<TData extends Record<string, any>>(props: DataTableCon
     rowsPerPageOptions = [10, 25, 50, 100],
     stickyLeft = [],
     stickyRight = [],
+    onRowDoubleClick,
   } = props
 
   const hasStickyColumns = stickyLeft.length > 0 || stickyRight.length > 0
@@ -409,7 +410,11 @@ export function DataTable<TData extends Record<string, any>>(props: DataTableCon
             ) : (
               <tbody>
                 {table.getRowModel().rows.map(row => (
-                  <tr key={row.id}>
+                  <tr 
+                    key={row.id}
+                    onDoubleClick={() => onRowDoubleClick?.(row.original)}
+                    style={{ cursor: onRowDoubleClick ? 'pointer' : undefined }}
+                  >
                     {row.getVisibleCells().map(cell => (
                       <td key={cell.id} style={getStickyStyle(cell.column.id, 'body')}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}

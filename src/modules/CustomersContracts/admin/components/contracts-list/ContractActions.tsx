@@ -12,7 +12,7 @@ import type { CustomerContract } from '../../../types'
 import type { ContractTranslations } from '../../hooks/useContractTranslations'
 
 type ActionType =
-  | 'view' | 'edit' | 'copy_ref' | 'delete'
+  | 'edit' | 'copy_ref' | 'delete'
   | 'confirm' | 'unconfirm'
   | 'cancel' | 'uncancel'
   | 'blowing' | 'unblowing'
@@ -47,7 +47,6 @@ export default function ContractActionsCell({ contract, onAction, onEdit, onDele
     handleClose()
     if (action === 'edit') onEdit(contract.id)
     else if (action === 'delete') onDelete(contract.id)
-    else if (action === 'view') window.open(`/admin/contracts/${contract.id}`, '_blank')
     else if (action === 'copy_ref') navigator.clipboard.writeText(contract.reference)
     else onAction(contract.id, action)
   }, [handleClose, contract.id, contract.reference, onAction, onEdit, onDelete])
@@ -64,7 +63,6 @@ export default function ContractActionsCell({ contract, onAction, onEdit, onDele
   const dimmedSx = isHold ? { opacity: 0.3, pointerEvents: 'none' as const } : {}
 
   // Permission checks matching Symfony's hasCredential patterns
-  const canView = hasCredential([['superadmin', 'admin', 'contract_view']])
   const canEdit = hasCredential([['superadmin', 'admin', 'contract_modify']])
   const canDelete = hasCredential([['superadmin', 'admin']])
 
@@ -215,14 +213,8 @@ export default function ContractActionsCell({ contract, onAction, onEdit, onDele
           </MenuItem>
         )}
 
-        {/* ── Group 2: View / Edit ── */}
-        {hasToggleGroup && (canView || canEdit) && <Divider />}
-        {canView && (
-          <MenuItem onClick={() => fire('view')} sx={menuItemSx}>
-            <ListItemIcon><i className='ri-eye-line' style={iconSx} /></ListItemIcon>
-            <ListItemText>{t.actionView}</ListItemText>
-          </MenuItem>
-        )}
+        {/* ── Group 2: Edit ── */}
+        {hasToggleGroup && canEdit && <Divider />}
         {canEdit && (
           <MenuItem onClick={() => fire('edit')} sx={{ ...menuItemSx, color: 'primary.main' }}>
             <ListItemIcon><i className='ri-edit-box-line' style={{ ...iconSx, color: 'inherit' }} /></ListItemIcon>
