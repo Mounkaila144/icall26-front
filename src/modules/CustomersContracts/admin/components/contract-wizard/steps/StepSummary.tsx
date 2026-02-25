@@ -10,16 +10,18 @@ import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import Box from '@mui/material/Box'
 
-import type { CustomerFormData, ContractDetailsFormData, TeamFinanceFormData } from '../contractFormSchema'
+import type { CustomerFormData, ContractDetailsFormData, TeamFinanceFormData, IsoFormData } from '../contractFormSchema'
 import type { ContractFilterOptions } from '../../../../types'
+import type { DomoprimeFilterOptions } from '@/modules/AppDomoprime/types'
 import type { ContractTranslations } from '../../../hooks/useContractTranslations'
 
 interface StepSummaryProps {
   customerForm: UseFormReturn<CustomerFormData>
   detailsForm: UseFormReturn<ContractDetailsFormData>
   teamFinanceForm: UseFormReturn<TeamFinanceFormData>
+  isoForm: UseFormReturn<IsoFormData>
   filterOptions: ContractFilterOptions
-  selectedCustomerName?: string
+  domoprimeOptions: DomoprimeFilterOptions
   t: ContractTranslations
 }
 
@@ -40,10 +42,13 @@ function resolveName(id: number | undefined, options: { id: number | string; nam
   return opt?.name ?? String(id)
 }
 
-export default function StepSummary({ customerForm, detailsForm, teamFinanceForm, filterOptions, selectedCustomerName, t }: StepSummaryProps) {
+export default function StepSummary({ customerForm, detailsForm, teamFinanceForm, isoForm, filterOptions, domoprimeOptions, t }: StepSummaryProps) {
   const customer = customerForm.getValues()
   const details = detailsForm.getValues()
   const tf = teamFinanceForm.getValues()
+  const iso = isoForm.getValues()
+
+  const hasIsoData = Object.entries(iso).some(([, v]) => v !== undefined && v !== '')
 
   const dateRows = useMemo(() => {
     const all: [string, string | undefined][] = [
@@ -58,6 +63,7 @@ export default function StepSummary({ customerForm, detailsForm, teamFinanceForm
       [t.datePreMeeting, details.pre_meeting_at],
       [t.dateDoc, details.doc_at],
       [t.dateClosed, details.closed_at],
+      [t.wizardDateInstallation, details.install_at],
     ]
 
     return all.filter(([, v]) => !!v)
@@ -73,26 +79,18 @@ export default function StepSummary({ customerForm, detailsForm, teamFinanceForm
               <i className='ri-user-line' />
               {t.wizardSummaryClient}
             </Typography>
-            {customer.customerMode === 'existing' ? (
-              <Typography variant='body2'>
-                {selectedCustomerName || `${t.wizardSummaryExistingCustomer}${customer.customer_id}`}
-              </Typography>
-            ) : (
-              <>
-                {customer.customer?.gender ? <SummaryRow label={t.wizardGender} value={customer.customer.gender} /> : null}
-                <SummaryRow label={t.lastName} value={customer.customer?.lastname} />
-                <SummaryRow label={t.firstName} value={customer.customer?.firstname} />
-                <SummaryRow label={t.phone} value={customer.customer?.phone} />
-                {customer.customer?.email ? <SummaryRow label={t.wizardEmail} value={customer.customer.email} /> : null}
-                {customer.customer?.mobile ? <SummaryRow label={t.wizardMobile} value={customer.customer.mobile} /> : null}
-                {customer.customer?.mobile2 ? <SummaryRow label={t.wizardMobile2} value={customer.customer.mobile2} /> : null}
-                {customer.customer?.company ? <SummaryRow label={t.wizardCustomerCompany} value={customer.customer.company} /> : null}
-                <SummaryRow label={t.address} value={customer.customer?.address?.address1} />
-                {customer.customer?.address?.address2 ? <SummaryRow label={t.wizardAddress2} value={customer.customer.address.address2} /> : null}
-                <SummaryRow label={t.postcode} value={customer.customer?.address?.postcode} />
-                <SummaryRow label={t.city} value={customer.customer?.address?.city} />
-              </>
-            )}
+            {customer.customer?.gender ? <SummaryRow label={t.wizardGender} value={customer.customer.gender} /> : null}
+            <SummaryRow label={t.lastName} value={customer.customer?.lastname} />
+            <SummaryRow label={t.firstName} value={customer.customer?.firstname} />
+            <SummaryRow label={t.phone} value={customer.customer?.phone} />
+            {customer.customer?.email ? <SummaryRow label={t.wizardEmail} value={customer.customer.email} /> : null}
+            {customer.customer?.mobile ? <SummaryRow label={t.wizardMobile} value={customer.customer.mobile} /> : null}
+            {customer.customer?.mobile2 ? <SummaryRow label={t.wizardMobile2} value={customer.customer.mobile2} /> : null}
+            {customer.customer?.company ? <SummaryRow label={t.wizardCustomerCompany} value={customer.customer.company} /> : null}
+            <SummaryRow label={t.address} value={customer.customer?.address?.address1} />
+            {customer.customer?.address?.address2 ? <SummaryRow label={t.wizardAddress2} value={customer.customer.address.address2} /> : null}
+            <SummaryRow label={t.postcode} value={customer.customer?.address?.postcode} />
+            <SummaryRow label={t.city} value={customer.customer?.address?.city} />
           </CardContent>
         </Card>
       </Grid>
@@ -130,12 +128,31 @@ export default function StepSummary({ customerForm, detailsForm, teamFinanceForm
             <SummaryRow label={t.wizardInstaller} value={resolveName(tf.installer_user_id, filterOptions.users)} />
             <SummaryRow label={t.wizardTeam} value={resolveName(tf.team_id, filterOptions.teams)} />
             <SummaryRow label={t.wizardCompany} value={resolveName(tf.company_id, filterOptions.companies)} />
-            {tf.polluter_id ? <SummaryRow label={t.wizardPolluter} value={resolveName(tf.polluter_id, filterOptions.polluters)} /> : null}
+            {tf.sous_traitant_id ? <SummaryRow label={t.wizardSousTraitant} value={resolveName(tf.sous_traitant_id, filterOptions.users)} /> : null}
+            {tf.polluter_id ? <SummaryRow label={t.wizardWorksType} value={resolveName(tf.polluter_id, filterOptions.polluters)} /> : null}
             {tf.partner_layer_id ? <SummaryRow label={t.wizardPartnerLayer} value={resolveName(tf.partner_layer_id, filterOptions.partner_layers)} /> : null}
             {tf.campaign_id ? <SummaryRow label={t.wizardCampaign} value={resolveName(tf.campaign_id, filterOptions.campaigns)} /> : null}
           </CardContent>
         </Card>
       </Grid>
+
+      {/* Other info card */}
+      {(tf.rapport_installation || tf.rapport_temps || tf.periode_cee || tf.surface_parcelle) ? (
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Card variant='outlined'>
+            <CardContent>
+              <Typography variant='subtitle1' gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <i className='ri-information-line' />
+                {t.wizardSummaryOther}
+              </Typography>
+              {tf.rapport_installation ? <SummaryRow label={t.wizardRapport} value={tf.rapport_installation} /> : null}
+              {tf.rapport_temps ? <SummaryRow label={t.wizardRapportSuivie} value={tf.rapport_temps} /> : null}
+              {tf.periode_cee ? <SummaryRow label={t.wizardPeriodeCee} value={tf.periode_cee} /> : null}
+              {tf.surface_parcelle ? <SummaryRow label={t.wizardSurfaceParcelle} value={tf.surface_parcelle} /> : null}
+            </CardContent>
+          </Card>
+        </Grid>
+      ) : null}
 
       {/* Finance & status card */}
       <Grid size={{ xs: 12, md: 6 }}>
@@ -179,6 +196,46 @@ export default function StepSummary({ customerForm, detailsForm, teamFinanceForm
           </CardContent>
         </Card>
       </Grid>
+
+      {/* ISO / Domoprime card */}
+      {hasIsoData ? (
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Card variant='outlined'>
+            <CardContent>
+              <Typography variant='subtitle1' gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <i className='ri-home-4-line' />
+                {t.isoStepTitle}
+              </Typography>
+              {iso.fiscal_reference_1 ? <SummaryRow label={`${t.isoFiscalReference} 1`} value={iso.fiscal_reference_1} /> : null}
+              {iso.fiscal_number_1 ? <SummaryRow label={`${t.isoFiscalNumber} 1`} value={iso.fiscal_number_1} /> : null}
+              {iso.fiscal_reference_2 ? <SummaryRow label={`${t.isoFiscalReference} 2`} value={iso.fiscal_reference_2} /> : null}
+              {iso.fiscal_number_2 ? <SummaryRow label={`${t.isoFiscalNumber} 2`} value={iso.fiscal_number_2} /> : null}
+              {iso.calcul_maprimerenov_manuel ? <SummaryRow label={t.isoCalcMaprimerenov} value={iso.calcul_maprimerenov_manuel === 'YES' ? t.yes : t.no} /> : null}
+              {iso.number_of_people != null ? <SummaryRow label={t.isoNumberOfPeople} value={String(iso.number_of_people)} /> : null}
+              {iso.number_of_children != null ? <SummaryRow label={t.isoNumberOfChildren} value={String(iso.number_of_children)} /> : null}
+              {iso.revenue != null ? <SummaryRow label={t.isoRevenue} value={`${iso.revenue} EUR`} /> : null}
+              {iso.number_of_fiscal != null ? <SummaryRow label={t.isoNumberOfFiscal} value={String(iso.number_of_fiscal)} /> : null}
+              {iso.number_of_parts != null ? <SummaryRow label={t.isoNumberOfParts} value={String(iso.number_of_parts)} /> : null}
+              {iso.tax_credit_used != null ? <SummaryRow label={t.isoTaxCreditUsed} value={`${iso.tax_credit_used} EUR`} /> : null}
+              {iso.declarants ? <SummaryRow label={t.isoDeclarants} value={iso.declarants} /> : null}
+              {iso.previous_energy_id ? <SummaryRow label={t.isoPreviousEnergy} value={resolveName(iso.previous_energy_id, domoprimeOptions.energies)} /> : null}
+              {iso.energy_id ? <SummaryRow label={t.isoEnergy} value={resolveName(iso.energy_id, domoprimeOptions.energies)} /> : null}
+              {iso.occupation_id ? <SummaryRow label={t.isoOccupationType} value={resolveName(iso.occupation_id, domoprimeOptions.occupations)} /> : null}
+              {iso.layer_type_id ? <SummaryRow label={t.isoLayerType} value={resolveName(iso.layer_type_id, domoprimeOptions.layer_types)} /> : null}
+              {iso.more_2_years ? <SummaryRow label={t.isoMore2Years} value={iso.more_2_years === 'YES' ? t.yes : t.no} /> : null}
+              {iso.parcel_reference ? <SummaryRow label={t.isoParcelReference} value={iso.parcel_reference} /> : null}
+              {iso.parcel_surface != null ? <SummaryRow label={t.isoParcelSurface} value={`${iso.parcel_surface} m²`} /> : null}
+              {iso.surface_home != null ? <SummaryRow label={t.isoSurfaceHabitat} value={`${iso.surface_home} m²`} /> : null}
+              {iso.surface_top != null ? <SummaryRow label={t.isoSurfaceTop} value={`${iso.surface_top} m²`} /> : null}
+              {iso.surface_wall != null ? <SummaryRow label={t.isoSurfaceWall} value={`${iso.surface_wall} m²`} /> : null}
+              {iso.surface_floor != null ? <SummaryRow label={t.isoSurfaceFloor} value={`${iso.surface_floor} m²`} /> : null}
+              {iso.install_surface_top != null ? <SummaryRow label={t.isoInstallSurfaceTop} value={`${iso.install_surface_top} m²`} /> : null}
+              {iso.install_surface_wall != null ? <SummaryRow label={t.isoInstallSurfaceWall} value={`${iso.install_surface_wall} m²`} /> : null}
+              {iso.install_surface_floor != null ? <SummaryRow label={t.isoInstallSurfaceFloor} value={`${iso.install_surface_floor} m²`} /> : null}
+            </CardContent>
+          </Card>
+        </Grid>
+      ) : null}
 
       {/* Remarks card (if present) */}
       {details.remarks ? (

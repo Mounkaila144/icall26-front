@@ -3,6 +3,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import type { ColumnDef } from '@tanstack/react-table'
 
 import Typography from '@mui/material/Typography'
+import Checkbox from '@mui/material/Checkbox'
 
 import { usePermissions } from '@/shared/contexts/PermissionsContext'
 import type { CustomerContract, ContractFilterOptions, ContractActionResponse } from '../../../types'
@@ -119,17 +120,17 @@ export function useContractListState({ loading, deleteContract, updateContract, 
   // Build column definitions with current translations
   const columnDefs = useMemo(() => getColumnDefs(t), [t])
 
-  // Filter columns by backend-provided permitted fields (single source of truth)
+  // Filter columns by credential (Symfony hasCredential) + backend permitted fields (defense-in-depth)
   const permittedColumns = useMemo<ContractColumnDef[]>(
     () => columnDefs.filter(col => {
-      // Columns without permissionKey are always visible
+      // Frontend credential gate (mirrors Symfony template hasCredential checks)
+      if (col.credential && !hasCredential(col.credential)) return false
+      // Backend API permitted fields check
       if (!col.permissionKey) return true
-      // If permittedFields is empty (first load, before API responds), show all
       if (permittedFields.size === 0) return true
-      // Otherwise, check against the backend-provided set
       return permittedFields.has(col.permissionKey)
     }),
-    [columnDefs, permittedFields]
+    [columnDefs, permittedFields, hasCredential]
   )
 
   // States
@@ -338,11 +339,13 @@ export function useContractListState({ loading, deleteContract, updateContract, 
 
   // TanStack Column Definitions
   const columns = useMemo<ColumnDef<CustomerContract, any>[]>(() => {
-    const idCol = columnHelper.accessor('id', {
+    // ID column gated by credential (Symfony: superadmin, admin, contract_view_list_id)
+    const showId = hasCredential([['superadmin', 'admin', 'contract_view_list_id']])
+    const idCols = showId ? [columnHelper.accessor('id', {
       id: 'id',
       header: '# ID',
       cell: ({ row }) => <Typography className='font-semibold' color='primary'>{row.original.id}</Typography>
-    })
+    })] : []
 
     const dataCols = permittedColumns.map(def =>
       columnHelper.accessor(def.getValue, {
@@ -352,24 +355,52 @@ export function useContractListState({ loading, deleteContract, updateContract, 
       })
     )
 
-    // Actions column still uses hasCredential (action-level, not field-level)
-    const actionsCols = hasCredential([['superadmin', 'admin', 'contract_list_view_actions']]) ? [
-      columnHelper.display({
-        id: 'actions',
-        header: t.colActions,
-        cell: ({ row }) => (
-          <ContractActionsCell
-            contract={row.original}
-            onAction={handleAction}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            t={t}
-          />
-        )
-      })
-    ] : []
+    // Actions column always visible (Symfony: formFilter->hasColumn('actions'))
+    // Per-row authorization is handled inside ContractActionsCell (isAuthorized || contract_list_view_actions)
+    const actionsCol = columnHelper.display({
+      id: 'actions',
+      header: t.colActions,
+      cell: ({ row }) => (
+        <ContractActionsCell
+          contract={row.original}
+          onAction={handleAction}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          t={t}
+        />
+      )
+    })
 
-    return [idCol, ...dataCols, ...actionsCols] as ColumnDef<CustomerContract, any>[]
+    const selectCol = columnHelper.display({
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          indeterminate={table.getIsSomePageRowsSelected()}
+          onChange={table.getToggleAllPageRowsSelectedHandler()}
+          size='small'
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onChange={row.getToggleSelectedHandler()}
+          size='small'
+        />
+      ),
+    })
+
+    const rowNumberCol = columnHelper.display({
+      id: 'row_number',
+      header: '#',
+      cell: ({ row }) => (
+        <Typography variant='body2' color='text.secondary'>
+          {row.index + 1}
+        </Typography>
+      ),
+    })
+
+    return [selectCol, rowNumberCol, ...idCols, ...dataCols, actionsCol] as ColumnDef<CustomerContract, any>[]
   }, [permittedColumns, handleDelete, handleEdit, handleAction, hasCredential, t])
 
   return {

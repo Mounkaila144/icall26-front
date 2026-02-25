@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 
 import IconButton from '@mui/material/IconButton'
 import Menu from '@mui/material/Menu'
@@ -6,6 +6,7 @@ import MenuItem from '@mui/material/MenuItem'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import Divider from '@mui/material/Divider'
+import Typography from '@mui/material/Typography'
 
 import { usePermissions } from '@/shared/contexts/PermissionsContext'
 import type { CustomerContract } from '../../../types'
@@ -33,7 +34,41 @@ interface ContractActionsCellProps {
 
 export default function ContractActionsCell({ contract, onAction, onEdit, onDelete, t }: ContractActionsCellProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const { hasCredential } = usePermissions()
+  const { hasCredential, permissions } = usePermissions()
+
+  // ── isAuthorized: mirrors Symfony CustomerContractBase::isAuthorized() ──
+  const isAuthorized = useMemo(() => {
+    // 1. superadmin/admin/contract_owner always authorized
+    if (hasCredential([['superadmin', 'admin', 'contract_owner']])) return true
+
+    // 2. If user does NOT have contract_list_owner credential → authorized
+    //    (restriction only applies to users who have this credential)
+    if (!hasCredential([['contract_list_owner']])) return true
+
+    // 3. Ownership: current user ID matches one of the contract's user fields
+    const userId = permissions?.user_id
+    if (userId != null) {
+      if (userId === contract.assistant_id) return true
+      if (userId === contract.telepro_id) return true
+      if (userId === contract.sale_1_id) return true
+      if (userId === contract.sale_2_id) return true
+    }
+
+    // 4. "Free" role access: user has free_* credential AND contract has no one assigned
+    if (hasCredential([['contract_list_owner_free_assistant']]) && !contract.assistant_id) return true
+    if (hasCredential([['contract_list_owner_free_telepro']]) && !contract.telepro_id) return true
+    if (hasCredential([['contract_list_owner_free_sale1']]) && !contract.sale_1_id) return true
+    if (hasCredential([['contract_list_owner_free_sale2']]) && !contract.sale_2_id) return true
+
+    return false
+  }, [hasCredential, permissions?.user_id, contract.assistant_id, contract.telepro_id, contract.sale_1_id, contract.sale_2_id])
+
+  // Row-level gate: Symfony line 2266 — $item->isAuthorized() || hasCredential([['contract_list_view_actions']])
+  const canViewActions = isAuthorized || hasCredential([['contract_list_view_actions']])
+
+  if (!canViewActions) {
+    return <Typography variant='body2' color='text.disabled'>---</Typography>
+  }
 
   const handleOpen = useCallback((e: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(e.currentTarget)
@@ -63,8 +98,8 @@ export default function ContractActionsCell({ contract, onAction, onEdit, onDele
   const dimmedSx = isHold ? { opacity: 0.3, pointerEvents: 'none' as const } : {}
 
   // Permission checks matching Symfony's hasCredential patterns
-  const canEdit = hasCredential([['superadmin', 'admin', 'contract_modify']])
-  const canDelete = hasCredential([['superadmin', 'admin']])
+  const canEdit = hasCredential([['superadmin', 'admin', 'contract_modify', 'contract_view']])
+  const canDelete = hasCredential([['superadmin', 'admin', 'contract_delete']])
 
   // Toggle actions
   const canConfirm = hasCredential([['superadmin', 'admin', 'contracts_confirmation']])
@@ -94,22 +129,22 @@ export default function ContractActionsCell({ contract, onAction, onEdit, onDele
   const canCreateProducts = hasCredential([['superadmin', 'admin', 'contract_create_default_products']])
 
   // Hold/Lock toggles
-  const canHold = hasCredential([['superadmin', 'admin', 'contract_hold']]) && (
+  const canHold = hasCredential([['superadmin', 'contract_hold']]) && (
     isHold
       ? hasCredential([['superadmin', 'admin', 'contract_list_unhold']])
       : hasCredential([['superadmin', 'admin', 'contract_list_hold']])
   )
-  const canHoldQuote = hasCredential([['superadmin', 'admin', 'contract_hold_quote']]) && (
+  const canHoldQuote = hasCredential([['superadmin', 'contract_hold_quote']]) && (
     isHoldQuote
-      ? hasCredential([['superadmin', 'admin', 'contract_list_unhold_quote']])
-      : hasCredential([['superadmin', 'admin', 'contract_list_hold_quote']])
+      ? hasCredential([['superadmin', 'contract_list_unhold_quote']])
+      : hasCredential([['superadmin', 'contract_list_hold_quote']])
   )
-  const canHoldAdmin = hasCredential([['superadmin', 'admin', 'contract_hold_admin']]) && (
+  const canHoldAdmin = hasCredential([['superadmin', 'contract_hold_admin']]) && (
     isHoldAdmin
       ? hasCredential([['superadmin', 'admin', 'contract_list_unhold_admin']])
       : hasCredential([['superadmin', 'admin', 'contract_list_hold_admin']])
   )
-  const canCopyContract = hasCredential([['superadmin', 'admin', 'contract_copy']])
+  const canCopyContract = hasCredential([['superadmin', 'contract_copy']])
 
   // Check if any group has visible items (for divider rendering)
   const hasToggleGroup = canConfirmAction || canCancel || canBlowing || canPlacement

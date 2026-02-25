@@ -8,15 +8,17 @@ import {
   customerSchema,
   contractDetailsSchema,
   teamFinanceSchema,
+  isoSchema,
 } from './contractFormSchema'
 import type {
   CustomerFormData,
   ContractDetailsFormData,
   TeamFinanceFormData,
+  IsoFormData,
 } from './contractFormSchema'
 import type { CreateContractData } from '../../../types'
 
-const TOTAL_STEPS = 4
+const TOTAL_STEPS = 5
 
 export function useContractWizardState() {
   const [activeStep, setActiveStep] = useState(0)
@@ -25,8 +27,6 @@ export function useContractWizardState() {
   const customerForm = useForm<CustomerFormData>({
     resolver: valibotResolver(customerSchema),
     defaultValues: {
-      customerMode: 'new',
-      customer_id: undefined,
       customer: {
         gender: '',
         lastname: '',
@@ -57,6 +57,7 @@ export function useContractWizardState() {
       pre_meeting_at: '',
       doc_at: '',
       closed_at: '',
+      install_at: '',
       has_tva: '',
       reference: '',
       remarks: '',
@@ -86,6 +87,11 @@ export function useContractWizardState() {
       campaign_id: undefined,
       opc_range_id: undefined,
       sav_at_range_id: undefined,
+      sous_traitant_id: undefined,
+      rapport_installation: '',
+      rapport_temps: '',
+      periode_cee: '',
+      surface_parcelle: '',
       state_id: undefined,
       install_state_id: undefined,
       admin_status_id: undefined,
@@ -97,7 +103,40 @@ export function useContractWizardState() {
     },
   })
 
-  const formByStep = [customerForm, detailsForm, teamFinanceForm] as const
+  // --- Step 4: ISO / Domoprime ---
+  const isoForm = useForm<IsoFormData>({
+    resolver: valibotResolver(isoSchema),
+    defaultValues: {
+      fiscal_reference_1: '',
+      fiscal_number_1: '',
+      fiscal_reference_2: '',
+      fiscal_number_2: '',
+      calcul_maprimerenov_manuel: undefined,
+      number_of_people: undefined,
+      number_of_children: undefined,
+      revenue: undefined,
+      number_of_fiscal: undefined,
+      number_of_parts: undefined,
+      tax_credit_used: undefined,
+      declarants: '',
+      previous_energy_id: undefined,
+      energy_id: undefined,
+      occupation_id: undefined,
+      layer_type_id: undefined,
+      more_2_years: undefined,
+      parcel_reference: '',
+      parcel_surface: undefined,
+      surface_home: undefined,
+      surface_top: undefined,
+      surface_wall: undefined,
+      surface_floor: undefined,
+      install_surface_top: undefined,
+      install_surface_wall: undefined,
+      install_surface_floor: undefined,
+    },
+  })
+
+  const formByStep = [customerForm, detailsForm, teamFinanceForm, isoForm] as const
 
   // --- Navigation ---
   const handleNext = useCallback(async () => {
@@ -122,6 +161,7 @@ export function useContractWizardState() {
     const customer = customerForm.getValues()
     const details = detailsForm.getValues()
     const teamFinance = teamFinanceForm.getValues()
+    const iso = isoForm.getValues()
 
     const data: CreateContractData = {
       // Dates
@@ -136,6 +176,7 @@ export function useContractWizardState() {
       pre_meeting_at: details.pre_meeting_at || undefined,
       doc_at: details.doc_at || undefined,
       closed_at: details.closed_at || undefined,
+      install_at: details.install_at || undefined,
 
       // Other details
       has_tva: details.has_tva || undefined,
@@ -151,30 +192,35 @@ export function useContractWizardState() {
       status: teamFinance.status ?? 'ACTIVE',
     }
 
-    if (customer.customerMode === 'existing') {
-      data.customer_id = customer.customer_id
-    } else {
-      data.customer = {
-        gender: customer.customer?.gender || undefined,
-        lastname: customer.customer?.lastname ?? '',
-        firstname: customer.customer?.firstname ?? '',
-        phone: customer.customer?.phone ?? '',
-        email: customer.customer?.email || undefined,
-        mobile: customer.customer?.mobile || undefined,
-        mobile2: customer.customer?.mobile2 || undefined,
-        company: customer.customer?.company || undefined,
-        union_id: customer.customer?.union_id,
-        address: {
-          address1: customer.customer?.address?.address1 ?? '',
-          address2: customer.customer?.address?.address2 || undefined,
-          postcode: customer.customer?.address?.postcode ?? '',
-          city: customer.customer?.address?.city ?? '',
-        },
-      }
+    data.customer = {
+      gender: customer.customer?.gender || undefined,
+      lastname: customer.customer?.lastname ?? '',
+      firstname: customer.customer?.firstname ?? '',
+      phone: customer.customer?.phone ?? '',
+      email: customer.customer?.email || undefined,
+      mobile: customer.customer?.mobile || undefined,
+      mobile2: customer.customer?.mobile2 || undefined,
+      company: customer.customer?.company || undefined,
+      union_id: customer.customer?.union_id,
+      address: {
+        address1: customer.customer?.address?.address1 ?? '',
+        address2: customer.customer?.address?.address2 || undefined,
+        postcode: customer.customer?.address?.postcode ?? '',
+        city: customer.customer?.address?.city ?? '',
+      },
+    }
+
+    // ISO / Domoprime data (separate object like Symfony params.CustomerContract.iso)
+    const isoData = Object.fromEntries(
+      Object.entries(iso).filter(([, v]) => v !== undefined && v !== '')
+    )
+
+    if (Object.keys(isoData).length > 0) {
+      data.iso = isoData as CreateContractData['iso']
     }
 
     return data
-  }, [customerForm, detailsForm, teamFinanceForm])
+  }, [customerForm, detailsForm, teamFinanceForm, isoForm])
 
   // --- Reset ---
   const resetAll = useCallback(() => {
@@ -182,7 +228,8 @@ export function useContractWizardState() {
     customerForm.reset()
     detailsForm.reset()
     teamFinanceForm.reset()
-  }, [customerForm, detailsForm, teamFinanceForm])
+    isoForm.reset()
+  }, [customerForm, detailsForm, teamFinanceForm, isoForm])
 
   return {
     activeStep,
@@ -190,6 +237,7 @@ export function useContractWizardState() {
     customerForm,
     detailsForm,
     teamFinanceForm,
+    isoForm,
     handleNext,
     handleBack,
     getCombinedFormData,

@@ -21,9 +21,12 @@ import StepperWrapper from '@core/styles/stepper'
 import { useContractWizardState } from './useContractWizardState'
 import { useFilterOptions } from '../../hooks/useFilterOptions'
 import { useContractTranslations } from '../../hooks/useContractTranslations'
+import { useDomoprimeFilterOptions } from '@/modules/AppDomoprime/admin/hooks/useDomoprimeFilterOptions'
+
 import StepCustomer from './steps/StepCustomer'
 import StepContractDetails from './steps/StepContractDetails'
 import StepTeamFinance from './steps/StepTeamFinance'
+import StepIso from './steps/StepIso'
 import StepSummary from './steps/StepSummary'
 
 import type { AxiosError } from 'axios'
@@ -44,9 +47,9 @@ interface CreateContractWizardProps {
 export default function CreateContractWizard({ isOpen, onClose, onCreate }: CreateContractWizardProps) {
   const t = useContractTranslations()
   const { filterOptions, filterOptionsLoading } = useFilterOptions()
+  const { filterOptions: domoprimeOptions, loading: domoprimeOptionsLoading } = useDomoprimeFilterOptions()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [selectedCustomerName, setSelectedCustomerName] = useState('')
 
   const {
     activeStep,
@@ -54,6 +57,7 @@ export default function CreateContractWizard({ isOpen, onClose, onCreate }: Crea
     customerForm,
     detailsForm,
     teamFinanceForm,
+    isoForm,
     handleNext,
     handleBack,
     getCombinedFormData,
@@ -64,6 +68,7 @@ export default function CreateContractWizard({ isOpen, onClose, onCreate }: Crea
     { title: t.wizardStepCustomer, subtitle: t.wizardStepCustomerSubtitle, icon: 'ri-user-line' },
     { title: t.wizardStepDetails, subtitle: t.wizardStepDetailsSubtitle, icon: 'ri-file-list-line' },
     { title: t.wizardStepTeamFinance, subtitle: t.wizardStepTeamFinanceSubtitle, icon: 'ri-team-line' },
+    { title: t.isoStepTitle, subtitle: 'Domoprime ISO', icon: 'ri-home-4-line' },
     { title: t.wizardStepSummary, subtitle: t.wizardStepSummarySubtitle, icon: 'ri-checkbox-circle-line' },
   ]
 
@@ -75,7 +80,6 @@ export default function CreateContractWizard({ isOpen, onClose, onCreate }: Crea
       resetAll()
       setError(null)
       setSubmitting(false)
-      setSelectedCustomerName('')
     }
   }, [isOpen, resetAll])
 
@@ -129,7 +133,7 @@ export default function CreateContractWizard({ isOpen, onClose, onCreate }: Crea
   const renderStepContent = () => {
     switch (activeStep) {
       case 0:
-        return <StepCustomer form={customerForm} t={t} onCustomerSelected={setSelectedCustomerName} />
+        return <StepCustomer form={customerForm} t={t} />
       case 1:
         return <StepContractDetails form={detailsForm} t={t} />
       case 2:
@@ -143,12 +147,23 @@ export default function CreateContractWizard({ isOpen, onClose, onCreate }: Crea
         )
       case 3:
         return (
+          <StepIso
+            form={isoForm}
+            domoprimeOptions={domoprimeOptions}
+            domoprimeOptionsLoading={domoprimeOptionsLoading}
+            filterOptions={filterOptions}
+            t={t}
+          />
+        )
+      case 4:
+        return (
           <StepSummary
             customerForm={customerForm}
             detailsForm={detailsForm}
             teamFinanceForm={teamFinanceForm}
+            isoForm={isoForm}
             filterOptions={filterOptions}
-            selectedCustomerName={selectedCustomerName}
+            domoprimeOptions={domoprimeOptions}
             t={t}
           />
         )

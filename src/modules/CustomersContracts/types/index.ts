@@ -509,6 +509,7 @@ export interface CreateContractData {
   pre_meeting_at?: string;
   doc_at?: string;
   closed_at?: string;
+  install_at?: string;
 
   // Range IDs
   opened_at_range_id?: number;
@@ -603,6 +604,36 @@ export interface CreateContractData {
     product_id: number;
     details?: string;
   }>;
+
+  // ISO / Domoprime data (sent as separate object, matches Symfony params.CustomerContract.iso)
+  iso?: {
+    fiscal_reference_1?: string;
+    fiscal_number_1?: string;
+    fiscal_reference_2?: string;
+    fiscal_number_2?: string;
+    calcul_maprimerenov_manuel?: 'YES' | 'NO';
+    number_of_people?: number;
+    number_of_children?: number;
+    revenue?: number;
+    number_of_fiscal?: number;
+    number_of_parts?: number;
+    tax_credit_used?: number;
+    declarants?: string;
+    previous_energy_id?: number;
+    energy_id?: number;
+    occupation_id?: number;
+    layer_type_id?: number;
+    more_2_years?: 'YES' | 'NO';
+    parcel_reference?: string;
+    parcel_surface?: number;
+    surface_home?: number;
+    surface_top?: number;
+    surface_wall?: number;
+    surface_floor?: number;
+    install_surface_top?: number;
+    install_surface_wall?: number;
+    install_surface_floor?: number;
+  };
 }
 
 export interface UpdateContractData extends Partial<CreateContractData> {}

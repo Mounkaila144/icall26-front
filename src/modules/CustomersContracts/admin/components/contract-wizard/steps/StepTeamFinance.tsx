@@ -66,7 +66,7 @@ export default function StepTeamFinance({ form, filterOptions, filterOptionsLoad
   const showAssistant = canShow('contract_attributions_modify_assistant')
   const showInstaller = canShow('contract_new_installer_user')
   const showCompany = canShow('contract_new_contract_company')
-  const showPolluter = canShow('contract_new_polluter')
+  // polluter_id: no permission gate in Symfony (uses hasValidator only), shown as "Type de travaux"
   const showPartnerLayer = canShow('contract_new_partner_layer')
   const showCampaign = canShow('contract_new_contract_campaign')
   const showOpcRange = canShow('contract_new_opc_range')
@@ -100,12 +100,25 @@ export default function StepTeamFinance({ form, filterOptions, filterOptionsLoad
     { name: 'installer_user_id', label: t.wizardInstaller, options: filterOptions.users, visible: showInstaller },
     { name: 'team_id', label: t.wizardTeam, options: filterOptions.teams, visible: true },
     { name: 'company_id', label: t.wizardCompany, options: filterOptions.companies, visible: showCompany },
+    { name: 'sous_traitant_id', label: t.wizardSousTraitant, options: filterOptions.users, visible: true },
   ]
 
   const visibleTeamFields = teamFields.filter(f => f.visible)
 
   return (
     <Box>
+      {/* Works type section (polluter_id) - first, like Symfony */}
+      <Typography variant='subtitle1' sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+        <i className='ri-hammer-line' />
+        {t.wizardWorksType}
+      </Typography>
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <AutocompleteField name='polluter_id' control={control} label={t.wizardWorksType} options={filterOptions.polluters} />
+        </Grid>
+      </Grid>
+      <Divider sx={{ my: 4 }} />
+
       {/* Team section */}
       {visibleTeamFields.length > 0 ? (
         <>
@@ -125,14 +138,9 @@ export default function StepTeamFinance({ form, filterOptions, filterOptionsLoad
       ) : null}
 
       {/* Additional references (permission-gated) */}
-      {(showPolluter || showPartnerLayer || showCampaign) ? (
+      {(showPartnerLayer || showCampaign) ? (
         <>
           <Grid container spacing={3}>
-            {showPolluter ? (
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <AutocompleteField name='polluter_id' control={control} label={t.wizardPolluter} options={filterOptions.polluters} />
-              </Grid>
-            ) : null}
             {showPartnerLayer ? (
               <Grid size={{ xs: 12, sm: 6 }}>
                 <AutocompleteField name='partner_layer_id' control={control} label={t.wizardPartnerLayer} options={filterOptions.partner_layers} />
@@ -170,6 +178,78 @@ export default function StepTeamFinance({ form, filterOptions, filterOptionsLoad
           <Divider sx={{ my: 4 }} />
         </>
       ) : null}
+
+      {/* Reports section */}
+      <Typography variant='subtitle1' sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+        <i className='ri-file-text-line' />
+        {t.sectionReports}
+      </Typography>
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <Controller
+            name='rapport_installation'
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label={t.wizardRapport}
+                fullWidth
+              />
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <Controller
+            name='rapport_temps'
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label={t.wizardRapportSuivie}
+                fullWidth
+              />
+            )}
+          />
+        </Grid>
+      </Grid>
+
+      <Divider sx={{ my: 4 }} />
+
+      {/* Other section */}
+      <Typography variant='subtitle1' sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+        <i className='ri-information-line' />
+        {t.wizardOtherSection}
+      </Typography>
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <Controller
+            name='periode_cee'
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label={t.wizardPeriodeCee}
+                fullWidth
+              />
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <Controller
+            name='surface_parcelle'
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label={t.wizardSurfaceParcelle}
+                fullWidth
+              />
+            )}
+          />
+        </Grid>
+      </Grid>
+
+      <Divider sx={{ my: 4 }} />
 
       {/* Finance section */}
       <Typography variant='subtitle1' sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>

@@ -14,6 +14,12 @@ export interface ContractColumnDef extends ColumnConfig {
    * If omitted, the column is always visible.
    */
   permissionKey?: string
+  /**
+   * Frontend credential check matching Symfony's $user->hasCredential() pattern.
+   * Format: [['perm1', 'perm2']] = OR logic (any credential suffices).
+   * If set, column is hidden when hasCredential returns false.
+   */
+  credential?: string[][]
   getValue: (row: CustomerContract) => any
   renderCell: (row: CustomerContract) => ReactNode
 }
@@ -29,7 +35,6 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     // ── 1. Date ──
     {
       id: 'date', label: t.colDate, defaultVisible: true,
-      permissionKey: 'opened_at',
       getValue: r => r.opened_at,
       renderCell: r => dateCellMultiLine(r, t)
     },
@@ -85,6 +90,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'sale1', label: t.colSale1, defaultVisible: true,
       permissionKey: 'sale1',
+      credential: [['superadmin', 'admin', 'contract_list_view_sale1']],
       getValue: r => r.sale1?.name,
       renderCell: r => textCell(r.sale1?.name)
     },
@@ -93,6 +99,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'sale2', label: t.colSale2, defaultVisible: true,
       permissionKey: 'sale2',
+      credential: [['superadmin', 'admin', 'contract_list_view_sale2']],
       getValue: r => r.sale2?.name,
       renderCell: r => textCell(r.sale2?.name)
     },
@@ -109,6 +116,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'assistant', label: t.colAssistant, defaultVisible: true,
       permissionKey: 'assistant',
+      credential: [['superadmin', 'admin', 'contract_view_list_assistant', 'contract_list_display_assistant']],
       getValue: r => r.assistant?.name,
       renderCell: r => textCell(r.assistant?.name)
     },
@@ -117,6 +125,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'financial_partner', label: t.colFinancialPartner, defaultVisible: true,
       permissionKey: 'financial_partner',
+      credential: [['superadmin', 'admin', 'contract_view_list_partner']],
       getValue: r => r.financial_partner?.name,
       renderCell: r => textCell(r.financial_partner?.name)
     },
@@ -125,6 +134,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'partner_layer', label: t.colPartnerLayer, defaultVisible: true,
       permissionKey: 'partner_layer',
+      credential: [['superadmin', 'admin', 'contract_view_list_partner_layer']],
       getValue: r => r.partner_layer?.name,
       renderCell: r => textCell(r.partner_layer?.name)
     },
@@ -133,6 +143,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'opc_status', label: t.colOpcStatus, defaultVisible: true,
       permissionKey: 'opc_status',
+      credential: [['superadmin', 'admin', 'contract_view_list_opc_status']],
       getValue: r => r.opc_status?.value ?? r.opc_status?.name,
       renderCell: r => statusChip(r.opc_status)
     },
@@ -141,6 +152,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'admin_status', label: t.colAdminStatus, defaultVisible: true,
       permissionKey: 'admin_status',
+      credential: [['superadmin', 'admin', 'contract_view_list_admin_status']],
       getValue: r => r.admin_status?.value ?? r.admin_status?.name,
       renderCell: r => statusChip(r.admin_status)
     },
@@ -149,6 +161,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'time_status', label: t.colTimeStatus, defaultVisible: true,
       permissionKey: 'time_status',
+      credential: [['superadmin', 'contract_view_list_time_state']],
       getValue: r => r.time_status?.value ?? r.time_status?.name,
       renderCell: r => statusChip(r.time_status)
     },
@@ -157,6 +170,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'polluter', label: t.colPolluter, defaultVisible: true,
       permissionKey: 'polluter',
+      credential: [['superadmin', 'admin', 'contract_view_list_polluter']],
       getValue: r => r.polluter?.name,
       renderCell: r => textCell(r.polluter?.name)
     },
@@ -165,6 +179,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'team', label: t.colTeam, defaultVisible: true,
       permissionKey: 'team',
+      credential: [['superadmin', 'admin', 'contract_view_list_team', 'contract_list_display_team']],
       getValue: r => r.team?.name,
       renderCell: r => textCell(r.team?.name)
     },
@@ -173,6 +188,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'is_confirmed', label: t.colConfirmed, defaultVisible: true,
       permissionKey: 'is_confirmed',
+      credential: [['superadmin', 'contract_view_list_confirmed']],
       getValue: r => r.is_confirmed,
       renderCell: r => booleanChip(isYes(r.is_confirmed), t.chipConfirmed, t.chipNotConfirmed, 'success', 'warning')
     },
@@ -181,6 +197,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'is_hold', label: t.colBlocked, defaultVisible: true,
       permissionKey: 'is_hold',
+      credential: [['superadmin', 'admin', 'contract_view_list_hold']],
       getValue: r => r.is_hold,
       renderCell: r => booleanChip(isYes(r.is_hold), t.chipYes, t.chipNo, 'error', 'success')
     },
@@ -189,6 +206,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'is_hold_quote', label: t.colQuoteBlocked, defaultVisible: true,
       permissionKey: 'is_hold_quote',
+      credential: [['superadmin', 'contract_view_list_hold_quote']],
       getValue: r => r.is_hold_quote,
       renderCell: r => booleanChip(isYes(r.is_hold_quote), t.chipYes, t.chipNo, 'error', 'success')
     },
@@ -252,6 +270,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'surface_top', label: t.colSurfaceTop, defaultVisible: false,
       permissionKey: 'surface_top',
+      credential: [['app_domoprime_iso_contract_list_surface_101', 'app_domoprime_contract_list_surface_from_forms_101', 'app_domoprime_iso_contract_list_surface_from_form_101']],
       getValue: r => r.surface_top,
       renderCell: r => textCell(r.surface_top)
     },
@@ -260,6 +279,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'surface_wall', label: t.colSurfaceWall, defaultVisible: false,
       permissionKey: 'surface_wall',
+      credential: [['app_domoprime_iso_contract_list_surface_102', 'app_domoprime_contract_list_surface_from_forms_102', 'app_domoprime_iso_contract_list_surface_from_form_102']],
       getValue: r => r.surface_wall,
       renderCell: r => textCell(r.surface_wall)
     },
@@ -268,6 +288,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'surface_floor', label: t.colSurfaceFloor, defaultVisible: false,
       permissionKey: 'surface_floor',
+      credential: [['app_domoprime_iso_contract_list_surface_103', 'app_domoprime_contract_list_surface_from_forms_103', 'app_domoprime_iso_contract_list_surface_from_form_103']],
       getValue: r => r.surface_floor,
       renderCell: r => textCell(r.surface_floor)
     },
@@ -276,6 +297,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'surface_parcel', label: t.colSurfaceParcel, defaultVisible: false,
       permissionKey: 'surface_parcel',
+      credential: [['superadmin', 'app_domoprime_iso_contract_list_surface_parcel']],
       getValue: r => r.surface_parcel,
       renderCell: r => textCell(r.surface_parcel)
     },
@@ -292,6 +314,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'class_energy', label: t.colClassEnergy, defaultVisible: false,
       permissionKey: 'class_energy',
+      credential: [['app_domoprime_iso_contract_list_filter_header_class', 'contract_list_calculation_class_pager']],
       getValue: r => r.class_energy,
       renderCell: r => textCell(r.class_energy)
     },
@@ -308,6 +331,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'install_status', label: t.colInstallStatus, defaultVisible: true,
       permissionKey: 'install_status',
+      credential: [['superadmin', 'contract_list_install_state']],
       getValue: r => r.install_status?.value ?? r.install_status?.name,
       renderCell: r => statusChip(r.install_status)
     },
@@ -316,6 +340,7 @@ export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
     {
       id: 'status', label: t.colStatus, defaultVisible: true,
       permissionKey: 'status',
+      credential: [['superadmin', 'admin', 'contract_list_status']],
       getValue: r => r.status,
       renderCell: r => booleanChip(r.status === 'ACTIVE', t.chipActive, t.statusDeleted, 'success', 'error')
     },

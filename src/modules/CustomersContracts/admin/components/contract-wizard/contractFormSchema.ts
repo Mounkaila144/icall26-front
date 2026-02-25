@@ -7,43 +7,14 @@ import {
   nonEmpty,
   union,
   literal,
-  variant,
 } from 'valibot'
 import type { InferInput } from 'valibot'
 
 // ---------------------------------------------------------------------------
-// Step 1 – Customer
+// Step 1 – Customer (always new)
 // ---------------------------------------------------------------------------
 
-const existingCustomerSchema = object({
-  customerMode: literal('existing'),
-  customer_id: number(),
-  customer: optional(
-    object({
-      gender: optional(string()),
-      lastname: optional(string()),
-      firstname: optional(string()),
-      phone: optional(string()),
-      email: optional(string()),
-      mobile: optional(string()),
-      mobile2: optional(string()),
-      company: optional(string()),
-      union_id: optional(number()),
-      address: optional(
-        object({
-          address1: optional(string()),
-          address2: optional(string()),
-          postcode: optional(string()),
-          city: optional(string()),
-        })
-      ),
-    })
-  ),
-})
-
-const newCustomerSchema = object({
-  customerMode: literal('new'),
-  customer_id: optional(number()),
+export const customerSchema = object({
   customer: object({
     gender: optional(string()),
     lastname: pipe(string(), nonEmpty('Required')),
@@ -62,11 +33,6 @@ const newCustomerSchema = object({
     }),
   }),
 })
-
-export const customerSchema = variant('customerMode', [
-  existingCustomerSchema,
-  newCustomerSchema,
-])
 
 export type CustomerFormData = InferInput<typeof customerSchema>
 
@@ -91,6 +57,9 @@ export const contractDetailsSchema = object({
   pre_meeting_at: optional(string()),
   doc_at: optional(string()),
   closed_at: optional(string()),
+
+  // Installation date
+  install_at: optional(string()),
 
   // Other
   has_tva: optional(string()),
@@ -130,6 +99,17 @@ export const teamFinanceSchema = object({
   opc_range_id: optional(number()),
   sav_at_range_id: optional(number()),
 
+  // Sous-traitant
+  sous_traitant_id: optional(number()),
+
+  // Reports
+  rapport_installation: optional(string()),
+  rapport_temps: optional(string()),
+
+  // Other
+  periode_cee: optional(string()),
+  surface_parcelle: optional(string()),
+
   // Status
   state_id: optional(number()),
   install_state_id: optional(number()),
@@ -142,3 +122,49 @@ export const teamFinanceSchema = object({
 })
 
 export type TeamFinanceFormData = InferInput<typeof teamFinanceSchema>
+
+// ---------------------------------------------------------------------------
+// Step 4 – Isolation + (ISO / Domoprime data)
+// Matches Symfony app_domoprime_iso: t_domoprime_iso_customer_request
+// No permission checks in Symfony (all fields use hasValidator only)
+// ---------------------------------------------------------------------------
+
+export const isoSchema = object({
+  // Informations fiscales
+  fiscal_reference_1: optional(string()),
+  fiscal_number_1: optional(string()),
+  fiscal_reference_2: optional(string()),
+  fiscal_number_2: optional(string()),
+
+  // Fiscal
+  calcul_maprimerenov_manuel: optional(union([literal('YES'), literal('NO')])),
+  number_of_people: optional(number()),
+  number_of_children: optional(number()),
+  revenue: optional(number()),
+  number_of_fiscal: optional(number()),
+  number_of_parts: optional(number()),
+  tax_credit_used: optional(number()),
+  declarants: optional(string()),
+
+  // Habitat
+  previous_energy_id: optional(number()),
+  energy_id: optional(number()),
+  occupation_id: optional(number()),
+  layer_type_id: optional(number()),
+  more_2_years: optional(union([literal('YES'), literal('NO')])),
+  parcel_reference: optional(string()),
+  parcel_surface: optional(number()),
+  surface_home: optional(number()),
+
+  // Surfaces
+  surface_top: optional(number()),
+  surface_wall: optional(number()),
+  surface_floor: optional(number()),
+
+  // Surfaces Installateur
+  install_surface_top: optional(number()),
+  install_surface_wall: optional(number()),
+  install_surface_floor: optional(number()),
+})
+
+export type IsoFormData = InferInput<typeof isoSchema>
