@@ -57,7 +57,6 @@ export function useContractWizardState() {
       pre_meeting_at: '',
       doc_at: '',
       closed_at: '',
-      install_at: '',
       has_tva: '',
       reference: '',
       remarks: '',
@@ -176,7 +175,6 @@ export function useContractWizardState() {
       pre_meeting_at: details.pre_meeting_at || undefined,
       doc_at: details.doc_at || undefined,
       closed_at: details.closed_at || undefined,
-      install_at: details.install_at || undefined,
 
       // Other details
       has_tva: details.has_tva || undefined,

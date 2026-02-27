@@ -517,7 +517,6 @@ export interface CreateContractData {
   pre_meeting_at?: string;
   doc_at?: string;
   closed_at?: string;
-  install_at?: string;
 
   // Range IDs
   opened_at_range_id?: number;

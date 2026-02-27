@@ -244,8 +244,8 @@
 
   "dialogClose": "Fermer",
 
-  "wizardStepCustomer": "Client",
-  "wizardStepDetails": "Détails du contrat",
+  "wizardStepCustomer": "Coordonnées Client\n",
+  "wizardStepDetails": "Etat de contrat",
   "wizardStepTeamFinance": "Équipe & Finance",
   "wizardStepSummary": "Récapitulatif",
   "wizardStepCustomerSubtitle": "Informations client",

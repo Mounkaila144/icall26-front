@@ -30,7 +30,6 @@ export default function StepContractDetails({ form, t }: StepContractDetailsProp
   const showPreMeetingAt = canShow('contract_new_pre_meeting_at_date')
   const showDocAt = canShow('contract_new_doc_at_date')
   const showClosedAt = canShow('contract_new_closed_at')
-  const showInstallAt = canShow('contract_new_install_at_date')
   const showHasTva = canShow('contract_new_hastva')
   const showRemarks = canShow('contract_new_remarks')
 
@@ -61,7 +60,6 @@ export default function StepContractDetails({ form, t }: StepContractDetailsProp
     { name: 'pre_meeting_at', label: t.datePreMeeting, visible: showPreMeetingAt },
     { name: 'doc_at', label: t.dateDoc, visible: showDocAt },
     { name: 'closed_at', label: t.dateClosed, visible: showClosedAt },
-    { name: 'install_at', label: t.wizardDateInstallation, visible: showInstallAt },
   ]
 
   const visibleDefaultDates = defaultDates.filter(d => d.visible)

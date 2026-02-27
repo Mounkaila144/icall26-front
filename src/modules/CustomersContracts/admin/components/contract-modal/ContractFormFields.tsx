@@ -4,6 +4,7 @@ import React from 'react';
 
 import type { ContractTranslations } from '../../hooks/useContractTranslations';
 import type { ContractFormData } from './contractFormDefaults';
+import type { ContractFilterOptions } from '../../../types';
 import {
   formGroupStyle,
   labelStyle,
@@ -19,73 +20,82 @@ export interface FieldSectionProps {
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   disabledFields?: string[];
   hiddenFields?: string[];
+  filterOptions?: ContractFilterOptions;
   t: ContractTranslations;
 }
 
 // ==================== DATES ==================== //
 
-export const DatesFields = React.memo(({ formData, handleInputChange, t }: FieldSectionProps) => (
+export const DatesFields = React.memo(({ formData, handleInputChange, hiddenFields = [], t }: FieldSectionProps) => (
   <>
     <div style={rowStyle}>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="quoted_at">
-          {t.dateQuote + ' '}<span style={{ color: '#dc3545' }}>*</span>
-        </label>
-        <input
-          type="date"
-          id="quoted_at"
-          name="quoted_at"
-          value={formData.quoted_at}
-          onChange={handleInputChange}
-          required
-          style={inputStyle}
-        />
-      </div>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="billing_at">
-          {t.dateBilling + ' '}<span style={{ color: '#dc3545' }}>*</span>
-        </label>
-        <input
-          type="date"
-          id="billing_at"
-          name="billing_at"
-          value={formData.billing_at}
-          onChange={handleInputChange}
-          required
-          style={inputStyle}
-        />
-      </div>
+      {!hiddenFields.includes('quoted_at') && (
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="quoted_at">
+            {t.dateQuote + ' '}<span style={{ color: '#dc3545' }}>*</span>
+          </label>
+          <input
+            type="date"
+            id="quoted_at"
+            name="quoted_at"
+            value={formData.quoted_at}
+            onChange={handleInputChange}
+            required
+            style={inputStyle}
+          />
+        </div>
+      )}
+      {!hiddenFields.includes('billing_at') && (
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="billing_at">
+            {t.dateBilling + ' '}<span style={{ color: '#dc3545' }}>*</span>
+          </label>
+          <input
+            type="date"
+            id="billing_at"
+            name="billing_at"
+            value={formData.billing_at}
+            onChange={handleInputChange}
+            required
+            style={inputStyle}
+          />
+        </div>
+      )}
     </div>
 
     <div style={rowStyle}>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="opened_at">
-          {t.dateEngagement + ' '}<span style={{ color: '#dc3545' }}>*</span>
-        </label>
-        <input
-          type="date"
-          id="opened_at"
-          name="opened_at"
-          value={formData.opened_at}
-          onChange={handleInputChange}
-          required
-          style={inputStyle}
-        />
-      </div>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="opc_at">
-          {t.dateOpc + ' '}<span style={{ color: '#dc3545' }}>*</span>
-        </label>
-        <input
-          type="date"
-          id="opc_at"
-          name="opc_at"
-          value={formData.opc_at}
-          onChange={handleInputChange}
-          required
-          style={inputStyle}
-        />
-      </div>
+      {!hiddenFields.includes('opened_at') && (
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="opened_at">
+            {t.dateEngagement + ' '}<span style={{ color: '#dc3545' }}>*</span>
+          </label>
+          <input
+            type="date"
+            id="opened_at"
+            name="opened_at"
+            value={formData.opened_at}
+            onChange={handleInputChange}
+            required
+            style={inputStyle}
+          />
+        </div>
+      )}
+      {!hiddenFields.includes('opc_at') && (
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="opc_at">
+            {t.dateOpc + ' '}<span style={{ color: '#dc3545' }}>*</span>
+          </label>
+          <input
+            type="date"
+            id="opc_at"
+            name="opc_at"
+            value={formData.opc_at}
+            onChange={handleInputChange}
+            required
+            style={inputStyle}
+          />
+        </div>
+      )}
     </div>
 
     <div style={row3Style}>
@@ -102,32 +112,36 @@ export const DatesFields = React.memo(({ formData, handleInputChange, t }: Field
           style={inputStyle}
         />
       </div>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="payment_at">
-          {t.datePayment}
-        </label>
-        <input
-          type="date"
-          id="payment_at"
-          name="payment_at"
-          value={formData.payment_at}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
-      </div>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="apf_at">
-          {t.dateApf}
-        </label>
-        <input
-          type="date"
-          id="apf_at"
-          name="apf_at"
-          value={formData.apf_at}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
-      </div>
+      {!hiddenFields.includes('payment_at') && (
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="payment_at">
+            {t.datePayment}
+          </label>
+          <input
+            type="date"
+            id="payment_at"
+            name="payment_at"
+            value={formData.payment_at}
+            onChange={handleInputChange}
+            style={inputStyle}
+          />
+        </div>
+      )}
+      {!hiddenFields.includes('apf_at') && (
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="apf_at">
+            {t.dateApf}
+          </label>
+          <input
+            type="date"
+            id="apf_at"
+            name="apf_at"
+            value={formData.apf_at}
+            onChange={handleInputChange}
+            style={inputStyle}
+          />
+        </div>
+      )}
     </div>
   </>
 ));
@@ -254,345 +268,397 @@ export const CustomerFields = React.memo(({ formData, handleInputChange, hiddenF
 
 // ==================== TEAM ==================== //
 
-export const TeamFields = React.memo(({ formData, handleInputChange, t }: FieldSectionProps) => (
+export const TeamFields = React.memo(({ formData, handleInputChange, hiddenFields = [], t }: FieldSectionProps) => (
   <>
     <div style={row3Style}>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="telepro_id">
-          {t.teleproId}
-        </label>
-        <input
-          type="number"
-          id="telepro_id"
-          name="telepro_id"
-          value={formData.telepro_id || ''}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
-      </div>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="sale_1_id">
-          {t.sale1Id}
-        </label>
-        <input
-          type="number"
-          id="sale_1_id"
-          name="sale_1_id"
-          value={formData.sale_1_id || ''}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
-      </div>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="sale_2_id">
-          {t.sale2Id}
-        </label>
-        <input
-          type="number"
-          id="sale_2_id"
-          name="sale_2_id"
-          value={formData.sale_2_id || ''}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
-      </div>
+      {!hiddenFields.includes('telepro_id') && (
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="telepro_id">
+            {t.teleproId}
+          </label>
+          <input
+            type="number"
+            id="telepro_id"
+            name="telepro_id"
+            value={formData.telepro_id || ''}
+            onChange={handleInputChange}
+            style={inputStyle}
+          />
+        </div>
+      )}
+      {!hiddenFields.includes('sale_1_id') && (
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="sale_1_id">
+            {t.sale1Id}
+          </label>
+          <input
+            type="number"
+            id="sale_1_id"
+            name="sale_1_id"
+            value={formData.sale_1_id || ''}
+            onChange={handleInputChange}
+            style={inputStyle}
+          />
+        </div>
+      )}
+      {!hiddenFields.includes('sale_2_id') && (
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="sale_2_id">
+            {t.sale2Id}
+          </label>
+          <input
+            type="number"
+            id="sale_2_id"
+            name="sale_2_id"
+            value={formData.sale_2_id || ''}
+            onChange={handleInputChange}
+            style={inputStyle}
+          />
+        </div>
+      )}
     </div>
 
     <div style={row3Style}>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="manager_id">
-          {t.managerId}
-        </label>
-        <input
-          type="number"
-          id="manager_id"
-          name="manager_id"
-          value={formData.manager_id || ''}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
-      </div>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="assistant_id">
-          {t.assistantId}
-        </label>
-        <input
-          type="number"
-          id="assistant_id"
-          name="assistant_id"
-          value={formData.assistant_id || ''}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
-      </div>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="installer_user_id">
-          {t.installerId}
-        </label>
-        <input
-          type="number"
-          id="installer_user_id"
-          name="installer_user_id"
-          value={formData.installer_user_id || ''}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
-      </div>
+      {!hiddenFields.includes('manager_id') && (
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="manager_id">
+            {t.managerId}
+          </label>
+          <input
+            type="number"
+            id="manager_id"
+            name="manager_id"
+            value={formData.manager_id || ''}
+            onChange={handleInputChange}
+            style={inputStyle}
+          />
+        </div>
+      )}
+      {!hiddenFields.includes('assistant_id') && (
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="assistant_id">
+            {t.assistantId}
+          </label>
+          <input
+            type="number"
+            id="assistant_id"
+            name="assistant_id"
+            value={formData.assistant_id || ''}
+            onChange={handleInputChange}
+            style={inputStyle}
+          />
+        </div>
+      )}
+      {!hiddenFields.includes('installer_user_id') && (
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="installer_user_id">
+            {t.installerId}
+          </label>
+          <input
+            type="number"
+            id="installer_user_id"
+            name="installer_user_id"
+            value={formData.installer_user_id || ''}
+            onChange={handleInputChange}
+            style={inputStyle}
+          />
+        </div>
+      )}
     </div>
 
     <div style={rowStyle}>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="team_id">
-          {t.teamId}
-        </label>
-        <input
-          type="number"
-          id="team_id"
-          name="team_id"
-          value={formData.team_id || ''}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
-      </div>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="company_id">
-          {t.companyId}
-        </label>
-        <input
-          type="number"
-          id="company_id"
-          name="company_id"
-          value={formData.company_id || ''}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
-      </div>
+      {!hiddenFields.includes('team_id') && (
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="team_id">
+            {t.teamId}
+          </label>
+          <input
+            type="number"
+            id="team_id"
+            name="team_id"
+            value={formData.team_id || ''}
+            onChange={handleInputChange}
+            style={inputStyle}
+          />
+        </div>
+      )}
+      {!hiddenFields.includes('company_id') && (
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="company_id">
+            {t.companyId}
+          </label>
+          <input
+            type="number"
+            id="company_id"
+            name="company_id"
+            value={formData.company_id || ''}
+            onChange={handleInputChange}
+            style={inputStyle}
+          />
+        </div>
+      )}
     </div>
   </>
 ));
 
 // ==================== FINANCIAL ==================== //
 
-export const FinancialFields = React.memo(({ formData, handleInputChange, t }: FieldSectionProps) => (
+export const FinancialFields = React.memo(({ formData, handleInputChange, hiddenFields = [], t }: FieldSectionProps) => (
   <>
     <div style={row3Style}>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="financial_partner_id">
-          {t.financialPartnerId}
-        </label>
-        <input
-          type="number"
-          id="financial_partner_id"
-          name="financial_partner_id"
-          value={formData.financial_partner_id || ''}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
-      </div>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="total_price_without_taxe">
-          {t.priceHt}
-        </label>
-        <input
-          type="number"
-          step="0.01"
-          id="total_price_without_taxe"
-          name="total_price_without_taxe"
-          value={formData.total_price_without_taxe || ''}
-          onChange={handleInputChange}
-          style={inputStyle}
-          placeholder="0.00"
-        />
-      </div>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="total_price_with_taxe">
-          {t.priceTtc}
-        </label>
-        <input
-          type="number"
-          step="0.01"
-          id="total_price_with_taxe"
-          name="total_price_with_taxe"
-          value={formData.total_price_with_taxe || ''}
-          onChange={handleInputChange}
-          style={inputStyle}
-          placeholder="0.00"
-        />
-      </div>
+      {!hiddenFields.includes('financial_partner_id') && (
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="financial_partner_id">
+            {t.financialPartnerId}
+          </label>
+          <input
+            type="number"
+            id="financial_partner_id"
+            name="financial_partner_id"
+            value={formData.financial_partner_id || ''}
+            onChange={handleInputChange}
+            style={inputStyle}
+          />
+        </div>
+      )}
+      {!hiddenFields.includes('total_price_without_taxe') && (
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="total_price_without_taxe">
+            {t.priceHt}
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            id="total_price_without_taxe"
+            name="total_price_without_taxe"
+            value={formData.total_price_without_taxe || ''}
+            onChange={handleInputChange}
+            style={inputStyle}
+            placeholder="0.00"
+          />
+        </div>
+      )}
+      {!hiddenFields.includes('total_price_with_taxe') && (
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="total_price_with_taxe">
+            {t.priceTtc}
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            id="total_price_with_taxe"
+            name="total_price_with_taxe"
+            value={formData.total_price_with_taxe || ''}
+            onChange={handleInputChange}
+            style={inputStyle}
+            placeholder="0.00"
+          />
+        </div>
+      )}
     </div>
 
-    <div style={formGroupStyle}>
-      <label style={labelStyle} htmlFor="tax_id">
-        {t.taxId}
-      </label>
-      <input
-        type="number"
-        id="tax_id"
-        name="tax_id"
-        value={formData.tax_id || ''}
-        onChange={handleInputChange}
-        style={inputStyle}
-      />
-    </div>
+    {!hiddenFields.includes('tax_id') && (
+      <div style={formGroupStyle}>
+        <label style={labelStyle} htmlFor="tax_id">
+          {t.taxId}
+        </label>
+        <input
+          type="number"
+          id="tax_id"
+          name="tax_id"
+          value={formData.tax_id || ''}
+          onChange={handleInputChange}
+          style={inputStyle}
+        />
+      </div>
+    )}
   </>
 ));
 
 // ==================== STATUS ==================== //
 
-export const StatusFields = React.memo(({ formData, handleInputChange, t }: FieldSectionProps) => (
-  <>
-    <div style={row3Style}>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="state_id">
-          {t.stateId}
-        </label>
-        <input
-          type="number"
-          id="state_id"
-          name="state_id"
-          value={formData.state_id || ''}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
-      </div>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="install_state_id">
-          {t.installStateId}
-        </label>
-        <input
-          type="number"
-          id="install_state_id"
-          name="install_state_id"
-          value={formData.install_state_id || ''}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
-      </div>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="admin_status_id">
-          {t.adminStatusId}
-        </label>
-        <input
-          type="number"
-          id="admin_status_id"
-          name="admin_status_id"
-          value={formData.admin_status_id || ''}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
-      </div>
-    </div>
+export const StatusFields = React.memo(({ formData, handleInputChange, hiddenFields = [], filterOptions, t }: FieldSectionProps) => {
+  const contractStatuses = filterOptions?.contract_statuses ?? [];
+  const installStatuses = filterOptions?.install_statuses ?? [];
+  const adminStatuses = filterOptions?.admin_statuses ?? [];
 
-    <div style={row3Style}>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="opened_at_range_id">
-          {t.openedAtRangeId}
-        </label>
-        <input
-          type="number"
-          id="opened_at_range_id"
-          name="opened_at_range_id"
-          value={formData.opened_at_range_id || ''}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
+  return (
+    <>
+      <div style={row3Style}>
+        {!hiddenFields.includes('state_id') && (
+          <div style={formGroupStyle}>
+            <label style={labelStyle} htmlFor="state_id">
+              {t.stateId}
+            </label>
+            <select
+              id="state_id"
+              name="state_id"
+              value={formData.state_id || ''}
+              onChange={handleInputChange}
+              style={inputStyle}
+            >
+              <option value="">--</option>
+              {contractStatuses.map(opt => (
+                <option key={opt.id} value={opt.id}>{opt.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="install_state_id">
+            {t.installStateId}
+          </label>
+          <select
+            id="install_state_id"
+            name="install_state_id"
+            value={formData.install_state_id || ''}
+            onChange={handleInputChange}
+            style={inputStyle}
+          >
+            <option value="">--</option>
+            {installStatuses.map(opt => (
+              <option key={opt.id} value={opt.id}>{opt.name}</option>
+            ))}
+          </select>
+        </div>
+        {!hiddenFields.includes('admin_status_id') && (
+          <div style={formGroupStyle}>
+            <label style={labelStyle} htmlFor="admin_status_id">
+              {t.adminStatusId}
+            </label>
+            <select
+              id="admin_status_id"
+              name="admin_status_id"
+              value={formData.admin_status_id || ''}
+              onChange={handleInputChange}
+              style={inputStyle}
+            >
+              <option value="">--</option>
+              {adminStatuses.map(opt => (
+                <option key={opt.id} value={opt.id}>{opt.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="opc_range_id">
-          {t.opcRangeId}
-        </label>
-        <input
-          type="number"
-          id="opc_range_id"
-          name="opc_range_id"
-          value={formData.opc_range_id || ''}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
-      </div>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="meeting_id">
-          {t.meetingId}
-        </label>
-        <input
-          type="number"
-          id="meeting_id"
-          name="meeting_id"
-          value={formData.meeting_id || ''}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
-      </div>
-    </div>
 
-    <div style={rowStyle}>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="is_signed">
-          {t.isSigned}
-        </label>
-        <select
-          id="is_signed"
-          name="is_signed"
-          value={formData.is_signed}
-          onChange={handleInputChange}
-          style={inputStyle}
-        >
-          <option value="NO">{t.no}</option>
-          <option value="YES">{t.yes}</option>
-        </select>
+      <div style={row3Style}>
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="opened_at_range_id">
+            {t.openedAtRangeId}
+          </label>
+          <input
+            type="number"
+            id="opened_at_range_id"
+            name="opened_at_range_id"
+            value={formData.opened_at_range_id || ''}
+            onChange={handleInputChange}
+            style={inputStyle}
+          />
+        </div>
+        {!hiddenFields.includes('opc_range_id') && (
+          <div style={formGroupStyle}>
+            <label style={labelStyle} htmlFor="opc_range_id">
+              {t.opcRangeId}
+            </label>
+            <input
+              type="number"
+              id="opc_range_id"
+              name="opc_range_id"
+              value={formData.opc_range_id || ''}
+              onChange={handleInputChange}
+              style={inputStyle}
+            />
+          </div>
+        )}
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="meeting_id">
+            {t.meetingId}
+          </label>
+          <input
+            type="number"
+            id="meeting_id"
+            name="meeting_id"
+            value={formData.meeting_id || ''}
+            onChange={handleInputChange}
+            style={inputStyle}
+          />
+        </div>
       </div>
-      <div style={formGroupStyle}>
-        <label style={labelStyle} htmlFor="status">
-          {t.statusLabel}
-        </label>
-        <select
-          id="status"
-          name="status"
-          value={formData.status}
-          onChange={handleInputChange}
-          style={inputStyle}
-        >
-          <option value="ACTIVE">{t.statusActive}</option>
-          <option value="DELETE">{t.statusDeleted}</option>
-        </select>
+
+      <div style={rowStyle}>
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="is_signed">
+            {t.isSigned}
+          </label>
+          <select
+            id="is_signed"
+            name="is_signed"
+            value={formData.is_signed}
+            onChange={handleInputChange}
+            style={inputStyle}
+          >
+            <option value="NO">{t.no}</option>
+            <option value="YES">{t.yes}</option>
+          </select>
+        </div>
+        <div style={formGroupStyle}>
+          <label style={labelStyle} htmlFor="status">
+            {t.statusLabel}
+          </label>
+          <select
+            id="status"
+            name="status"
+            value={formData.status}
+            onChange={handleInputChange}
+            style={inputStyle}
+          >
+            <option value="ACTIVE">{t.statusActive}</option>
+            <option value="DELETE">{t.statusDeleted}</option>
+          </select>
+        </div>
       </div>
-    </div>
-  </>
-));
+    </>
+  );
+});
 
 // ==================== OTHER ==================== //
 
-export const OtherFields = React.memo(({ formData, handleInputChange, disabledFields = [], t }: FieldSectionProps) => (
+export const OtherFields = React.memo(({ formData, handleInputChange, disabledFields = [], hiddenFields = [], t }: FieldSectionProps) => (
   <>
-    <div style={formGroupStyle}>
-      <label style={labelStyle} htmlFor="reference">
-        {t.reference}
-      </label>
-      <input
-        type="text"
-        id="reference"
-        name="reference"
-        value={formData.reference}
-        onChange={handleInputChange}
-        style={inputStyle}
-        disabled={disabledFields.includes('reference')}
-        placeholder={disabledFields.includes('reference') ? undefined : t.referencePlaceholder}
-      />
-    </div>
+    {!hiddenFields.includes('reference') && (
+      <div style={formGroupStyle}>
+        <label style={labelStyle} htmlFor="reference">
+          {t.reference}
+        </label>
+        <input
+          type="text"
+          id="reference"
+          name="reference"
+          value={formData.reference}
+          onChange={handleInputChange}
+          style={inputStyle}
+          disabled={disabledFields.includes('reference')}
+          placeholder={disabledFields.includes('reference') ? undefined : t.referencePlaceholder}
+        />
+      </div>
+    )}
 
-    <div style={formGroupStyle}>
-      <label style={labelStyle} htmlFor="remarks">
-        {t.remarks}
-      </label>
-      <textarea
-        id="remarks"
-        name="remarks"
-        value={formData.remarks}
-        onChange={handleInputChange}
-        style={textareaStyle}
-        placeholder={t.remarksPlaceholder}
-      />
-    </div>
+    {!hiddenFields.includes('remarks') && (
+      <div style={formGroupStyle}>
+        <label style={labelStyle} htmlFor="remarks">
+          {t.remarks}
+        </label>
+        <textarea
+          id="remarks"
+          name="remarks"
+          value={formData.remarks}
+          onChange={handleInputChange}
+          style={textareaStyle}
+          placeholder={t.remarksPlaceholder}
+        />
+      </div>
+    )}
 
     <div style={formGroupStyle}>
       <label style={labelStyle} htmlFor="customer_id">

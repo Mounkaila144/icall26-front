@@ -23,11 +23,22 @@ export function useWizardPermissions() {
 
   /**
    * SHOW credential: field visible if user has the credential.
+   * Symfony pattern: ['superadmin', 'credential']
    * Superadmin sees all fields (hasCredential returns true for superadmin).
    */
   const canShow = useCallback(
     (credential: string) => hasCredential(credential),
     [hasCredential]
+  )
+
+  /**
+   * SHOW credential for admin-level fields.
+   * Symfony pattern: ['superadmin', 'admin', 'credential']
+   * Field visible if user is superadmin OR admin OR has the specific credential.
+   */
+  const canShowForAdmin = useCallback(
+    (credential: string) => hasCredential(credential) || (permissions?.is_admin ?? false),
+    [hasCredential, permissions]
   )
 
   /**
@@ -40,5 +51,5 @@ export function useWizardPermissions() {
     [rawPermissionSet]
   )
 
-  return { canShow, shouldRemove }
+  return { canShow, canShowForAdmin, shouldRemove }
 }

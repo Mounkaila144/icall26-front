@@ -56,31 +56,37 @@ function AutocompleteField({
 
 export default function StepTeamFinance({ form, filterOptions, filterOptionsLoading, t }: StepTeamFinanceProps) {
   const { control } = form
-  const { canShow, shouldRemove } = useWizardPermissions()
+  const { canShow, canShowForAdmin, shouldRemove } = useWizardPermissions()
 
-  // Team attribution credentials (SHOW)
-  const showTelepro = canShow('contract_attributions_modify_telepro')
-  const showSale1 = canShow('contract_attributions_modify_sale1')
-  const showSale2 = canShow('contract_attributions_modify_sale2')
-  const showManager = canShow('contract_attributions_modify_managers')
-  const showAssistant = canShow('contract_attributions_modify_assistant')
+  // Team attribution credentials — Symfony: ['superadmin', 'admin', 'credential']
+  const showTelepro = canShowForAdmin('contract_attributions_modify_telepro')
+  const showSale1 = canShowForAdmin('contract_attributions_modify_sale1')
+  const showSale2 = canShowForAdmin('contract_attributions_modify_sale2')
+  const showManager = canShowForAdmin('contract_attributions_modify_managers')
+  const showAssistant = canShowForAdmin('contract_attributions_modify_assistant')
   const showInstaller = canShow('contract_new_installer_user')
   const showCompany = canShow('contract_new_contract_company')
-  // polluter_id: no permission gate in Symfony (uses hasValidator only), shown as "Type de travaux"
+  const showPolluter = canShowForAdmin('contract_new_polluter')
+  const hideTeam = shouldRemove('contract_attributions_modify_no_team')
   const showPartnerLayer = canShow('contract_new_partner_layer')
   const showCampaign = canShow('contract_new_contract_campaign')
-  const showOpcRange = canShow('contract_new_opc_range')
+  const showOpcRange = canShowForAdmin('contract_new_opc_range')
   const showSavRange = canShow('contract_new_sav_at_range')
-  const showAdminStatus = canShow('contract_new_admin_status')
+  const showAdminStatus = canShowForAdmin('contract_new_admin_status')
   const showTimeStatus = canShow('contract_new_time_state')
   const showIsBillable = canShow('contract_new_is_billable')
 
-  // Finance remove credentials (REMOVE)
+  // Finance remove credentials (REMOVE) — form-level
   const hideFinancialPartner = shouldRemove('contract_new_financial_partner_remove')
   const hideTotalPriceTtc = shouldRemove('contract_new_total_price_with_taxe_remove')
   const hideTotalPriceHt = shouldRemove('contract_new_total_price_without_taxe_remove')
   const hideTaxId = shouldRemove('contract_new_tax_id_remove')
   const hideState = shouldRemove('contract_new_remove_state')
+
+  // Finance template-level SHOW gates — Symfony: ['superadminxx', 'credential']
+  const showTotalPriceTtc = canShow('contract_new_total_price_with_taxe')
+  const showTotalPriceHt = canShow('contract_new_total_price_without_taxe')
+  const showTax = canShow('contract_new_tva')
 
   if (filterOptionsLoading) {
     return (
@@ -98,7 +104,7 @@ export default function StepTeamFinance({ form, filterOptions, filterOptionsLoad
     { name: 'manager_id', label: t.wizardManager, options: filterOptions.users, visible: showManager },
     { name: 'assistant_id', label: t.wizardAssistant, options: filterOptions.users, visible: showAssistant },
     { name: 'installer_user_id', label: t.wizardInstaller, options: filterOptions.users, visible: showInstaller },
-    { name: 'team_id', label: t.wizardTeam, options: filterOptions.teams, visible: true },
+    { name: 'team_id', label: t.wizardTeam, options: filterOptions.teams, visible: !hideTeam },
     { name: 'company_id', label: t.wizardCompany, options: filterOptions.companies, visible: showCompany },
     { name: 'sous_traitant_id', label: t.wizardSousTraitant, options: filterOptions.users, visible: true },
   ]
@@ -107,17 +113,21 @@ export default function StepTeamFinance({ form, filterOptions, filterOptionsLoad
 
   return (
     <Box>
-      {/* Works type section (polluter_id) - first, like Symfony */}
-      <Typography variant='subtitle1' sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        <i className='ri-hammer-line' />
-        {t.wizardWorksType}
-      </Typography>
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, sm: 6 }}>
-          <AutocompleteField name='polluter_id' control={control} label={t.wizardWorksType} options={filterOptions.polluters} />
-        </Grid>
-      </Grid>
-      <Divider sx={{ my: 4 }} />
+      {/* Works type section (polluter_id) - gated by contract_new_polluter */}
+      {showPolluter ? (
+        <>
+          <Typography variant='subtitle1' sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <i className='ri-hammer-line' />
+            {t.wizardWorksType}
+          </Typography>
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <AutocompleteField name='polluter_id' control={control} label={t.wizardWorksType} options={filterOptions.polluters} />
+            </Grid>
+          </Grid>
+          <Divider sx={{ my: 4 }} />
+        </>
+      ) : null}
 
       {/* Team section */}
       {visibleTeamFields.length > 0 ? (
@@ -262,7 +272,7 @@ export default function StepTeamFinance({ form, filterOptions, filterOptionsLoad
             <AutocompleteField name='financial_partner_id' control={control} label={t.wizardFinancialPartner} options={filterOptions.financial_partners} />
           </Grid>
         ) : null}
-        {!hideTaxId ? (
+        {!hideTaxId && showTax ? (
           <Grid size={{ xs: 12, sm: 6 }}>
             <Controller
               name='tax_id'
@@ -280,7 +290,7 @@ export default function StepTeamFinance({ form, filterOptions, filterOptionsLoad
             />
           </Grid>
         ) : null}
-        {!hideTotalPriceHt ? (
+        {!hideTotalPriceHt && showTotalPriceHt ? (
           <Grid size={{ xs: 12, sm: 6 }}>
             <Controller
               name='total_price_without_taxe'
@@ -303,7 +313,7 @@ export default function StepTeamFinance({ form, filterOptions, filterOptionsLoad
             />
           </Grid>
         ) : null}
-        {!hideTotalPriceTtc ? (
+        {!hideTotalPriceTtc && showTotalPriceTtc ? (
           <Grid size={{ xs: 12, sm: 6 }}>
             <Controller
               name='total_price_with_taxe'

@@ -58,9 +58,6 @@ export const contractDetailsSchema = object({
   doc_at: optional(string()),
   closed_at: optional(string()),
 
-  // Installation date
-  install_at: optional(string()),
-
   // Other
   has_tva: optional(string()),
   reference: optional(string()),

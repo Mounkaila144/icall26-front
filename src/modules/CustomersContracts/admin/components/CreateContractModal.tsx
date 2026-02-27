@@ -17,6 +17,8 @@ import {
   OtherFields,
 } from './contract-modal/ContractFormFields';
 import type { FieldSectionProps } from './contract-modal/ContractFormFields';
+import { useContractFormPermissions } from './contract-modal/useContractFormPermissions';
+import { useFilterOptions } from '../hooks/useFilterOptions';
 
 interface CreateContractModalProps {
   isOpen: boolean;
@@ -44,6 +46,9 @@ const SECTIONS: SectionDef[] = [
 
 export default function CreateContractModal({ isOpen, onClose, onCreate }: CreateContractModalProps) {
   const t = useContractTranslations();
+  const hiddenFieldsSet = useContractFormPermissions();
+  const hiddenFields = useMemo(() => Array.from(hiddenFieldsSet), [hiddenFieldsSet]);
+  const { filterOptions } = useFilterOptions();
   const [formData, setFormData] = useState(getInitialFormData());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -104,7 +109,7 @@ export default function CreateContractModal({ isOpen, onClose, onCreate }: Creat
           isOpen={openSections[key]}
           onToggle={() => toggleSection(key)}
         >
-          <Component formData={formData} handleInputChange={handleInputChange} t={t} />
+          <Component formData={formData} handleInputChange={handleInputChange} hiddenFields={hiddenFields} filterOptions={filterOptions} t={t} />
         </CollapsibleSection>
       ))}
     </ModalShell>

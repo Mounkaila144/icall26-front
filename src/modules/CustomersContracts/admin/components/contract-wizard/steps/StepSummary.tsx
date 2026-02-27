@@ -63,7 +63,6 @@ export default function StepSummary({ customerForm, detailsForm, teamFinanceForm
       [t.datePreMeeting, details.pre_meeting_at],
       [t.dateDoc, details.doc_at],
       [t.dateClosed, details.closed_at],
-      [t.wizardDateInstallation, details.install_at],
     ]
 
     return all.filter(([, v]) => !!v)
