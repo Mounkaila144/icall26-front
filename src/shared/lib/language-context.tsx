@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
+import { useParams } from 'next/navigation';
 
 interface LanguageContextType {
   language: string;
@@ -10,19 +11,19 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<string>('fr');
+  const params = useParams();
+  const urlLocale = params?.lang as string | undefined;
 
-  // Initialize language from localStorage or browser
+  const [language, setLanguageState] = useState<string>(urlLocale || 'fr');
+
+  // Sync with URL locale — URL is the source of truth
   useEffect(() => {
-    const savedLang = localStorage.getItem('app_language');
-    console.log('📚 [LanguageProvider] Initializing:', { savedLang, browserLang: navigator.language });
-    if (savedLang) {
-      setLanguageState(savedLang);
-    } else {
-      const browserLang = navigator.language.split('-')[0];
-      setLanguageState(browserLang || 'fr');
+    if (urlLocale && urlLocale !== language) {
+      console.log('📚 [LanguageProvider] Syncing with URL locale:', urlLocale);
+      setLanguageState(urlLocale);
+      localStorage.setItem('app_language', urlLocale);
     }
-  }, []);
+  }, [urlLocale]);
 
   const setLanguage = useCallback((lang: string) => {
     console.log('📚 [LanguageProvider] Language changed:', lang);

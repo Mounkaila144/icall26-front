@@ -17,7 +17,7 @@ import type { ContractFilterOptions, FilterOption } from '../../../types'
 import type { ContractTranslations } from '../../hooks/useContractTranslations'
 
 // ── Text search columns (free-text input) ──
-// Note: customer_name handled separately (section 7) because it has domoprime_status sub-filter
+// Note: customer handled separately (section 7) because it has domoprime_status sub-filter
 export const TEXT_SEARCH_COLUMNS = new Set([
   'customer_phone', 'customer_city', 'customer_postcode'
 ])
@@ -379,7 +379,7 @@ export function createColumnFilterFactory(
     }
 
     // 7. Customer column — domoprime_status (Cumac) select only (Symfony lines 396-409)
-    if (columnId === 'customer_name') {
+    if (columnId === 'customer') {
       const domoItems: FilterOption[] = filterOptions.domoprime_statuses || []
 
       if (domoItems.length === 0) return null

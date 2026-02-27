@@ -109,6 +109,9 @@
   "colSurfaceParcel": "مساحة القطعة",
   "colPricing": "التسعير",
   "colClassEnergy": "الفئة",
+  "colPrimeRenov": "بريم رينوف",
+  "colPrimeRenovState1": "بريم رينوف حالة 1",
+  "colPrimeRenovState2": "بريم رينوف حالة 2",
 
   "chipYes": "نعم",
   "chipNo": "لا",

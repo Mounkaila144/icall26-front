@@ -268,6 +268,14 @@ export interface CustomerContract {
   pricing?: string | null;
   class_energy?: string | null;
 
+  // Prime Rénov (via customer)
+  prime_renov?: {
+    reference?: string | null;
+    amount?: number | null;
+    state1?: string | null;
+    state2?: string | null;
+  } | null;
+
   // Other Fields
   esclave?: string | null;
   actif?: boolean;

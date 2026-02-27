@@ -24,7 +24,7 @@ const columnHelper = createColumnHelper<CustomerContract>()
  */
 export const COLUMN_TO_BACKEND_FILTER: Record<string, string> = {
   // Text search columns
-  customer_name:     'search_lastname',
+  customer:          'search_lastname',
   customer_phone:    'search_phone',
   customer_city:     'search_city',
   customer_postcode: 'postcode',
@@ -117,20 +117,33 @@ export function useContractListState({ loading, deleteContract, updateContract, 
   const { hasCredential } = usePermissions()
   const t = useContractTranslations()
 
-  // Build column definitions with current translations
-  const columnDefs = useMemo(() => getColumnDefs(t), [t])
+  // Sale cell SMS/Email action handler
+  const handleSaleAction = useCallback((contractId: number, saleField: 'sale1' | 'sale2', action: 'sms' | 'email') => {
+    setSaleDialogTarget({ contractId, saleField })
+    if (action === 'sms') setSmsDialogContractId(contractId)
+    else setEmailDialogContractId(contractId)
+  }, [])
 
-  // Filter columns by credential (Symfony hasCredential) + backend permitted fields (defense-in-depth)
+  // Financial partner cell action handler (installer email, partner email, WhatsApp)
+  const handlePartnerAction = useCallback((contractId: number, action: 'email_installer' | 'email_partner' | 'whatsapp_partner') => {
+    if (action === 'email_installer' || action === 'email_partner') {
+      setEmailDialogContractId(contractId)
+    }
+    // TODO: WhatsApp action — requires dedicated endpoint/dialog
+  }, [])
+
+  // Build column definitions with current translations
+  const columnDefs = useMemo(() => getColumnDefs(t, hasCredential, handleSaleAction, handlePartnerAction), [t, hasCredential, handleSaleAction, handlePartnerAction])
+
+  // Filter columns by backend permitted fields (single source of truth).
+  // If col.id is in permittedFields → show. If permittedFields doesn't
+  // manage the column (not in the set at all) → always show.
   const permittedColumns = useMemo<ContractColumnDef[]>(
     () => columnDefs.filter(col => {
-      // Frontend credential gate (mirrors Symfony template hasCredential checks)
-      if (col.credential && !hasCredential(col.credential)) return false
-      // Backend API permitted fields check
-      if (!col.permissionKey) return true
       if (permittedFields.size === 0) return true
-      return permittedFields.has(col.permissionKey)
+      return permittedFields.has(col.id)
     }),
-    [columnDefs, permittedFields, hasCredential]
+    [columnDefs, permittedFields]
   )
 
   // States
@@ -149,6 +162,9 @@ export function useContractListState({ loading, deleteContract, updateContract, 
   const [smsDialogContractId, setSmsDialogContractId] = useState<number | null>(null)
   const [emailDialogContractId, setEmailDialogContractId] = useState<number | null>(null)
   const [commentDialogContractId, setCommentDialogContractId] = useState<number | null>(null)
+
+  // Sale-specific SMS/Email dialog state (target = sale1 or sale2)
+  const [saleDialogTarget, setSaleDialogTarget] = useState<{ contractId: number; saleField: 'sale1' | 'sale2' } | null>(null)
 
   // Snackbar notification state
   const [notification, setNotification] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'warning' | 'info' }>({
@@ -327,8 +343,8 @@ export function useContractListState({ loading, deleteContract, updateContract, 
     setSelectedContractId(null)
   }, [])
 
-  const handleCloseSmsDialog = useCallback(() => setSmsDialogContractId(null), [])
-  const handleCloseEmailDialog = useCallback(() => setEmailDialogContractId(null), [])
+  const handleCloseSmsDialog = useCallback(() => { setSmsDialogContractId(null); setSaleDialogTarget(null) }, [])
+  const handleCloseEmailDialog = useCallback(() => { setEmailDialogContractId(null); setSaleDialogTarget(null) }, [])
   const handleCloseCommentDialog = useCallback(() => setCommentDialogContractId(null), [])
 
   // Column filter factory
@@ -420,6 +436,7 @@ export function useContractListState({ loading, deleteContract, updateContract, 
     smsDialogContractId,
     emailDialogContractId,
     commentDialogContractId,
+    saleDialogTarget,
 
     // Handlers
     handleColumnVisibilityChange,

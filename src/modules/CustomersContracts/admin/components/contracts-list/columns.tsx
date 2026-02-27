@@ -5,365 +5,258 @@ import type { ContractTranslations } from '../../hooks/useContractTranslations'
 import type { CustomerContract } from '../../../types'
 
 import { isYes, getCustomerFullName, formatPrice } from './helpers'
-import { textCell, booleanChip, statusChip, dateCellMultiLine, customerCell, phoneCell } from './cell-renderers'
+import { textCell, booleanChip, statusChip, dateCellMultiLine, customerCell, phoneCell, saleCell, financialPartnerCell } from './cell-renderers'
+import type { HasCredentialFn, OnSaleActionFn, OnPartnerActionFn } from './cell-renderers'
+
+// ─── Types ──────────────────────────────────────────────────────────────────
 
 export interface ContractColumnDef extends ColumnConfig {
-  /**
-   * Maps to a backend permission key from ContractListResource::FIELD_PERMISSIONS.
-   * If set, this column is only visible when the key is present in meta.permitted_fields.
-   * If omitted, the column is always visible.
-   */
-  permissionKey?: string
-  /**
-   * Frontend credential check matching Symfony's $user->hasCredential() pattern.
-   * Format: [['perm1', 'perm2']] = OR logic (any credential suffices).
-   * If set, column is hidden when hasCredential returns false.
-   */
-  credential?: string[][]
   getValue: (row: CustomerContract) => any
   renderCell: (row: CustomerContract) => ReactNode
 }
 
 export const STORAGE_KEY = 'contractsListTableColumns'
 
-/**
- * Column definitions ordered to match the Symfony 1 template.
- * Now a function that receives translations for i18n column labels & cell text.
- */
-export function getColumnDefs(t: ContractTranslations): ContractColumnDef[] {
+// ─── Column Builders ────────────────────────────────────────────────────────
+//
+// Factory functions for common column rendering patterns.
+// Each reduces a 6-line object literal to a 1–3 line call.
+
+/** Text column — displays getValue() result as plain text */
+function textCol(id: string, label: string, getValue: (r: CustomerContract) => any, defaultVisible = true): ContractColumnDef {
+  return { id, label, defaultVisible, getValue, renderCell: r => textCell(getValue(r)) }
+}
+
+/** Boolean chip — colored YES/NO chip via isYes() check */
+function boolCol(
+  id: string,
+  label: string,
+  getValue: (r: CustomerContract) => any,
+  yes: string,
+  no: string,
+  yesColor: string,
+  noColor: string,
+  defaultVisible = true
+): ContractColumnDef {
+  return { id, label, defaultVisible, getValue, renderCell: r => booleanChip(isYes(getValue(r)), yes, no, yesColor, noColor) }
+}
+
+/** Status chip — renders a { value, name, color } status object */
+function statusCol(id: string, label: string, getStatus: (r: CustomerContract) => any, defaultVisible = true): ContractColumnDef {
+  return {
+    id,
+    label,
+    defaultVisible,
+    getValue: r => {
+      const s = getStatus(r)
+      return s?.value ?? s?.name
+    },
+    renderCell: r => statusChip(getStatus(r))
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Column Definitions (ordered to match the Symfony 1 template)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+export function getColumnDefs(t: ContractTranslations, hasCredential: HasCredentialFn, onSaleAction?: OnSaleActionFn, onPartnerAction?: OnPartnerActionFn): ContractColumnDef[] {
   return [
-    // ── 1. Date ──
+    // ── Date (tpl:841) ────────────────────────────────────────────────────
+
     {
-      id: 'date', label: t.colDate, defaultVisible: true,
+      id: 'date',
+      label: t.colDate,
+      defaultVisible: true,
       getValue: r => r.opened_at,
-      renderCell: r => dateCellMultiLine(r, t)
+      renderCell: r => dateCellMultiLine(r, t, hasCredential)
     },
 
-    // ── 2. Client ──
+    // ── Client (tpl:927) ──────────────────────────────────────────────────
+
     {
-      id: 'customer_name', label: t.colClient, defaultVisible: true,
-      permissionKey: 'customer',
+      id: 'customer',
+      label: t.colClient,
+      defaultVisible: true,
       getValue: r => getCustomerFullName(r),
       renderCell: r => customerCell(r)
     },
 
-    // ── 3. Société Porteuse ──
-    {
-      id: 'company', label: t.colCompany, defaultVisible: true,
-      permissionKey: 'company',
-      getValue: r => r.company?.name,
-      renderCell: r => textCell(r.company?.name)
-    },
+    // ── Classe Énergie (tpl:946) ──────────────────────────────────────────
 
-    // ── 4. Facturable ──
-    {
-      id: 'is_billable', label: t.colBillable, defaultVisible: true,
-      getValue: r => r.is_billable,
-      renderCell: r => booleanChip(isYes(r.is_billable), t.chipYes, t.chipNo, 'success', 'error')
-    },
+    textCol('class_energy', t.colClassEnergy, r => r.class_energy, false),
 
-    // ── 5. Téléphone ──
+    // ── Société & Campagne (tpl:961, 970) ─────────────────────────────────
+
+    textCol('company', t.colCompany, r => r.company?.name),
+    textCol('campaign', t.colCampaign, r => r.campaign?.name, false),
+
+    // ── Facturable (tpl:979) ──────────────────────────────────────────────
+
+    boolCol('is_billable', t.colBillable, r => r.is_billable, t.chipYes, t.chipNo, 'success', 'error'),
+
+    // ── Coordonnées Client (tpl:996–1035) ─────────────────────────────────
+
     {
-      id: 'customer_phone', label: t.colPhone, defaultVisible: true,
-      permissionKey: 'customer_phone',
+      id: 'customer_phone',
+      label: t.colPhone,
+      defaultVisible: true,
       getValue: r => r.customer?.phone,
       renderCell: r => phoneCell(r)
     },
-
-    // ── 6. Code Postal ──
     {
-      id: 'customer_postcode', label: t.colPostcode, defaultVisible: true,
-      permissionKey: 'customer_postcode',
+      id: 'customer_postcode',
+      label: t.colPostcode,
+      defaultVisible: true,
       getValue: r => r.customer?.address?.postcode,
       renderCell: r => textCell(r.customer?.address?.postcode?.toUpperCase())
     },
-
-    // ── 7. Ville ──
     {
-      id: 'customer_city', label: t.colCity, defaultVisible: true,
-      permissionKey: 'customer_city',
+      id: 'customer_city',
+      label: t.colCity,
+      defaultVisible: true,
       getValue: r => r.customer?.address?.city,
       renderCell: r => textCell(r.customer?.address?.city?.toUpperCase())
     },
 
-    // ── 8. Commercial 1 ──
+    // ── Pricing & Surfaces (tpl:1036–1161) ────────────────────────────────
+
+    textCol('pricing', t.colPricing, r => r.pricing, false),
+    textCol('surface_home', t.colSurfaceHome, r => r.surface_home),
+
+    // ── Prime Rénov (tpl:1058–1089) ─────────────────────────────────────
+
+    textCol('prime_renov', t.colPrimeRenov, r => {
+      const pr = r.prime_renov
+      if (!pr?.reference) return null
+      return pr.amount ? `${pr.reference} — ${pr.amount} €` : pr.reference
+    }, false),
+    textCol('prime_renov_state1', t.colPrimeRenovState1, r => r.prime_renov?.state1, false),
+    textCol('prime_renov_state2', t.colPrimeRenovState2, r => r.prime_renov?.state2, false),
+
+    // ── Surfaces suite (tpl:1090–1161) ──────────────────────────────────
+
+    textCol('surface_top', t.colSurfaceTop, r => r.surface_top, false),
+    textCol('surface_wall', t.colSurfaceWall, r => r.surface_wall, false),
+    textCol('surface_floor', t.colSurfaceFloor, r => r.surface_floor, false),
+    textCol('surface_parcel', t.colSurfaceParcel, r => r.surface_parcel, false),
+
+    // ── Équipe Commerciale (tpl:1162–1237) ────────────────────────────────
+
     {
-      id: 'sale1', label: t.colSale1, defaultVisible: true,
-      permissionKey: 'sale1',
-      credential: [['superadmin', 'admin', 'contract_list_view_sale1']],
+      id: 'sale1',
+      label: t.colSale1,
+      defaultVisible: true,
       getValue: r => r.sale1?.name,
-      renderCell: r => textCell(r.sale1?.name)
+      renderCell: r => saleCell(r, 'sale1', hasCredential, onSaleAction)
     },
-
-    // ── 9. Commercial 2 ──
     {
-      id: 'sale2', label: t.colSale2, defaultVisible: true,
-      permissionKey: 'sale2',
-      credential: [['superadmin', 'admin', 'contract_list_view_sale2']],
+      id: 'sale2',
+      label: t.colSale2,
+      defaultVisible: true,
       getValue: r => r.sale2?.name,
-      renderCell: r => textCell(r.sale2?.name)
+      renderCell: r => saleCell(r, 'sale2', hasCredential, onSaleAction)
     },
+    textCol('telepro', t.colTelepro, r => r.telepro?.name),
+    textCol('assistant', t.colAssistant, r => r.assistant?.name),
 
-    // ── 10. Télépro ──
-    {
-      id: 'telepro', label: t.colTelepro, defaultVisible: true,
-      permissionKey: 'telepro',
-      getValue: r => r.telepro?.name,
-      renderCell: r => textCell(r.telepro?.name)
-    },
+    // ── Partenaires (tpl:1238–1261) ───────────────────────────────────────
 
-    // ── 11. Assistant ──
     {
-      id: 'assistant', label: t.colAssistant, defaultVisible: true,
-      permissionKey: 'assistant',
-      credential: [['superadmin', 'admin', 'contract_view_list_assistant', 'contract_list_display_assistant']],
-      getValue: r => r.assistant?.name,
-      renderCell: r => textCell(r.assistant?.name)
-    },
-
-    // ── 12. Équipe Installation ──
-    {
-      id: 'financial_partner', label: t.colFinancialPartner, defaultVisible: true,
-      permissionKey: 'financial_partner',
-      credential: [['superadmin', 'admin', 'contract_view_list_partner']],
+      id: 'financial_partner',
+      label: t.colFinancialPartner,
+      defaultVisible: true,
       getValue: r => r.financial_partner?.name,
-      renderCell: r => textCell(r.financial_partner?.name)
+      renderCell: r => financialPartnerCell(r, hasCredential, onPartnerAction)
     },
+    textCol('partner_layer', t.colPartnerLayer, r => r.partner_layer?.name),
 
-    // ── 13. Sous-traitant ──
-    {
-      id: 'partner_layer', label: t.colPartnerLayer, defaultVisible: true,
-      permissionKey: 'partner_layer',
-      credential: [['superadmin', 'admin', 'contract_view_list_partner_layer']],
-      getValue: r => r.partner_layer?.name,
-      renderCell: r => textCell(r.partner_layer?.name)
-    },
+    // ── Statuts (tpl:1263–1327) ───────────────────────────────────────────
 
-    // ── 14. Statut Attribution (OPC) ──
-    {
-      id: 'opc_status', label: t.colOpcStatus, defaultVisible: true,
-      permissionKey: 'opc_status',
-      credential: [['superadmin', 'admin', 'contract_view_list_opc_status']],
-      getValue: r => r.opc_status?.value ?? r.opc_status?.name,
-      renderCell: r => statusChip(r.opc_status)
-    },
+    statusCol('opc_status', t.colOpcStatus, r => r.opc_status),
+    statusCol('admin_status', t.colAdminStatus, r => r.admin_status),
+    statusCol('time_status', t.colTimeStatus, r => r.time_status),
 
-    // ── 15. Statut Admin ──
-    {
-      id: 'admin_status', label: t.colAdminStatus, defaultVisible: true,
-      permissionKey: 'admin_status',
-      credential: [['superadmin', 'admin', 'contract_view_list_admin_status']],
-      getValue: r => r.admin_status?.value ?? r.admin_status?.name,
-      renderCell: r => statusChip(r.admin_status)
-    },
+    // ── Organisation (tpl:1328–1351) ──────────────────────────────────────
 
-    // ── 16. Statut Temps ──
-    {
-      id: 'time_status', label: t.colTimeStatus, defaultVisible: true,
-      permissionKey: 'time_status',
-      credential: [['superadmin', 'contract_view_list_time_state']],
-      getValue: r => r.time_status?.value ?? r.time_status?.name,
-      renderCell: r => statusChip(r.time_status)
-    },
+    textCol('polluter', t.colPolluter, r => r.polluter?.name),
+    textCol('team', t.colTeam, r => r.team?.name),
 
-    // ── 17. Obligé ──
-    {
-      id: 'polluter', label: t.colPolluter, defaultVisible: true,
-      permissionKey: 'polluter',
-      credential: [['superadmin', 'admin', 'contract_view_list_polluter']],
-      getValue: r => r.polluter?.name,
-      renderCell: r => textCell(r.polluter?.name)
-    },
+    // ── Indicateurs Oui/Non (tpl:1357–1400+) ─────────────────────────────
 
-    // ── 18. Régie / Équipe ──
-    {
-      id: 'team', label: t.colTeam, defaultVisible: true,
-      permissionKey: 'team',
-      credential: [['superadmin', 'admin', 'contract_view_list_team', 'contract_list_display_team']],
-      getValue: r => r.team?.name,
-      renderCell: r => textCell(r.team?.name)
-    },
+    boolCol('is_confirmed', t.colConfirmed, r => r.is_confirmed, t.chipConfirmed, t.chipNotConfirmed, 'success', 'warning'),
+    boolCol('is_hold', t.colBlocked, r => r.is_hold, t.chipYes, t.chipNo, 'error', 'success'),
+    boolCol('is_hold_quote', t.colQuoteBlocked, r => r.is_hold_quote, t.chipYes, t.chipNo, 'error', 'success'),
+    boolCol('is_document', t.colDocument, r => r.is_document, t.chipYes, t.chipNo, 'success', 'default'),
+    boolCol('is_photo', t.colPhoto, r => r.is_photo, t.chipYes, t.chipNo, 'success', 'default'),
+    boolCol('is_quality', t.colQuality, r => r.is_quality, t.chipValidated, t.chipPending, 'success', 'default'),
 
-    // ── 19. Confirmé ──
-    {
-      id: 'is_confirmed', label: t.colConfirmed, defaultVisible: true,
-      permissionKey: 'is_confirmed',
-      credential: [['superadmin', 'contract_view_list_confirmed']],
-      getValue: r => r.is_confirmed,
-      renderCell: r => booleanChip(isYes(r.is_confirmed), t.chipConfirmed, t.chipNotConfirmed, 'success', 'warning')
-    },
+    // ── Métadonnées ───────────────────────────────────────────────────────
 
-    // ── 20. Bloqué ──
-    {
-      id: 'is_hold', label: t.colBlocked, defaultVisible: true,
-      permissionKey: 'is_hold',
-      credential: [['superadmin', 'admin', 'contract_view_list_hold']],
-      getValue: r => r.is_hold,
-      renderCell: r => booleanChip(isYes(r.is_hold), t.chipYes, t.chipNo, 'error', 'success')
-    },
+    textCol('creator', t.colCreator, r => r.creator?.name),
+    textCol('contributor', t.colContributor, r => r.contributor_summary, false),
 
-    // ── 21. Devis Bloqué ──
-    {
-      id: 'is_hold_quote', label: t.colQuoteBlocked, defaultVisible: true,
-      permissionKey: 'is_hold_quote',
-      credential: [['superadmin', 'contract_view_list_hold_quote']],
-      getValue: r => r.is_hold_quote,
-      renderCell: r => booleanChip(isYes(r.is_hold_quote), t.chipYes, t.chipNo, 'error', 'success')
-    },
+    // ── Statuts Contrat & Montant ─────────────────────────────────────────
 
-    // ── 22. Document ──
+    statusCol('contract_status', t.colContractStatus, r => r.contract_status),
+    statusCol('install_status', t.colInstallStatus, r => r.install_status),
     {
-      id: 'is_document', label: t.colDocument, defaultVisible: true,
-      permissionKey: 'is_document',
-      getValue: r => r.is_document,
-      renderCell: r => booleanChip(isYes(r.is_document), t.chipYes, t.chipNo, 'success', 'default')
-    },
-
-    // ── 23. Photo ──
-    {
-      id: 'is_photo', label: t.colPhoto, defaultVisible: true,
-      permissionKey: 'is_photo',
-      getValue: r => r.is_photo,
-      renderCell: r => booleanChip(isYes(r.is_photo), t.chipYes, t.chipNo, 'success', 'default')
-    },
-
-    // ── 24. Qualité ──
-    {
-      id: 'is_quality', label: t.colQuality, defaultVisible: true,
-      permissionKey: 'is_quality',
-      getValue: r => r.is_quality,
-      renderCell: r => booleanChip(isYes(r.is_quality), t.chipValidated, t.chipPending, 'success', 'default')
-    },
-
-    // ── 25. Créateur ──
-    {
-      id: 'creator', label: t.colCreator, defaultVisible: true,
-      permissionKey: 'creator',
-      getValue: r => r.creator?.name,
-      renderCell: r => textCell(r.creator?.name)
-    },
-
-    // ── 26. Campagne ──
-    {
-      id: 'campaign', label: t.colCampaign, defaultVisible: false,
-      permissionKey: 'campaign',
-      getValue: r => r.campaign?.name,
-      renderCell: r => textCell(r.campaign?.name)
-    },
-
-    // ── 27. Attributions (contributors) ──
-    {
-      id: 'contributor', label: t.colContributor, defaultVisible: false,
-      permissionKey: 'contributor',
-      getValue: r => r.contributor_summary,
-      renderCell: r => textCell(r.contributor_summary)
-    },
-
-    // ── 28. Surface Habitation ──
-    {
-      id: 'surface_home', label: t.colSurfaceHome, defaultVisible: false,
-      getValue: r => r.surface_home,
-      renderCell: r => textCell(r.surface_home)
-    },
-
-    // ── 29. Surface 101 (Combles) ──
-    {
-      id: 'surface_top', label: t.colSurfaceTop, defaultVisible: false,
-      permissionKey: 'surface_top',
-      credential: [['app_domoprime_iso_contract_list_surface_101', 'app_domoprime_contract_list_surface_from_forms_101', 'app_domoprime_iso_contract_list_surface_from_form_101']],
-      getValue: r => r.surface_top,
-      renderCell: r => textCell(r.surface_top)
-    },
-
-    // ── 30. Surface 102 (Murs) ──
-    {
-      id: 'surface_wall', label: t.colSurfaceWall, defaultVisible: false,
-      permissionKey: 'surface_wall',
-      credential: [['app_domoprime_iso_contract_list_surface_102', 'app_domoprime_contract_list_surface_from_forms_102', 'app_domoprime_iso_contract_list_surface_from_form_102']],
-      getValue: r => r.surface_wall,
-      renderCell: r => textCell(r.surface_wall)
-    },
-
-    // ── 31. Surface 103 (Plancher) ──
-    {
-      id: 'surface_floor', label: t.colSurfaceFloor, defaultVisible: false,
-      permissionKey: 'surface_floor',
-      credential: [['app_domoprime_iso_contract_list_surface_103', 'app_domoprime_contract_list_surface_from_forms_103', 'app_domoprime_iso_contract_list_surface_from_form_103']],
-      getValue: r => r.surface_floor,
-      renderCell: r => textCell(r.surface_floor)
-    },
-
-    // ── 32. Surface Parcelle ──
-    {
-      id: 'surface_parcel', label: t.colSurfaceParcel, defaultVisible: false,
-      permissionKey: 'surface_parcel',
-      credential: [['superadmin', 'app_domoprime_iso_contract_list_surface_parcel']],
-      getValue: r => r.surface_parcel,
-      renderCell: r => textCell(r.surface_parcel)
-    },
-
-    // ── 33. Tarification ──
-    {
-      id: 'pricing', label: t.colPricing, defaultVisible: false,
-      permissionKey: 'pricing',
-      getValue: r => r.pricing,
-      renderCell: r => textCell(r.pricing)
-    },
-
-    // ── 34. Classe Énergie ──
-    {
-      id: 'class_energy', label: t.colClassEnergy, defaultVisible: false,
-      permissionKey: 'class_energy',
-      credential: [['app_domoprime_iso_contract_list_filter_header_class', 'contract_list_calculation_class_pager']],
-      getValue: r => r.class_energy,
-      renderCell: r => textCell(r.class_energy)
-    },
-
-    // ── 35. Statut Contrat ──
-    {
-      id: 'contract_status', label: t.colContractStatus, defaultVisible: true,
-      permissionKey: 'contract_status',
-      getValue: r => r.contract_status?.value ?? r.contract_status?.name,
-      renderCell: r => statusChip(r.contract_status)
-    },
-
-    // ── 36. Statut Installation ──
-    {
-      id: 'install_status', label: t.colInstallStatus, defaultVisible: true,
-      permissionKey: 'install_status',
-      credential: [['superadmin', 'contract_list_install_state']],
-      getValue: r => r.install_status?.value ?? r.install_status?.name,
-      renderCell: r => statusChip(r.install_status)
-    },
-
-    // ── 37. Statut ──
-    {
-      id: 'status', label: t.colStatus, defaultVisible: true,
-      permissionKey: 'status',
-      credential: [['superadmin', 'admin', 'contract_list_status']],
+      id: 'status',
+      label: t.colStatus,
+      defaultVisible: true,
       getValue: r => r.status,
       renderCell: r => booleanChip(r.status === 'ACTIVE', t.chipActive, t.statusDeleted, 'success', 'error')
     },
-
-    // ── 38. Montant TTC ──
     {
-      id: 'montant_ttc', label: t.colAmountTtc, defaultVisible: true,
+      id: 'montant_ttc',
+      label: t.colAmountTtc,
+      defaultVisible: true,
       getValue: r => r.total_price_with_taxe,
       renderCell: r => textCell(formatPrice(r.total_price_with_taxe), 'font-semibold', 'success.main')
-    },
+    }
   ]
 }
 
-/**
- * @deprecated Use getColumnDefs(t) instead. Kept for default visibility initialization.
- */
+/** @deprecated Use getColumnDefs(t) instead. Kept for default visibility initialization. */
 export const COLUMN_DEF_IDS = [
-  'date', 'customer_name', 'company', 'is_billable', 'customer_phone',
-  'customer_postcode', 'customer_city', 'sale1', 'sale2', 'telepro',
-  'assistant', 'financial_partner', 'partner_layer', 'opc_status',
-  'admin_status', 'time_status', 'polluter', 'team', 'is_confirmed',
-  'is_hold', 'is_hold_quote', 'is_document', 'is_photo', 'is_quality',
-  'creator', 'campaign', 'contributor', 'surface_home', 'surface_top',
-  'surface_wall', 'surface_floor', 'surface_parcel', 'pricing',
-  'class_energy', 'contract_status', 'install_status', 'status', 'montant_ttc',
+  'date',
+  'customer',
+  'class_energy',
+  'company',
+  'campaign',
+  'is_billable',
+  'customer_phone',
+  'customer_postcode',
+  'customer_city',
+  'pricing',
+  'surface_home',
+  'prime_renov',
+  'prime_renov_state1',
+  'prime_renov_state2',
+  'surface_top',
+  'surface_wall',
+  'surface_floor',
+  'surface_parcel',
+  'sale1',
+  'sale2',
+  'telepro',
+  'assistant',
+  'financial_partner',
+  'partner_layer',
+  'opc_status',
+  'admin_status',
+  'time_status',
+  'polluter',
+  'team',
+  'is_confirmed',
+  'is_hold',
+  'is_hold_quote',
+  'is_document',
+  'is_photo',
+  'is_quality',
+  'creator',
+  'contributor',
+  'contract_status',
+  'install_status',
+  'status',
+  'montant_ttc'
 ] as const

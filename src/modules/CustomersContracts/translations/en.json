@@ -109,6 +109,9 @@
   "colSurfaceParcel": "Parcel Surface",
   "colPricing": "Pricing",
   "colClassEnergy": "Class",
+  "colPrimeRenov": "Prime Rénov",
+  "colPrimeRenovState1": "Prime Rénov Status 1",
+  "colPrimeRenovState2": "Prime Rénov Status 2",
 
   "chipYes": "Yes",
   "chipNo": "No",

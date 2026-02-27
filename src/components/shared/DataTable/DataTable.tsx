@@ -101,7 +101,7 @@ export function DataTable<TData extends Record<string, any>>(props: DataTableCon
       const id = column.id as string
 
       // Always show selection and action columns
-      if (id === 'select' || id === 'action' || id === 'actions') return true
+      if (id === 'select' || id === 'row_number' || id === 'action' || id === 'actions') return true
 
       // Check visibility
       return columnVisibility[id] !== false
@@ -377,7 +377,7 @@ export function DataTable<TData extends Record<string, any>>(props: DataTableCon
                           key={`${header.id}-filter`}
                           style={{ padding: '4px 6px', ...getStickyStyle(header.id, 'filter') }}
                         >
-                          {header.id === 'select' || header.id === 'action' || header.id === 'actions' || header.id === 'id' ? null : (
+                          {header.id === 'select' || header.id === 'row_number' || header.id === 'action' || header.id === 'actions' || header.id === 'id' ? null : (
                             createColumnFilter(header.id)
                           )}
                         </th>
