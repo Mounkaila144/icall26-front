@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server'
 
 // Supported locales from template
 const locales = ['en', 'fr', 'ar']
-const defaultLocale = 'en'
+const defaultLocale = 'fr'
 
 /**
  * Middleware for multi-tenant admin application

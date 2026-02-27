@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/',
-        destination: '/en/login',
+        destination: '/fr/login',
         permanent: true,
         locale: false
       },
@@ -26,7 +26,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/:path((?!en|fr|ar|front-pages|favicon\\.ico|api).*)',
-        destination: '/en/:path',
+        destination: '/fr/:path',
         permanent: true,
         locale: false
       }
