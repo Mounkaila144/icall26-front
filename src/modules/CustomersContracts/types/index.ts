@@ -612,31 +612,40 @@ export interface CreateContractData {
     details?: string;
   }>;
 
+  // Fiscal verification (dynamic array, sent at root level)
+  verif?: Array<{ reference?: string; number?: string }>;
+
   // ISO / Domoprime data (sent as separate object, matches Symfony params.CustomerContract.iso)
   iso?: {
-    fiscal_reference_1?: string;
-    fiscal_number_1?: string;
-    fiscal_reference_2?: string;
-    fiscal_number_2?: string;
-    calcul_maprimerenov_manuel?: 'YES' | 'NO';
+    // Fiscal
+    ana_prime?: number;
     number_of_people?: number;
-    number_of_children?: number;
     revenue?: number;
     number_of_fiscal?: number;
-    number_of_parts?: number;
-    tax_credit_used?: number;
     declarants?: string;
-    previous_energy_id?: number;
-    energy_id?: number;
-    occupation_id?: number;
-    layer_type_id?: number;
-    more_2_years?: 'YES' | 'NO';
-    parcel_reference?: string;
-    parcel_surface?: number;
-    surface_home?: number;
+    number_of_parts?: number;
+
+    // Fiscal supplement
+    number_of_children?: number;
+    tax_credit_used?: number;
+
+    // Home
     surface_top?: number;
     surface_wall?: number;
     surface_floor?: number;
+    surface_ite?: number;
+    boiler_quantity?: number;
+    pack_quantity?: number;
+    energy_id?: number;
+    previous_energy_id?: number;
+    occupation_id?: number;
+    more_2_years?: 'YES' | 'NO';
+    parcel_reference?: string;
+    pricing_id?: number;
+    parcel_surface?: number;
+    layer_type_id?: number;
+
+    // Surfaces installateur
     install_surface_top?: number;
     install_surface_wall?: number;
     install_surface_floor?: number;

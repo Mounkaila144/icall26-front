@@ -58,6 +58,7 @@ export default function CreateContractWizard({ isOpen, onClose, onCreate }: Crea
     detailsForm,
     teamFinanceForm,
     isoForm,
+    verifForm,
     handleNext,
     handleBack,
     getCombinedFormData,
@@ -67,8 +68,8 @@ export default function CreateContractWizard({ isOpen, onClose, onCreate }: Crea
   const steps = [
     { title: t.wizardStepCustomer, subtitle: t.wizardStepCustomerSubtitle, icon: 'ri-user-line' },
     { title: t.wizardStepDetails, subtitle: t.wizardStepDetailsSubtitle, icon: 'ri-file-list-line' },
-    { title: t.wizardStepTeamFinance, subtitle: t.wizardStepTeamFinanceSubtitle, icon: 'ri-team-line' },
-    { title: t.isoStepTitle, subtitle: 'Domoprime ISO', icon: 'ri-home-4-line' },
+    { title: t.wizardStepTeamFinance, subtitle: t.wizardStepTeamFinanceSubtitle, icon: 'ri-home-4-line' },
+    { title: t.wizardStepTeamFinanceOld, subtitle: t.wizardStepTeamFinanceOldSubtitle, icon: 'ri-team-line' },
     { title: t.wizardStepSummary, subtitle: t.wizardStepSummarySubtitle, icon: 'ri-checkbox-circle-line' },
   ]
 
@@ -135,23 +136,31 @@ export default function CreateContractWizard({ isOpen, onClose, onCreate }: Crea
       case 0:
         return <StepCustomer form={customerForm} t={t} />
       case 1:
-        return <StepContractDetails form={detailsForm} t={t} />
-      case 2:
         return (
-          <StepTeamFinance
-            form={teamFinanceForm}
+          <StepContractDetails
+            form={detailsForm}
             filterOptions={filterOptions}
             filterOptionsLoading={filterOptionsLoading}
             t={t}
           />
         )
-      case 3:
+      case 2:
         return (
           <StepIso
             form={isoForm}
+            verifForm={verifForm}
             domoprimeOptions={domoprimeOptions}
             domoprimeOptionsLoading={domoprimeOptionsLoading}
             filterOptions={filterOptions}
+            t={t}
+          />
+        )
+      case 3:
+        return (
+          <StepTeamFinance
+            form={teamFinanceForm}
+            filterOptions={filterOptions}
+            filterOptionsLoading={filterOptionsLoading}
             t={t}
           />
         )
@@ -162,6 +171,7 @@ export default function CreateContractWizard({ isOpen, onClose, onCreate }: Crea
             detailsForm={detailsForm}
             teamFinanceForm={teamFinanceForm}
             isoForm={isoForm}
+            verifForm={verifForm}
             filterOptions={filterOptions}
             domoprimeOptions={domoprimeOptions}
             t={t}

@@ -10,6 +10,8 @@ const EMPTY_OPTIONS: DomoprimeFilterOptions = {
   energies: [],
   occupations: [],
   layer_types: [],
+  pricings: [],
+  previous_energies: [],
   classes: [],
   regions: [],
   zones: [],

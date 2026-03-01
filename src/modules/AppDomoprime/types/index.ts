@@ -937,6 +937,8 @@ export interface DomoprimeFilterOptions {
   energies: FilterOption[];
   occupations: FilterOption[];
   layer_types: FilterOption[];
+  pricings: FilterOption[];
+  previous_energies: FilterOption[];
   classes: FilterOption[];
   regions: FilterOption[];
   zones: FilterOption[];

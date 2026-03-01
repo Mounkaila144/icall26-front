@@ -7,6 +7,7 @@ import {
   nonEmpty,
   union,
   literal,
+  array,
 } from 'valibot'
 import type { InferInput } from 'valibot'
 
@@ -43,25 +44,34 @@ export type CustomerFormData = InferInput<typeof customerSchema>
 // ---------------------------------------------------------------------------
 
 export const contractDetailsSchema = object({
-  // Dates that are shown by default (can be hidden by "remove" credentials)
-  quoted_at: optional(string()),
-  billing_at: optional(string()),
-  opened_at: optional(string()),
-  opc_at: optional(string()),
-  sent_at: optional(string()),
-  payment_at: optional(string()),
-  apf_at: optional(string()),
-
-  // Dates shown only with "show" credentials
+  // Dates (all from template lines 4-121)
   sav_at: optional(string()),
   pre_meeting_at: optional(string()),
+  quoted_at: optional(string()),
+  opened_at: optional(string()),
+  billing_at: optional(string()),
   doc_at: optional(string()),
+  opc_at: optional(string()),
+  payment_at: optional(string()),
+  apf_at: optional(string()),
   closed_at: optional(string()),
 
-  // Other
+  // TVA & Finance (template lines 123-157)
   has_tva: optional(string()),
-  reference: optional(string()),
+  total_price_with_taxe: optional(number()),
+  tax_id: optional(number()),
+  total_price_without_taxe: optional(number()),
+
+  // References (template lines 166-198)
+  company_id: optional(number()),
+  financial_partner_id: optional(number()),
   remarks: optional(string()),
+  partner_layer_id: optional(number()),
+
+  // State & Ranges (template lines 199-228)
+  state_id: optional(number()),
+  opc_range_id: optional(number()),
+  sav_at_range_id: optional(number()),
 })
 
 export type ContractDetailsFormData = InferInput<typeof contractDetailsSchema>
@@ -79,22 +89,14 @@ export const teamFinanceSchema = object({
   assistant_id: optional(number()),
   installer_user_id: optional(number()),
   team_id: optional(number()),
-  company_id: optional(number()),
 
-  // Finance
-  financial_partner_id: optional(number()),
-  tax_id: optional(number()),
-  total_price_without_taxe: optional(number()),
-  total_price_with_taxe: optional(number()),
+  // Finance (remaining — prices/tax/financial_partner moved to contractDetailsSchema)
   mensuality: optional(number()),
   advance_payment: optional(number()),
 
-  // Additional references (permission-gated)
+  // Additional references
   polluter_id: optional(number()),
-  partner_layer_id: optional(number()),
   campaign_id: optional(number()),
-  opc_range_id: optional(number()),
-  sav_at_range_id: optional(number()),
 
   // Sous-traitant
   sous_traitant_id: optional(number()),
@@ -107,8 +109,7 @@ export const teamFinanceSchema = object({
   periode_cee: optional(string()),
   surface_parcelle: optional(string()),
 
-  // Status
-  state_id: optional(number()),
+  // Status (state_id moved to contractDetailsSchema)
   install_state_id: optional(number()),
   admin_status_id: optional(number()),
   opc_status_id: optional(number()),
@@ -121,47 +122,62 @@ export const teamFinanceSchema = object({
 export type TeamFinanceFormData = InferInput<typeof teamFinanceSchema>
 
 // ---------------------------------------------------------------------------
-// Step 4 – Isolation + (ISO / Domoprime data)
-// Matches Symfony app_domoprime_iso: t_domoprime_iso_customer_request
-// No permission checks in Symfony (all fields use hasValidator only)
+// Step 3 – Fiscal et Habitat
+// Template sources:
+//   1) services_impot_verif_newForContract.tpl  (fiscal verification)
+//   2) app_domoprime_iso_requestForNewContract2.tpl (fiscal + habitat + financial)
+// Permission: "Fiscal supplement" section gated by contract_new_fiscal_supplement
 // ---------------------------------------------------------------------------
 
 export const isoSchema = object({
-  // Informations fiscales
-  fiscal_reference_1: optional(string()),
-  fiscal_number_1: optional(string()),
-  fiscal_reference_2: optional(string()),
-  fiscal_number_2: optional(string()),
-
-  // Fiscal
-  calcul_maprimerenov_manuel: optional(union([literal('YES'), literal('NO')])),
+  // Fiscal (template 2, section "Fiscal")
+  ana_prime: optional(number()),
   number_of_people: optional(number()),
-  number_of_children: optional(number()),
   revenue: optional(number()),
   number_of_fiscal: optional(number()),
-  number_of_parts: optional(number()),
-  tax_credit_used: optional(number()),
   declarants: optional(string()),
+  number_of_parts: optional(number()),
 
-  // Habitat
-  previous_energy_id: optional(number()),
-  energy_id: optional(number()),
-  occupation_id: optional(number()),
-  layer_type_id: optional(number()),
-  more_2_years: optional(union([literal('YES'), literal('NO')])),
-  parcel_reference: optional(string()),
-  parcel_surface: optional(number()),
-  surface_home: optional(number()),
+  // Fiscal supplement (permission: contract_new_fiscal_supplement)
+  number_of_children: optional(number()),
+  tax_credit_used: optional(number()),
 
-  // Surfaces
+  // Home (template 2, section "Home")
   surface_top: optional(number()),
   surface_wall: optional(number()),
   surface_floor: optional(number()),
+  surface_ite: optional(number()),
+  boiler_quantity: optional(number()),
+  pack_quantity: optional(number()),
+  energy_id: optional(number()),
+  previous_energy_id: optional(number()),
+  occupation_id: optional(number()),
+  more_2_years: optional(union([literal('YES'), literal('NO')])),
+  parcel_reference: optional(string()),
+  pricing_id: optional(number()),
+  parcel_surface: optional(number()),
+  layer_type_id: optional(number()),
 
-  // Surfaces Installateur
+  // Surfaces Installateur (template 2)
   install_surface_top: optional(number()),
   install_surface_wall: optional(number()),
   install_surface_floor: optional(number()),
 })
 
 export type IsoFormData = InferInput<typeof isoSchema>
+
+// ---------------------------------------------------------------------------
+// Step 3 – Fiscal Verification (dynamic add/remove pairs)
+// Template source: services_impot_verif_newForContract.tpl
+// ---------------------------------------------------------------------------
+
+export const verifSchema = object({
+  verif: array(
+    object({
+      reference: optional(string()),
+      number: optional(string()),
+    })
+  ),
+})
+
+export type VerifFormData = InferInput<typeof verifSchema>

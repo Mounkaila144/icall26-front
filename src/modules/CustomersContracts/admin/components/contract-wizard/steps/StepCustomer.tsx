@@ -154,23 +154,6 @@ export default function StepCustomer({ form, t }: StepCustomerProps) {
           </Grid>
         ) : null}
 
-        <Grid size={{ xs: 12, sm: 6 }}>
-          <Controller
-            name='customer.union_id'
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                value={field.value ?? ''}
-                onChange={e => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                label={t.unionId}
-                type='number'
-                fullWidth
-              />
-            )}
-          />
-        </Grid>
-
         {/* Address section */}
         <Grid size={12}>
           <Typography variant='subtitle1' sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
