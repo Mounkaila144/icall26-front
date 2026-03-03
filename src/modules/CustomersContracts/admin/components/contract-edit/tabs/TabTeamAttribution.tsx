@@ -46,13 +46,13 @@ function AutocompleteField({
         <Autocomplete
           options={options}
           getOptionLabel={opt => opt.name}
-          value={options.find(o => o.id === field.value) ?? null}
+          value={options.find(o => Number(o.id) === Number(field.value)) ?? null}
           onChange={(_, opt) => field.onChange(opt ? Number(opt.id) : undefined)}
           disabled={disabled}
           renderInput={params => (
             <TextField {...params} label={label} helperText={helperText} />
           )}
-          isOptionEqualToValue={(opt, val) => opt.id === val.id}
+          isOptionEqualToValue={(opt, val) => Number(opt.id) === Number(val.id)}
         />
       )}
     />

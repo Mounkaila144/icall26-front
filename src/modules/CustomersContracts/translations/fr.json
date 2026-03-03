@@ -369,6 +369,25 @@
 
   "wizardDateInstallation": "Date d'installation",
 
+  "editTabContrat": "Contrat",
+  "editTabCalculSubvention": "Calcul Subvention",
+  "editTabResultatsAnah": "Résultats ANAH",
+  "editTabRequests": "Requests",
+  "editTabFactures": "Factures",
+  "editTabAvoirs": "Avoirs",
+  "editTabInformations": "Informations",
+  "editTabAttributions": "Attributions",
+  "editTabAttributionsBracket": "[Attributions]",
+  "editTabPlanning": "Planning",
+  "editTabInstallations": "Installations",
+  "editTabDemarches": "Démarches",
+  "editTabDocCheck": "Doc. Check.",
+  "editTabDocuments": "Documents",
+  "editTabEmails": "Emails",
+  "editTabWhatsApp": "WhatsApp",
+  "editTabPartnerWhatsApp": "Partner WhatsApp",
+  "editTabCarte": "Carte",
+  "editTabComingSoon": "Bientôt disponible",
   "editTabDetails": "Détails",
   "editTabTeam": "Équipe",
   "editTabFinance": "Finance & Statuts",
@@ -382,5 +401,16 @@
   "editCustomerPhone": "Téléphone",
   "editCustomerEmail": "Email",
   "editCustomerAddress": "Adresse",
-  "editFieldDisabled": "Pas de permission de modifier"
+  "editFieldDisabled": "Pas de permission de modifier",
+
+  "iso3InfoTitle": "Informations",
+  "iso3Zone": "Zone",
+  "iso3Region": "Région",
+  "iso3Energy": "Énergie",
+  "iso3Level": "Niveau",
+  "iso3AnahAvailable": "Disponible",
+  "iso3AnahNotAvailable": "Non disponible",
+  "iso3NoPolluter": "Pas de pollueur dans le contrat.",
+  "iso3NoResults": "Le pollueur est configuré mais aucun résultat CUMAC n'a encore été calculé.",
+  "iso3ResultsError": "Erreur lors du chargement des résultats CUMAC"
 }

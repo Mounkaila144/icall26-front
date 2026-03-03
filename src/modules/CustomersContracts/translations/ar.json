@@ -369,6 +369,25 @@
 
   "wizardDateInstallation": "تاريخ التركيب",
 
+  "editTabContrat": "العقد",
+  "editTabCalculSubvention": "حساب الإعانة",
+  "editTabResultatsAnah": "نتائج ANAH",
+  "editTabRequests": "الطلبات",
+  "editTabFactures": "الفواتير",
+  "editTabAvoirs": "الأرصدة",
+  "editTabInformations": "المعلومات",
+  "editTabAttributions": "التعيينات",
+  "editTabAttributionsBracket": "[التعيينات]",
+  "editTabPlanning": "التخطيط",
+  "editTabInstallations": "التركيبات",
+  "editTabDemarches": "الإجراءات",
+  "editTabDocCheck": "فحص المستندات",
+  "editTabDocuments": "المستندات",
+  "editTabEmails": "البريد الإلكتروني",
+  "editTabWhatsApp": "واتساب",
+  "editTabPartnerWhatsApp": "واتساب الشريك",
+  "editTabCarte": "الخريطة",
+  "editTabComingSoon": "قريباً",
   "editTabDetails": "التفاصيل",
   "editTabTeam": "الفريق",
   "editTabFinance": "المالية والحالات",
@@ -382,5 +401,16 @@
   "editCustomerPhone": "الهاتف",
   "editCustomerEmail": "البريد الالكتروني",
   "editCustomerAddress": "العنوان",
-  "editFieldDisabled": "لا يوجد إذن للتعديل"
+  "editFieldDisabled": "لا يوجد إذن للتعديل",
+
+  "iso3InfoTitle": "معلومات",
+  "iso3Zone": "المنطقة",
+  "iso3Region": "الإقليم",
+  "iso3Energy": "الطاقة",
+  "iso3Level": "المستوى",
+  "iso3AnahAvailable": "متاح",
+  "iso3AnahNotAvailable": "غير متاح",
+  "iso3NoPolluter": "لا يوجد ملوث في العقد.",
+  "iso3NoResults": "تم تكوين الملوث ولكن لم يتم حساب نتائج CUMAC بعد.",
+  "iso3ResultsError": "خطأ في تحميل نتائج CUMAC"
 }

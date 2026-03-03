@@ -59,24 +59,32 @@ export function useEditContractState() {
           remarks: data.remarks || '',
         })
 
+        // Helper: resolve ID from direct field or nested relation
+        const resolveId = (directId: number | null | undefined, relation: { id: number | string } | null | undefined): number | undefined => {
+          if (directId != null) return directId
+          if (relation?.id != null) return Number(relation.id)
+
+          return undefined
+        }
+
         teamFinanceForm.reset({
-          telepro_id: data.telepro_id ?? undefined,
-          sale_1_id: data.sale_1_id ?? undefined,
-          sale_2_id: data.sale_2_id ?? undefined,
+          telepro_id: resolveId(data.telepro_id, data.telepro),
+          sale_1_id: resolveId(data.sale_1_id, data.sale1),
+          sale_2_id: resolveId(data.sale_2_id, data.sale2),
           manager_id: data.manager_id ?? undefined,
-          assistant_id: data.assistant_id ?? undefined,
-          installer_user_id: data.installer_user_id ?? undefined,
-          team_id: data.team_id ?? undefined,
-          company_id: data.company_id ?? undefined,
-          financial_partner_id: data.financial_partner_id ?? undefined,
-          tax_id: data.tax_id ?? undefined,
+          assistant_id: resolveId(data.assistant_id, data.assistant),
+          installer_user_id: resolveId(data.installer_user_id, data.installer_user),
+          team_id: resolveId(data.team_id, data.team),
+          company_id: resolveId(data.company_id, data.company),
+          financial_partner_id: resolveId(data.financial_partner_id, data.financial_partner),
+          tax_id: resolveId(data.tax_id, data.tax),
           total_price_without_taxe: data.total_price_without_taxe ?? undefined,
           total_price_with_taxe: data.total_price_with_taxe ?? undefined,
           mensuality: data.mensuality ?? undefined,
           advance_payment: data.advance_payment ?? undefined,
-          polluter_id: data.polluter_id ?? undefined,
-          partner_layer_id: data.partner_layer_id ?? undefined,
-          campaign_id: data.campaign_id ?? undefined,
+          polluter_id: resolveId(data.polluter_id, data.polluter),
+          partner_layer_id: resolveId(data.partner_layer_id, data.partner_layer),
+          campaign_id: resolveId(data.campaign_id, data.campaign),
           opc_range_id: data.opc_range_id ?? undefined,
           sav_at_range_id: data.sav_at_range_id ?? undefined,
           state_id: data.state_id ?? undefined,
