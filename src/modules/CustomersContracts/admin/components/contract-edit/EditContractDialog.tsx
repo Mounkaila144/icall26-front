@@ -25,7 +25,8 @@ import { useEditContractState } from './useEditContractState'
 import { useEditPermissions } from './useEditPermissions'
 import { useFilterOptions } from '../../hooks/useFilterOptions'
 import { useContractTranslations } from '../../hooks/useContractTranslations'
-import TabIso3Results from './tabs/TabIso3Results'
+import { useDomoprimeFilterOptions } from '@/modules/AppDomoprime'
+import { domoprimeIsoService } from '@/modules/AppDomoprime/admin/services/domoprimeService'
 import TabContractDetails from './tabs/TabContractDetails'
 import TabTeamAttribution from './tabs/TabTeamAttribution'
 import TabFinanceStatus from './tabs/TabFinanceStatus'
@@ -108,6 +109,7 @@ export default function EditContractDialog({
   const { lang } = useParams<{ lang: string }>()
   const { canEdit } = useEditPermissions()
   const { filterOptions, filterOptionsLoading } = useFilterOptions()
+  const { filterOptions: domoprimeOptions, loading: domoprimeOptionsLoading } = useDomoprimeFilterOptions()
 
   const canViewIso3Results = canEdit('app_domoprime_iso3_contract_view_cumac_results')
 
@@ -122,6 +124,9 @@ export default function EditContractDialog({
     setError,
     detailsForm,
     teamFinanceForm,
+    customerForm,
+    isoForm,
+    verifForm,
     loadContract,
     getFormData,
     resetAll,
@@ -130,7 +135,18 @@ export default function EditContractDialog({
   // Load contract when dialog opens
   useEffect(() => {
     if (isOpen && contractId) {
-      loadContract(contractId, onFetchContract)
+      // Wrapper function to load ISO data
+      const fetchIsoData = async (id: number) => {
+        try {
+          const response = await domoprimeIsoService.getByContractId(id)
+          return response.success ? response.data : null
+        } catch (error) {
+          console.error('Failed to load ISO data:', error)
+          return null
+        }
+      }
+
+      loadContract(contractId, onFetchContract, fetchIsoData)
     }
 
     if (!isOpen) {
@@ -175,12 +191,20 @@ export default function EditContractDialog({
     switch (key) {
       case 'contrat':
         return (
-          <>
-            {canViewIso3Results ? (
-              <TabIso3Results contractId={contractId} lang={lang || 'fr'} t={t} />
-            ) : null}
-            <TabContractDetails form={detailsForm} contract={contract} t={t} />
-          </>
+          <TabContractDetails
+            detailsForm={detailsForm}
+            customerForm={customerForm}
+            isoForm={isoForm}
+            verifForm={verifForm}
+            teamFinanceForm={teamFinanceForm}
+            contract={contract}
+            filterOptions={filterOptions}
+            domoprimeOptions={domoprimeOptions}
+            contractId={contractId}
+            lang={lang || 'fr'}
+            canViewIso3Results={canViewIso3Results}
+            t={t}
+          />
         )
       case 'attributions':
         return (
@@ -205,10 +229,10 @@ export default function EditContractDialog({
   }
 
   return (
-    <Dialog open={isOpen} onClose={onClose} fullScreen>
-      {submitting ? <LinearProgress sx={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1 }} /> : null}
+    <Dialog open={isOpen} onClose={onClose} maxWidth='xl' fullWidth>
+      {submitting ? <LinearProgress sx={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1301 }} /> : null}
 
-      <AppBar sx={{ position: 'relative' }} color='default' elevation={1}>
+      <AppBar sx={{ position: 'sticky', top: 0, zIndex: 1 }} color='default' elevation={1}>
         <Toolbar>
           <IconButton edge='start' onClick={onClose} aria-label='close'>
             <i className='ri-close-line' />
@@ -247,12 +271,48 @@ export default function EditContractDialog({
           </Box>
         ) : (
           <TabContext value={tabValue}>
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', position: 'relative' }}>
               <TabList
                 onChange={(_, val) => setActiveTab(Number(val))}
                 variant='scrollable'
-                scrollButtons='auto'
+                scrollButtons={true}
                 allowScrollButtonsMobile
+                sx={{
+                  '& .MuiTabs-scrollButtons': {
+                    width: 40,
+                    color: 'primary.main',
+                    backgroundColor: 'background.paper',
+                    boxShadow: 1,
+                    borderRadius: 1,
+                    my: 'auto',
+                    '&.Mui-disabled': {
+                      opacity: 0.3,
+                    },
+                    '&:hover': {
+                      backgroundColor: 'action.hover',
+                    },
+                  },
+                  '& .MuiTabs-scrollButtons.MuiTabScrollButton-horizontal': {
+                    height: 36,
+                  },
+                  '& .MuiTabs-scroller': {
+                    overflowX: 'auto !important',
+                    scrollbarWidth: 'thin',
+                    '&::-webkit-scrollbar': {
+                      height: 6,
+                    },
+                    '&::-webkit-scrollbar-track': {
+                      backgroundColor: 'action.hover',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                      backgroundColor: 'primary.main',
+                      borderRadius: 3,
+                      '&:hover': {
+                        backgroundColor: 'primary.dark',
+                      },
+                    },
+                  },
+                }}
               >
                 {TABS.map((tab, index) => (
                   <Tab
@@ -261,7 +321,11 @@ export default function EditContractDialog({
                     value={String(index)}
                     icon={<i className={tab.icon} />}
                     iconPosition='start'
-                    sx={{ minHeight: 48, textTransform: 'none' }}
+                    sx={{
+                      minHeight: 48,
+                      textTransform: 'none',
+                      fontWeight: 500,
+                    }}
                   />
                 ))}
               </TabList>
