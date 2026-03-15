@@ -349,3 +349,35 @@ export interface Iso3ImportResponse {
   };
   message?: string;
 }
+
+// ----------------------------------------------------------------------------
+// Company Models & Document Signatures
+// ----------------------------------------------------------------------------
+
+export interface CompanyModel {
+  id: number;
+  name: string;
+  value: string;
+  fileUrl: string | null;
+}
+
+export interface CompanyDocSignature {
+  id: number;
+  modelName: string;
+  isSigned: boolean;
+  signedAt: string | null;
+}
+
+export interface CompanyModelListResponse {
+  success: boolean;
+  data: {
+    models: CompanyModel[];
+  };
+}
+
+export interface CompanyDocSignatureListResponse {
+  success: boolean;
+  data: {
+    documents: CompanyDocSignature[];
+  };
+}

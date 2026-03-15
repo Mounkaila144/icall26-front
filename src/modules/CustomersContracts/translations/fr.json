@@ -420,6 +420,7 @@
   "iso3ResultsError": "Erreur lors du chargement des résultats CUMAC",
 
   "docLoadError": "Erreur lors du chargement des documents",
+  "docDocumentsFor": "Documents pour",
   "docNoPolluter": "Aucun pollueur associé au contrat.",
   "docVerifyBillingDate": "Vérifier la date de facturation",
   "docQuotations": "Devis",
@@ -449,5 +450,13 @@
   "docColActions": "Actions",
   "docDownloadPdf": "Télécharger le PDF",
   "docDownloadSigned": "Télécharger le PDF signé",
-  "docDownloadError": "Erreur lors du téléchargement du document"
+  "docDownloadError": "Erreur lors du téléchargement du document",
+  "docEndOfWork": "Document fin de travaux",
+  "docAllDocsComposite": "Document Prévisite/Vérif fiscal/AH/Devis/Facture",
+  "docAllSignedDocsComposite": "Documents Pré visite/Verifs/AH signé/Devis signé/Facture",
+  "docCompanyModels": "La liste des modèles société",
+  "docCompanyDocsFor": "Documents pour la société",
+  "docCompanyDocSignatures": "Documents société",
+  "docSignedStatus": "Signé",
+  "docSignedAtLabel": "Signé le"
 }

@@ -420,6 +420,7 @@
   "iso3ResultsError": "خطأ في تحميل نتائج CUMAC",
 
   "docLoadError": "خطأ في تحميل المستندات",
+  "docDocumentsFor": "وثائق لـ",
   "docNoPolluter": "لا يوجد ملوث مرتبط بهذا العقد.",
   "docVerifyBillingDate": "تحقق من تاريخ الفوترة",
   "docQuotations": "عروض الأسعار",
@@ -449,5 +450,13 @@
   "docColActions": "الإجراءات",
   "docDownloadPdf": "تحميل ملف PDF",
   "docDownloadSigned": "تحميل ملف PDF الموقع",
-  "docDownloadError": "خطأ أثناء تحميل المستند"
+  "docDownloadError": "خطأ أثناء تحميل المستند",
+  "docEndOfWork": "مستند نهاية الأعمال",
+  "docAllDocsComposite": "مستند الزيارة المسبقة/التحقق الضريبي/AH/العرض/الفاتورة",
+  "docAllSignedDocsComposite": "مستندات الزيارة المسبقة/التحقق/AH موقع/عرض موقع/فاتورة",
+  "docCompanyModels": "قائمة نماذج الشركة",
+  "docCompanyDocsFor": "مستندات الشركة",
+  "docCompanyDocSignatures": "مستندات الشركة",
+  "docSignedStatus": "موقّع",
+  "docSignedAtLabel": "تاريخ التوقيع"
 }

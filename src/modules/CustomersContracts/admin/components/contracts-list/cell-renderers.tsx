@@ -171,7 +171,8 @@ export const dateCellMultiLine = (
 }
 
 /**
- * Customer cell matching Symfony: company on first line, LASTNAME FIRSTNAME on second.
+ * Customer cell matching Symfony: company on first line, LASTNAME FIRSTNAME on second,
+ * then Cumac status (tpl:1744 — calculationForPager component).
  */
 export const customerCell = (r: CustomerContract): ReactNode => {
   const c = r.customer
@@ -180,6 +181,8 @@ export const customerCell = (r: CustomerContract): ReactNode => {
   const fullName = (c.lastname || c.firstname)
     ? `${(c.lastname || '').toUpperCase()} ${(c.firstname || '').toUpperCase()}`.trim()
     : c.nom_prenom?.toUpperCase() || '-'
+
+  const calc = r.calculation
 
   return (
     <Box>
@@ -191,6 +194,14 @@ export const customerCell = (r: CustomerContract): ReactNode => {
       ) : (
         <Typography variant='body2' sx={{ fontWeight: 500 }}>{fullName}</Typography>
       )}
+      <Typography variant='caption' sx={{ lineHeight: 1.3 }}>
+        <span style={{ fontWeight: 'bold' }}>Cumac:</span>{' '}
+        {calc ? (
+          <span style={{ fontWeight: 'bold', color: calc.is_accepted ? '#4caf50' : '#f44336' }}>
+            {calc.status_i18n}
+          </span>
+        ) : '---'}
+      </Typography>
     </Box>
   )
 }

@@ -35,6 +35,13 @@ export interface NamedRelation {
   name: string;
 }
 
+export interface PolluterRelation {
+  id: number;
+  name: string;
+  commercial?: string;
+  type?: string;
+}
+
 // ----------------------------------------------------------------------------
 // Customer & Address (nested in contract)
 // ----------------------------------------------------------------------------
@@ -128,6 +135,16 @@ export interface ContractHistory {
   };
   created_at: string;
   updated_at: string;
+}
+
+// ----------------------------------------------------------------------------
+// Domoprime Calculation (nested in contract list)
+// ----------------------------------------------------------------------------
+
+export interface ContractCalculation {
+  status: string;
+  status_i18n: string;
+  is_accepted: boolean;
 }
 
 // ----------------------------------------------------------------------------
@@ -268,6 +285,9 @@ export interface CustomerContract {
   pricing?: string | null;
   class_energy?: string | null;
 
+  // Domoprime calculation (cumac status)
+  calculation?: ContractCalculation | null;
+
   // Prime Rénov (via customer)
   prime_renov?: {
     reference?: string | null;
@@ -293,7 +313,7 @@ export interface CustomerContract {
   team?: NamedRelation | null;
   financial_partner?: NamedRelation | null;
   partner_layer?: NamedRelation | null;
-  polluter?: NamedRelation | null;
+  polluter?: PolluterRelation | null;
   company?: NamedRelation | null;
   creator?: NamedRelation | null;
   installer_user?: NamedRelation | null;

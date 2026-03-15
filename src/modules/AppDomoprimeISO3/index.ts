@@ -13,6 +13,7 @@ export {
   iso3PricingService,
   iso3QuotationService,
   iso3ExportService,
+  iso3CompanyDocsService,
 } from './admin/services/iso3Service';
 
 // Admin Layer Hooks
@@ -76,4 +77,10 @@ export type {
   Iso3BillingListResponse,
   Iso3SimulationResponse,
   Iso3ImportResponse,
+
+  // Company Models & Document Signatures
+  CompanyModel,
+  CompanyDocSignature,
+  CompanyModelListResponse,
+  CompanyDocSignatureListResponse,
 } from './types';

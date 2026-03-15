@@ -32,6 +32,8 @@ import type {
   CreateQuotationContractData,
   UpdateQuotationMeetingData,
   UpdateQuotationContractData,
+  CompanyModelListResponse,
+  CompanyDocSignatureListResponse,
 } from '../../types';
 
 const BASE_URL = '/admin/appdomoprime-iso3';
@@ -456,6 +458,36 @@ export const iso3ExportService = {
       return response.data;
     } catch (error) {
       console.error(`Error exporting signed PDF for quotation ${quotationId}:`, error);
+      throw error;
+    }
+  },
+};
+
+// ============================================================================
+// Company Models & Document Signatures Service
+// ============================================================================
+
+export const iso3CompanyDocsService = {
+  async listCompanyModels(contractId: number): Promise<CompanyModelListResponse> {
+    try {
+      const response = await apiClient.get<CompanyModelListResponse>(
+        `${BASE_URL}/contracts/${contractId}/company-models`
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching company models for contract ${contractId}:`, error);
+      throw error;
+    }
+  },
+
+  async listCompanyDocSignatures(contractId: number): Promise<CompanyDocSignatureListResponse> {
+    try {
+      const response = await apiClient.get<CompanyDocSignatureListResponse>(
+        `${BASE_URL}/contracts/${contractId}/company-doc-signatures`
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching company doc signatures for contract ${contractId}:`, error);
       throw error;
     }
   },

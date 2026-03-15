@@ -420,6 +420,7 @@
   "iso3ResultsError": "Error loading CUMAC results",
 
   "docLoadError": "Error loading documents",
+  "docDocumentsFor": "Documents for",
   "docNoPolluter": "No polluter associated with this contract.",
   "docVerifyBillingDate": "Verify billing date",
   "docQuotations": "Quotations",
@@ -449,5 +450,13 @@
   "docColActions": "Actions",
   "docDownloadPdf": "Download PDF",
   "docDownloadSigned": "Download signed PDF",
-  "docDownloadError": "Error downloading document"
+  "docDownloadError": "Error downloading document",
+  "docEndOfWork": "End of work document",
+  "docAllDocsComposite": "Document Pre-visit/Tax verif./AH/Quotation/Invoice",
+  "docAllSignedDocsComposite": "Documents Pre-visit/Verifs/Signed AH/Signed Quote/Invoice",
+  "docCompanyModels": "Company model list",
+  "docCompanyDocsFor": "Documents for company",
+  "docCompanyDocSignatures": "Company documents",
+  "docSignedStatus": "Signed",
+  "docSignedAtLabel": "Signed on"
 }
