@@ -15,6 +15,7 @@ export { contractsService } from './admin/services/contractsService';
 export { useContracts } from './admin/hooks/useContracts';
 export { useContract } from './admin/hooks/useContract';
 export { useContractTranslations } from './admin/hooks/useContractTranslations';
+export { useContractTabs } from './admin/hooks/useContractTabs';
 
 // Type Exports
 export type {
@@ -37,6 +38,10 @@ export type {
   ContractFilters,
   CreateContractData,
   UpdateContractData,
+
+  // Tabs
+  ContractTab,
+  ContractTabsResponse,
 
   // Utility Types
   ContractSortField,

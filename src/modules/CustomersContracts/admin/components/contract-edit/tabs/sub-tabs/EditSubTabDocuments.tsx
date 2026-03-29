@@ -4,10 +4,15 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Alert from '@mui/material/Alert'
 import CircularProgress from '@mui/material/CircularProgress'
-import Divider from '@mui/material/Divider'
+import Snackbar from '@mui/material/Snackbar'
+import MuiAlert from '@mui/material/Alert'
+import Tooltip from '@mui/material/Tooltip'
+import IconButton from '@mui/material/IconButton'
+import Collapse from '@mui/material/Collapse'
 
 import type { CustomerContract } from '../../../../../types'
 import type { ContractTranslations } from '../../../../../hooks/useContractTranslations'
+import { usePermissions } from '@/shared/contexts/PermissionsContext'
 
 import { POLLUTER_TYPE_SUFFIXES, resolvePolluterType, formatDate } from './documents/helpers'
 import { useDocumentState } from './documents/useDocumentState'
@@ -16,6 +21,8 @@ import QuotationDetailsTable from './documents/QuotationDetailsTable'
 import BillingDetailsTable from './documents/BillingDetailsTable'
 import CompanyModelsSection from './documents/CompanyModelsSection'
 import CompanyDocSignatureSection from './documents/CompanyDocSignatureSection'
+import CreateBillingDialog from './documents/CreateBillingDialog'
+import EditQuotationView from './documents/EditQuotationView'
 
 // ---------------------------------------------------------------------------
 // Props
@@ -36,21 +43,32 @@ export default function EditSubTabDocuments({
   contractId,
   t,
 }: EditSubTabDocumentsProps) {
+  const { hasCredential } = usePermissions()
+
   const hasPolluter = Boolean(contract?.polluter_id)
   const polluterCommercial = contract?.polluter?.commercial ?? contract?.polluter?.name ?? '-'
   const polluterType = contract?.polluter?.type?.toUpperCase() ?? resolvePolluterType(polluterCommercial)
   const suffix = POLLUTER_TYPE_SUFFIXES[polluterType] ?? ''
   const sectionTitle = `${t.docDocumentsFor} ${polluterCommercial}${suffix ? ` ${suffix}` : ''}`
 
+  const isHold = contract?.is_hold === 'YES'
+
   // Date validity check (Symfony: opened_at <= billing_at)
   const hasValidDates = contract?.opened_at && contract?.billing_at
     ? contract.opened_at <= contract.billing_at
     : true
 
+  // Permissions for top-level actions (exact Symfony credential names)
+  const canEdit = hasCredential([['superadmin', 'app_domoprime_contract_view_quotation_edit', 'app_domoprime_contract_view_quotation_edit3']])
+  const canCreateBilling = hasCredential([['superadmin', 'app_domoprime_list_quotation_create_billing']])
+  const canUpdateLastBilling = hasCredential([['superadmin', 'app_domoprime_list_quotation_update_billing_from_last_quotation']])
+  const canRefreshRef = hasCredential([['superadmin', 'app_domoprime_iso3_contract_list_quotation_refresh_reference']])
+
   const {
     loading,
     error,
     downloading,
+    quotations,
     activeQuotations,
     lastQuotation,
     activeBillings,
@@ -64,8 +82,31 @@ export default function EditSubTabDocuments({
     expandedCompanyDocs,
     setExpandedCompanyDocs,
     handleDownloadPdf,
-    handleDownloadAllPdf,
     handleDownloadSignedPdf,
+    handleDisableQuotation,
+    handleEnableQuotation,
+    fetchDocuments,
+    handleDownloadBillingPdf,
+    handleSendBillingEmail,
+    handleCreateAssetFromBilling,
+    handleUpdateLastBilling,
+    handleDownloadPreMeetingPdf,
+    handleDownloadAfterWorkPdf,
+    handleDownloadAllDocsPdf,
+    handleDownloadAllSignedPdf,
+    handleRefreshReference,
+    handleSendQuotationEmail,
+    billingDialogOpen,
+    billingLoading,
+    openBillingDialog,
+    closeBillingDialog,
+    handleCreateBilling,
+    editingQuotationId,
+    startEditing,
+    cancelEditing,
+    handleSaveQuotation,
+    notification,
+    handleCloseNotification,
   } = useDocumentState(contractId, t)
 
   // Build quotation / billing labels matching Symfony format
@@ -99,6 +140,37 @@ export default function EditSubTabDocuments({
     return <Alert severity='error' sx={{ mt: 2 }}>{error}</Alert>
   }
 
+  // Inline edit view — replaces document list (same as Symfony AJAX replace)
+  if (editingQuotationId) {
+    return (
+      <Box>
+        <EditQuotationView
+          quotationId={editingQuotationId}
+          onSave={handleSaveQuotation}
+          onCancel={cancelEditing}
+          t={t}
+        />
+
+        {/* Notification Snackbar */}
+        <Snackbar
+          open={notification.open}
+          autoHideDuration={4000}
+          onClose={handleCloseNotification}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <MuiAlert
+            onClose={handleCloseNotification}
+            severity={notification.severity}
+            variant='filled'
+            elevation={6}
+          >
+            {notification.message}
+          </MuiAlert>
+        </Snackbar>
+      </Box>
+    )
+  }
+
   return (
     <Box>
       {/* Section Header */}
@@ -116,87 +188,255 @@ export default function EditSubTabDocuments({
 
       {lastQuotation ? (
         <>
-          {/* 1. Document de pré visite */}
+          {/* Symfony order 1: PreMeetingPolluterDocumentForViewContract — Document de pré visite */}
           <DocumentLinkRow
             icon='ri-file-user-line'
             label={t.docPreMeeting}
-            available={hasPolluter && contract?.is_hold !== 'YES'}
-            loading={downloading === `pdf-${lastQuotation.id}`}
-            onClick={() => handleDownloadPdf(lastQuotation.id, lastQuotation.reference)}
+            available={hasPolluter && !isHold}
+            loading={downloading === `premeeting-${contractId}`}
+            onClick={() => handleDownloadPreMeetingPdf()}
           />
 
-          {/* 2. AH Document */}
-          <DocumentLinkRow
-            icon='ri-file-chart-line'
-            label={t.docAhDocument}
-            available={hasValidDates}
-            warning={!hasValidDates ? t.docVerifyBillingDate : undefined}
-            loading={downloading === `all-${lastQuotation.id}`}
-            onClick={() => handleDownloadAllPdf(lastQuotation.id, lastQuotation.reference)}
-          />
-
-          {/* 3. Devis DEV-XXX dd/mm/yyyy (expandable) */}
-          <DocumentLinkRow
-            icon='ri-file-list-3-line'
-            label={quotationLabel}
-            available={activeQuotations.length > 0}
-            loading={downloading === `pdf-${lastQuotation.id}`}
-            onClick={() => handleDownloadPdf(lastQuotation.id, lastQuotation.reference)}
-            expandable={activeQuotations.length > 1}
-            expanded={expandedQuotation}
-            onToggle={() => setExpandedQuotation(prev => !prev)}
+          {/* 2. Quotation top-level action bar (matches Symfony layout)    */}
+          {/* PDF link + Edit + CreateBilling + UpdateLastBilling + Refresh  */}
+          {/* + Details toggle + Yousign + Email                            */}
+          {/* ============================================================= */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 0.5,
+              py: 1,
+              px: 1,
+              borderRadius: 1,
+            }}
           >
-            <QuotationDetailsTable
-              quotations={activeQuotations}
-              downloading={downloading}
-              onDownloadPdf={handleDownloadPdf}
-              onDownloadSignedPdf={handleDownloadSignedPdf}
-              t={t}
-            />
-          </DocumentLinkRow>
+            {/* PDF export for last quotation */}
+            <Tooltip title={t.docDownloadPdf}>
+              <IconButton
+                size='small'
+                color='primary'
+                disabled={downloading === `pdf-${lastQuotation.id}`}
+                onClick={() => handleDownloadPdf(lastQuotation.id, lastQuotation.reference)}
+              >
+                {downloading === `pdf-${lastQuotation.id}`
+                  ? <CircularProgress size={14} />
+                  : <i className='ri-file-pdf-2-line' style={{ fontSize: 16 }} />
+                }
+              </IconButton>
+            </Tooltip>
 
-          {/* 4. Facture FAC-XXX dd/mm/yyyy (expandable) */}
-          <DocumentLinkRow
-            icon='ri-bill-line'
-            label={billingLabel}
-            available={activeBillings.length > 0}
-            loading={downloading === `all-${lastQuotation.id}`}
-            onClick={() => handleDownloadAllPdf(lastQuotation.id, lastQuotation.reference)}
-            expandable={activeBillings.length > 1}
-            expanded={expandedBilling}
-            onToggle={() => setExpandedBilling(prev => !prev)}
-          >
-            <BillingDetailsTable billings={activeBillings} t={t} />
-          </DocumentLinkRow>
+            <Typography variant='body2' sx={{ mr: 1 }}>
+              {quotationLabel}
+            </Typography>
 
-          {/* 5. Document fin de travaux */}
+            {/* Edit last quotation (blue pencil) */}
+            {canEdit ? (
+              <Tooltip title={t.docActionEdit}>
+                <span>
+                  <IconButton
+                    size='small'
+                    sx={{ color: 'info.main' }}
+                    disabled={isHold}
+                    onClick={() => startEditing(lastQuotation.id)}
+                  >
+                    <i className='ri-pencil-line' style={{ fontSize: 16 }} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            ) : null}
+
+            {/* Create Billing from last quotation (euro icon) */}
+            {canCreateBilling ? (
+              <Tooltip title={t.docActionBilling}>
+                <span>
+                  <IconButton
+                    size='small'
+                    color='warning'
+                    disabled={isHold}
+                    onClick={() => openBillingDialog(lastQuotation.id)}
+                  >
+                    <i className='ri-money-euro-circle-line' style={{ fontSize: 16 }} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            ) : null}
+
+            {/* Update Last Billing (blue euro icon) */}
+            {canUpdateLastBilling ? (
+              <Tooltip title={t.docActionUpdateLastBilling}>
+                <span>
+                  <IconButton
+                    size='small'
+                    sx={{ color: 'info.main' }}
+                    disabled={isHold || activeBillings.length === 0}
+                    onClick={() => handleUpdateLastBilling(lastQuotation.id)}
+                  >
+                    <i className='ri-money-euro-circle-line' style={{ fontSize: 16 }} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            ) : null}
+
+            {/* Refresh Reference */}
+            {canRefreshRef ? (
+              <Tooltip title={t.docRefresh}>
+                <IconButton
+                  size='small'
+                  onClick={() => handleRefreshReference(lastQuotation.id)}
+                >
+                  <i className='ri-refresh-line' style={{ fontSize: 16 }} />
+                </IconButton>
+              </Tooltip>
+            ) : (
+              <Tooltip title={t.docRefresh}>
+                <IconButton
+                  size='small'
+                  onClick={() => fetchDocuments()}
+                >
+                  <i className='ri-refresh-line' style={{ fontSize: 16 }} />
+                </IconButton>
+              </Tooltip>
+            )}
+
+            {/* Details toggle (loupe) */}
+            <Tooltip title={expandedQuotation ? t.docHideDetails : t.docShowDetails}>
+              <IconButton
+                size='small'
+                onClick={() => setExpandedQuotation(prev => !prev)}
+              >
+                <i className='ri-search-line' style={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
+
+            {/* Yousign — show status for last quotation */}
+            {lastQuotation.is_signed === 'YES' ? (
+              <Tooltip title={`${t.docSigned} ${lastQuotation.signed_at ? formatDate(lastQuotation.signed_at) : ''}`}>
+                <IconButton
+                  size='small'
+                  color='success'
+                  onClick={() => handleDownloadSignedPdf(lastQuotation.id, lastQuotation.reference)}
+                >
+                  <i className='ri-check-double-line' style={{ fontSize: 16 }} />
+                </IconButton>
+              </Tooltip>
+            ) : (
+              <Tooltip title={t.docActionYousign}>
+                <span>
+                  <IconButton size='small' color='success' disabled>
+                    <i className='ri-quill-pen-line' style={{ fontSize: 16 }} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            )}
+
+            {/* Email — send quotation email */}
+            <Tooltip title={t.docActionEmail}>
+              <IconButton
+                size='small'
+                sx={{ color: 'info.main' }}
+                onClick={() => handleSendQuotationEmail(lastQuotation.id)}
+              >
+                <i className='ri-mail-line' style={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
+          </Box>
+
+          {/* Quotation Details Table (toggled by loupe icon above) */}
+          <Collapse in={expandedQuotation}>
+            <Box sx={{ pl: 2, pb: 1 }}>
+              <QuotationDetailsTable
+                quotations={quotations}
+                downloading={downloading}
+                isHold={isHold}
+                onDownloadPdf={handleDownloadPdf}
+                onDisable={handleDisableQuotation}
+                onEnable={handleEnableQuotation}
+                onOpenBillingDialog={openBillingDialog}
+                onEditQuotation={startEditing}
+                t={t}
+              />
+            </Box>
+          </Collapse>
+
+          {/* Symfony order 9: billingsITEForViewContract — Facture FAC-XXX dd/mm/yyyy */}
+          {hasValidDates ? (
+            <DocumentLinkRow
+              icon='ri-bill-line'
+              label={billingLabel}
+              available={activeBillings.length > 0}
+              loading={downloading === `all-${lastQuotation.id}`}
+              onClick={() => activeBillings.length > 0 ? handleDownloadBillingPdf(lastBilling.id, lastBilling.reference) : undefined}
+              expandable={activeBillings.length > 1}
+              expanded={expandedBilling}
+              onToggle={() => setExpandedBilling(prev => !prev)}
+            >
+              <BillingDetailsTable
+                billings={activeBillings}
+                downloading={downloading}
+                onDownloadPdf={handleDownloadBillingPdf}
+                onSendEmail={handleSendBillingEmail}
+                onCreateAsset={handleCreateAssetFromBilling}
+                t={t}
+              />
+            </DocumentLinkRow>
+          ) : null}
+
+          {/* Symfony order 10: AfterWorkPolluterDocumentForViewContract — Document fin de travaux */}
           <DocumentLinkRow
             icon='ri-file-check-line'
-            label={t.docEndOfWork}
-            available={hasPolluter && contract?.is_hold !== 'YES' && lastQuotation.is_signed === 'YES'}
-            loading={downloading === `signed-${lastQuotation.id}`}
-            onClick={() => handleDownloadSignedPdf(lastQuotation.id, lastQuotation.reference)}
+            label={t.docAfterWork}
+            available={hasPolluter && !isHold}
+            loading={downloading === `afterwork-${contractId}`}
+            onClick={() => handleDownloadAfterWorkPdf()}
           />
 
-          <Divider sx={{ my: 1.5 }} />
-
-          {/* 6. Document Prévisite/Vérif fiscal/AH/Devis/Facture */}
+          {/* Symfony order 11: linkForAllDocumentsForContract */}
           <DocumentLinkRow
             icon='ri-folder-zip-line'
             label={t.docAllDocsComposite}
             available
-            loading={downloading === `all-${lastQuotation.id}`}
-            onClick={() => handleDownloadAllPdf(lastQuotation.id, lastQuotation.reference)}
+            loading={downloading === `alldocs-${contractId}`}
+            onClick={() => handleDownloadAllDocsPdf()}
           />
 
-          {/* 7. Documents Pré visite/Verifs/AH signé/Devis signé/Facture */}
+          {/* Symfony order 12: linkForAllSignedDocumentsForContract */}
           <DocumentLinkRow
             icon='ri-folder-shield-2-line'
             label={t.docAllSignedDocsComposite}
             available={lastQuotation.is_signed === 'YES'}
-            loading={downloading === `signed-${lastQuotation.id}`}
-            onClick={() => handleDownloadSignedPdf(lastQuotation.id, lastQuotation.reference)}
+            loading={downloading === `allsigned-${contractId}`}
+            onClick={() => handleDownloadAllSignedPdf()}
           />
+
+          {/* Symfony order 13: site_company_document/documentIteForViewContract — La liste des modéles société */}
+          {contractId ? (
+            <DocumentLinkRow
+              icon='ri-building-line'
+              label={t.docCompanyModels}
+              available
+              expandable
+              expanded={expandedCompanyModels}
+              onToggle={() => setExpandedCompanyModels(prev => !prev)}
+            >
+              <CompanyModelsSection contractId={contractId} t={t} />
+            </DocumentLinkRow>
+          ) : null}
+
+          {/* Symfony order 14: app_domoprime_yousign_evidence/linkCompanyDocumentForViewContract — socity document */}
+          {contractId ? (
+            <DocumentLinkRow
+              icon='ri-shield-check-line'
+              label={t.docCompanyDocSignatures}
+              available
+              expandable
+              expanded={expandedCompanyDocs}
+              onToggle={() => setExpandedCompanyDocs(prev => !prev)}
+            >
+              <CompanyDocSignatureSection contractId={contractId} t={t} />
+            </DocumentLinkRow>
+          ) : null}
         </>
       ) : (
         <Typography variant='body2' color='text.secondary' sx={{ py: 1 }}>
@@ -204,35 +444,31 @@ export default function EditSubTabDocuments({
         </Typography>
       )}
 
-      <Divider sx={{ my: 1.5 }} />
+      {/* Create Billing Dialog */}
+      <CreateBillingDialog
+        open={billingDialogOpen}
+        onClose={closeBillingDialog}
+        onConfirm={handleCreateBilling}
+        loading={billingLoading}
+        t={t}
+      />
 
-      {/* 8. La liste des modèles société (expandable) */}
-      {contractId ? (
-        <DocumentLinkRow
-          icon='ri-building-line'
-          label={t.docCompanyModels}
-          available
-          expandable
-          expanded={expandedCompanyModels}
-          onToggle={() => setExpandedCompanyModels(prev => !prev)}
+      {/* Notification Snackbar */}
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={4000}
+        onClose={handleCloseNotification}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <MuiAlert
+          onClose={handleCloseNotification}
+          severity={notification.severity}
+          variant='filled'
+          elevation={6}
         >
-          <CompanyModelsSection contractId={contractId} t={t} />
-        </DocumentLinkRow>
-      ) : null}
-
-      {/* 9. Documents société avec statut signature (expandable) */}
-      {contractId ? (
-        <DocumentLinkRow
-          icon='ri-shield-check-line'
-          label={t.docCompanyDocSignatures}
-          available
-          expandable
-          expanded={expandedCompanyDocs}
-          onToggle={() => setExpandedCompanyDocs(prev => !prev)}
-        >
-          <CompanyDocSignatureSection contractId={contractId} t={t} />
-        </DocumentLinkRow>
-      ) : null}
+          {notification.message}
+        </MuiAlert>
+      </Snackbar>
     </Box>
   )
 }

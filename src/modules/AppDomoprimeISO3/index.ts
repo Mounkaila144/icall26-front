@@ -63,6 +63,11 @@ export type {
   Iso3ContractResultsCumacPrice,
   Iso3ContractResultsResponse,
 
+  // ANAH Results
+  Iso3AnahOnlyData,
+  Iso3AnahResultsData,
+  Iso3AnahResultsResponse,
+
   // API Response types
   Iso3TypeDateListResponse,
   Iso3TypeDateSaveResponse,

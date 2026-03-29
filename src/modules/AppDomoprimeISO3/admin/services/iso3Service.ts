@@ -9,6 +9,7 @@ import { apiClient } from '@/shared/lib/api-client';
 
 import type {
   Iso3ContractResultsResponse,
+  Iso3AnahResultsResponse,
   Iso3TypeDateListResponse,
   Iso3TypeDateSaveResponse,
   SaveTypeDateData,
@@ -52,6 +53,19 @@ export const iso3ResultsService = {
       return response.data;
     } catch (error) {
       console.error(`Error fetching ISO3 results for contract ${contractId}:`, error);
+      throw error;
+    }
+  },
+
+  async getResultsAnaForContract(contractId: number, lang = 'fr'): Promise<Iso3AnahResultsResponse> {
+    try {
+      const response = await apiClient.get<Iso3AnahResultsResponse>(
+        `${BASE_URL}/contracts/${contractId}/results-anah`,
+        { params: { lang } }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching ANAH results for contract ${contractId}:`, error);
       throw error;
     }
   },
@@ -416,6 +430,151 @@ export const iso3QuotationService = {
       throw error;
     }
   },
+
+  async updateQuotation(id: number, data: Record<string, unknown>): Promise<Iso3QuotationResponse> {
+    try {
+      const response = await apiClient.put<Iso3QuotationResponse>(
+        `${BASE_URL}/quotations/${id}`,
+        data
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating quotation ${id}:`, error);
+      throw error;
+    }
+  },
+
+  async disableQuotation(id: number): Promise<{ success: boolean }> {
+    try {
+      const response = await apiClient.patch<{ success: boolean }>(
+        `${BASE_URL}/quotations/${id}/disable`
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error disabling quotation ${id}:`, error);
+      throw error;
+    }
+  },
+
+  async enableQuotation(id: number): Promise<{ success: boolean }> {
+    try {
+      const response = await apiClient.patch<{ success: boolean }>(
+        `${BASE_URL}/quotations/${id}/enable`
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error enabling quotation ${id}:`, error);
+      throw error;
+    }
+  },
+
+  async destroyQuotation(id: number): Promise<{ success: boolean }> {
+    try {
+      const response = await apiClient.delete<{ success: boolean }>(
+        `${BASE_URL}/quotations/${id}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting quotation ${id}:`, error);
+      throw error;
+    }
+  },
+
+  async createBillingFromQuotation(
+    id: number,
+    options: { send_email?: boolean; create_asset?: boolean } = {}
+  ): Promise<{ success: boolean; data: unknown }> {
+    try {
+      const response = await apiClient.post<{ success: boolean; data: unknown }>(
+        `${BASE_URL}/quotations/${id}/create-billing`,
+        options
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error creating billing from quotation ${id}:`, error);
+      throw error;
+    }
+  },
+
+  async updateLastBillingFromQuotation(
+    id: number,
+    options: { send_email?: boolean } = {}
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await apiClient.post<{ success: boolean; message: string }>(
+        `${BASE_URL}/quotations/${id}/update-last-billing`,
+        options
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating last billing from quotation ${id}:`, error);
+      throw error;
+    }
+  },
+
+  async sendQuotationEmail(
+    id: number,
+    modelEmailId?: number
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await apiClient.post<{ success: boolean; message: string }>(
+        `${BASE_URL}/quotations/${id}/send-email`,
+        { model_email_id: modelEmailId }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error sending quotation email ${id}:`, error);
+      throw error;
+    }
+  },
+
+  async refreshQuotationReference(id: number): Promise<{ success: boolean; reference: string }> {
+    try {
+      const response = await apiClient.post<{ success: boolean; reference: string }>(
+        `${BASE_URL}/quotations/${id}/refresh-reference`
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error refreshing quotation reference ${id}:`, error);
+      throw error;
+    }
+  },
+
+  async listQuotationEmailModels(contractId: number): Promise<{ success: boolean; data: { id: number; subject: string }[] }> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: { id: number; subject: string }[] }>(
+        `${BASE_URL}/contracts/${contractId}/quotation-email-models`
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching quotation email models for contract ${contractId}:`, error);
+      throw error;
+    }
+  },
+
+  async sendBillingEmail(billingId: number): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await apiClient.post<{ success: boolean; message: string }>(
+        `${BASE_URL}/billings/${billingId}/send-email`
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error sending billing email ${billingId}:`, error);
+      throw error;
+    }
+  },
+
+  async createAssetFromBilling(billingId: number): Promise<{ success: boolean; data: unknown }> {
+    try {
+      const response = await apiClient.post<{ success: boolean; data: unknown }>(
+        `${BASE_URL}/billings/${billingId}/create-asset`
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error creating asset from billing ${billingId}:`, error);
+      throw error;
+    }
+  },
 };
 
 // ============================================================================
@@ -458,6 +617,71 @@ export const iso3ExportService = {
       return response.data;
     } catch (error) {
       console.error(`Error exporting signed PDF for quotation ${quotationId}:`, error);
+      throw error;
+    }
+  },
+
+  async exportBillingPdf(billingId: number): Promise<Blob> {
+    try {
+      const response = await apiClient.get(
+        `${BASE_URL}/export/billing/${billingId}/pdf`,
+        { responseType: 'blob' }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error exporting billing PDF ${billingId}:`, error);
+      throw error;
+    }
+  },
+
+  async exportPreMeetingPdf(contractId: number): Promise<Blob> {
+    try {
+      const response = await apiClient.get(
+        `${BASE_URL}/contracts/${contractId}/export/premeeting-pdf`,
+        { responseType: 'blob' }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error exporting pre-meeting PDF for contract ${contractId}:`, error);
+      throw error;
+    }
+  },
+
+  async exportAfterWorkPdf(contractId: number): Promise<Blob> {
+    try {
+      const response = await apiClient.get(
+        `${BASE_URL}/contracts/${contractId}/export/afterwork-pdf`,
+        { responseType: 'blob' }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error exporting after-work PDF for contract ${contractId}:`, error);
+      throw error;
+    }
+  },
+
+  async exportAllDocumentsByContractPdf(contractId: number): Promise<Blob> {
+    try {
+      const response = await apiClient.get(
+        `${BASE_URL}/contracts/${contractId}/export/all-documents-pdf`,
+        { responseType: 'blob' }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error exporting all documents PDF for contract ${contractId}:`, error);
+      throw error;
+    }
+  },
+
+  async exportAllSignedByContractPdf(contractId: number): Promise<Blob> {
+    try {
+      const response = await apiClient.get(
+        `${BASE_URL}/contracts/${contractId}/export/all-signed-pdf`,
+        { responseType: 'blob' }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error exporting all signed PDF for contract ${contractId}:`, error);
       throw error;
     }
   },

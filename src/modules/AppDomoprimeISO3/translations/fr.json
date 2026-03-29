@@ -86,5 +86,38 @@
   "errorSaving": "Erreur lors de l'enregistrement",
   "errorDeleting": "Erreur lors de la suppression",
   "errorImporting": "Erreur lors de l'import",
-  "confirmDelete": "Êtes-vous sûr de vouloir supprimer ?"
+  "confirmDelete": "Êtes-vous sûr de vouloir supprimer ?",
+
+  "colTax55": "TVA 5,5%",
+  "colTax20": "TVA 20%",
+  "colPaidHtWithoutAnah": "Payé HT (hors ANAH)",
+  "colPaidHtWithAnah": "Payé HT (avec ANAH)",
+  "colTotalTax": "Total TVA",
+  "colPrimeAnah": "Prime ANAH",
+  "colCreatedBy": "Créé par",
+  "colCreatedAt": "Créé le",
+
+  "actionEdit": "Modifier le devis",
+  "actionYousign": "YouSign",
+  "actionBilling": "Créer une facture",
+  "actionPdf": "Télécharger PDF",
+  "actionDisable": "Désactiver le devis",
+  "actionEnable": "Activer le devis",
+  "actionRemove": "Supprimer définitivement",
+
+  "confirmDisable": "Êtes-vous sûr de vouloir désactiver ce devis ?",
+  "confirmEnable": "Êtes-vous sûr de vouloir activer ce devis ?",
+  "confirmRemove": "Êtes-vous sûr de vouloir supprimer définitivement ce devis ? Cette action est irréversible.",
+
+  "billingDialogTitle": "Créer une facture",
+  "billingDialogSendEmail": "Envoyer un email au client ?",
+  "billingDialogCreateAsset": "Créer un avoir ?",
+  "billingDialogConfirm": "Créer",
+  "billingDialogCancel": "Annuler",
+
+  "successDisabled": "Devis désactivé",
+  "successEnabled": "Devis activé",
+  "successRemoved": "Devis supprimé",
+  "successBillingCreated": "Facture créée avec succès",
+  "errorAction": "Une erreur est survenue"
 }

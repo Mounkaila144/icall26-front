@@ -36,7 +36,9 @@ export interface Iso3ContractResultsInfo {
   zone: string | null;
   region: string | null;
   energy: string | null;
+  revenue: number | null;
   level: string | null;
+  number_of_people: number | null;
 }
 
 export interface Iso3ContractResultsCumacPrice {
@@ -49,15 +51,51 @@ export interface Iso3ContractResultsCumac {
   is_ana_available: boolean;
 }
 
+export interface Iso3ContractResultsAnah {
+  engine: string;
+  polluter_name: string | null;
+  number_of_parts: number | null;
+  level: string | null;
+  is_available: boolean;
+}
+
 export interface Iso3ContractResultsData {
   has_polluter: boolean;
+  engine_type: string | null;
   info: Iso3ContractResultsInfo | null;
   cumac: Iso3ContractResultsCumac | null;
+  cumac_errors: string[];
+  anah: Iso3ContractResultsAnah | null;
 }
 
 export interface Iso3ContractResultsResponse {
   success: boolean;
   data: Iso3ContractResultsData;
+}
+
+// ANAH-only results (Résultats ANAH tab - separate from CUMAC)
+export interface Iso3AnahOnlyData {
+  engine: string;
+  polluter_name: string | null;
+  zone: string | null;
+  region: string | null;
+  energy: string | null;
+  revenue: number | null;
+  number_of_people: number | null;
+  number_of_parts: number | null;
+  level: string | null;
+  is_available: boolean;
+}
+
+export interface Iso3AnahResultsData {
+  has_polluter: boolean;
+  anah: Iso3AnahOnlyData | null;
+  errors: string[];
+}
+
+export interface Iso3AnahResultsResponse {
+  success: boolean;
+  data: Iso3AnahResultsData;
 }
 
 // ----------------------------------------------------------------------------

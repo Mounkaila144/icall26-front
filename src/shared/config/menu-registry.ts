@@ -15,6 +15,7 @@ import { CustomersContractsMenuConfig } from '@/modules/CustomersContracts/menu.
 import { superAdminMenuConfig } from '@/modules/SuperAdmin/menu.config';
 import { AppDomoprimeMenuConfig } from '@/modules/AppDomoprime/menu.config';
 import { CustomersMeetingsMenuConfig } from '@/modules/CustomersMeetings/menu.config';
+import { ConfigurationMenuConfig } from '@/modules/Configuration/menu.config';
 
 /**
  * Registry of all module menu configurations
@@ -32,6 +33,7 @@ const moduleMenuConfigs: ModuleMenuConfig[] = [
   superAdminMenuConfig,
   AppDomoprimeMenuConfig,
   CustomersMeetingsMenuConfig,
+  ConfigurationMenuConfig,
   // Add more module menu configs here
 ];
 

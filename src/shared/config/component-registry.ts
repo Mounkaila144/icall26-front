@@ -12,6 +12,7 @@ import CustomersComponent from '@/modules/Customers/admin/components/Customers'
 import CustomersContractsList1 from '@/modules/CustomersContracts/admin/components/ContractsList1'
 import MeetingsList from '@/modules/CustomersMeetings/admin/components/MeetingsList'
 import { UsersList } from '@/modules/Users/admin/components/UsersList'
+import ConfigurationPage from '@/modules/Configuration/admin/components/ConfigurationPage'
 
 /**
  * Registry mapping module:component to actual component
@@ -28,6 +29,9 @@ export const adminComponentRegistry: Record<string, ComponentType<any>> = {
 
   // Users module
   'Users:UsersList': UsersList,
+
+  // Configuration module
+  'Configuration:ConfigurationPage': ConfigurationPage,
 }
 
 /**

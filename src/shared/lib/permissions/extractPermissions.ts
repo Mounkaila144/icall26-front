@@ -71,9 +71,10 @@ export function extractPermissionsFromLogin(loginResponse: any): UserPermissions
   }
 
   // 3. Déterminer si superadmin/admin
+  // Check both group names AND permissions (Symfony stores 'admin'/'superadmin' as permissions, not group names)
   const groupsArray = Array.from(groups)
-  const is_superadmin = groupsArray.includes('superadmin')
-  const is_admin = is_superadmin || groupsArray.includes('admin')
+  const is_superadmin = groupsArray.includes('superadmin') || permissions.has('superadmin')
+  const is_admin = is_superadmin || groupsArray.includes('admin') || permissions.has('admin')
 
   return {
     permissions: Array.from(permissions),

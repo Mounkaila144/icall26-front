@@ -125,19 +125,23 @@ export default function ContractsList1() {
         </Box>
       </Box>
 
-      <CreateContractWizard
-        isOpen={isCreateModalOpen}
-        onClose={handleCloseCreateModal}
-        onCreate={createContract}
-      />
+      {isCreateModalOpen && (
+        <CreateContractWizard
+          isOpen={isCreateModalOpen}
+          onClose={handleCloseCreateModal}
+          onCreate={createContract}
+        />
+      )}
 
-      <EditContractDialog
-        isOpen={isEditModalOpen}
-        onClose={handleCloseEditModal}
-        onUpdate={updateContract}
-        contractId={selectedContractId}
-        onFetchContract={getContract}
-      />
+      {isEditModalOpen && selectedContractId !== null && (
+        <EditContractDialog
+          isOpen={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          onUpdate={updateContract}
+          contractId={selectedContractId}
+          onFetchContract={getContract}
+        />
+      )}
 
       <SendSmsDialog
         open={smsDialogContractId !== null}

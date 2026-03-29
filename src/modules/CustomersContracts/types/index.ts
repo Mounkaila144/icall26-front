@@ -728,3 +728,193 @@ export interface FilterOptionsResponse {
   success: boolean;
   data: ContractFilterOptions;
 }
+
+// ----------------------------------------------------------------------------
+// Tabs (dynamic, from TabsManager API)
+// ----------------------------------------------------------------------------
+
+export interface ContractTab {
+  key: string;
+  title: string;
+  icon: string | null;
+  component: string | null;
+  help: string | null;
+  module: string | null;
+}
+
+export interface ContractTabsResponse {
+  success: boolean;
+  data: ContractTab[];
+}
+
+// Generic response for tab data endpoints
+export interface TabDataResponse<T> {
+  success: boolean;
+  data: T;
+}
+
+// Tab: Products
+export interface ContractProductItem {
+  id: number;
+  product_id: number;
+  reference: string | null;
+  name: string | null;
+  unit: string | null;
+  quantity: number;
+  purchase_price_ht: number;
+  sale_price_ht: number;
+  purchase_price_ttc: number;
+  sale_price_ttc: number;
+  total_purchase_ht: number;
+  total_sale_ht: number;
+  total_purchase_ttc: number;
+  total_sale_ttc: number;
+  details: string | null;
+  is_one_shoot: boolean;
+  created_at: string | null;
+}
+
+// Tab: Comments
+export interface ContractCommentItem {
+  id: number;
+  comment: string;
+  status: string;
+  type: string;
+  user: { id: number; name: string } | null;
+  created_at: string | null;
+}
+
+// Tab: Emails
+export interface ContractEmailItem {
+  id: number;
+  email: string;
+  subject: string;
+  body: string;
+  is_sent: boolean;
+  sent_at: string | null;
+  user: { id: number; name: string } | null;
+  created_at: string | null;
+}
+
+// Tab: SMS
+export interface ContractSmsItem {
+  id: number;
+  mobile: string;
+  message: string;
+  send_at: string | null;
+  created_at: string | null;
+}
+
+// Tab: Documents
+export interface ContractDocumentItem {
+  id: number;
+  title: string;
+  file: string;
+  extension: string;
+  created_at: string | null;
+}
+
+// Tab: Installations
+export interface ContractInstallationItem {
+  id: number;
+  product: { id: number; reference: string; name: string } | null;
+  installer: { id: number; name: string } | null;
+  in_at: string | null;
+  details: string | null;
+  status: string;
+  created_at: string | null;
+}
+
+// Tab: Billing (Factures Domoprime)
+export interface ContractBillingItem {
+  id: number;
+  reference: string;
+  dated_at: string | null;
+  total_sale_ht: number;
+  total_tax: number;
+  total_sale_ttc: number;
+  prime: number;
+  tax_credit: number;
+  qmac_value: number;
+  number_of_people: number;
+  number_of_children: number;
+  tax_credit_used: number;
+  rest_in_charge: number;
+  tax_credit_limit: number;
+  rest_in_charge_after_credit: number;
+  tax_credit_available: number;
+  creator: string | null;
+  status: string;
+  created_at: string | null;
+}
+
+// Tab: WhatsApp message
+export interface ContractWhatsAppItem {
+  id: number;
+  mobile: string;
+  message: string;
+  user: { id: number; name: string } | null;
+  send_at: string | null;
+  created_at: string | null;
+}
+
+// Tab: Steps / Participants
+export interface ContractStepsData {
+  erdf: Record<string, unknown> | null;
+  erdf_quotation: Record<string, unknown> | null;
+  cityhall: Record<string, unknown> | null;
+  consuel: { id: number; status_id: number; send_at: string | null; conformity: string; installer: string | null; remarks: string } | null;
+  installation: { id: number; type: string; counter_at: string | null; linked_at: string | null; worked_at: string | null; installer: string | null } | null;
+}
+
+// Tab: Doc Check
+export interface DocumentCheckerItem {
+  id: number;
+  name: string;
+}
+
+// Tab: Requests (Domoprime Calculations)
+export interface ContractRequestItem {
+  id: number;
+  region: string | null;
+  zone: string | null;
+  sector: string | null;
+  energy: string | null;
+  class: string | null;
+  revenue: number;
+  number_of_people: number;
+  qmac: number;
+  qmac_value: number;
+  status: string;
+  is_last: string;
+  causes: string | null;
+  user: string | null;
+  accepted_by: string | null;
+  created_at: string | null;
+}
+
+// Tab: Avoirs (Assets)
+export interface ContractAssetItem {
+  id: number;
+  reference: string;
+  dated_at: string | null;
+  total_ht: number;
+  total_ttc: number;
+  total_tax: number;
+  billing_id: number | null;
+  comments: string | null;
+  creator: string | null;
+  created_at: string | null;
+}
+
+// Tab: Localisation (Map)
+export interface ContractLocalisation {
+  lat: number;
+  lng: number;
+  address1: string;
+  address2: string;
+  postcode: string;
+  city: string;
+  country: string;
+  full_address: string;
+}

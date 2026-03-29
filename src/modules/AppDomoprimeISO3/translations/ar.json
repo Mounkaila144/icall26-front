@@ -86,5 +86,38 @@
   "errorSaving": "خطأ في الحفظ",
   "errorDeleting": "خطأ في الحذف",
   "errorImporting": "خطأ في الاستيراد",
-  "confirmDelete": "هل أنت متأكد من الحذف؟"
+  "confirmDelete": "هل أنت متأكد من الحذف؟",
+
+  "colTax55": "ضريبة 5.5%",
+  "colTax20": "ضريبة 20%",
+  "colPaidHtWithoutAnah": "المدفوع بدون ضريبة (بدون ANAH)",
+  "colPaidHtWithAnah": "المدفوع بدون ضريبة (مع ANAH)",
+  "colTotalTax": "إجمالي الضريبة",
+  "colPrimeAnah": "قسط ANAH",
+  "colCreatedBy": "أنشأ بواسطة",
+  "colCreatedAt": "تاريخ الإنشاء",
+
+  "actionEdit": "تعديل عرض السعر",
+  "actionYousign": "YouSign",
+  "actionBilling": "إنشاء فاتورة",
+  "actionPdf": "تحميل PDF",
+  "actionDisable": "تعطيل عرض السعر",
+  "actionEnable": "تفعيل عرض السعر",
+  "actionRemove": "حذف نهائي",
+
+  "confirmDisable": "هل أنت متأكد من تعطيل عرض السعر؟",
+  "confirmEnable": "هل أنت متأكد من تفعيل عرض السعر؟",
+  "confirmRemove": "هل أنت متأكد من الحذف النهائي لعرض السعر؟ لا يمكن التراجع عن هذا الإجراء.",
+
+  "billingDialogTitle": "إنشاء فاتورة",
+  "billingDialogSendEmail": "إرسال بريد إلكتروني للعميل؟",
+  "billingDialogCreateAsset": "إنشاء أصل؟",
+  "billingDialogConfirm": "إنشاء",
+  "billingDialogCancel": "إلغاء",
+
+  "successDisabled": "تم تعطيل عرض السعر",
+  "successEnabled": "تم تفعيل عرض السعر",
+  "successRemoved": "تم حذف عرض السعر",
+  "successBillingCreated": "تم إنشاء الفاتورة بنجاح",
+  "errorAction": "حدث خطأ"
 }

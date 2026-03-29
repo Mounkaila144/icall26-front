@@ -86,5 +86,38 @@
   "errorSaving": "Error saving",
   "errorDeleting": "Error deleting",
   "errorImporting": "Error importing",
-  "confirmDelete": "Are you sure you want to delete?"
+  "confirmDelete": "Are you sure you want to delete?",
+
+  "colTax55": "Tax 5.5%",
+  "colTax20": "Tax 20%",
+  "colPaidHtWithoutAnah": "Paid HT (excl. ANAH)",
+  "colPaidHtWithAnah": "Paid HT (incl. ANAH)",
+  "colTotalTax": "Total Tax",
+  "colPrimeAnah": "ANAH Premium",
+  "colCreatedBy": "Created By",
+  "colCreatedAt": "Created At",
+
+  "actionEdit": "Edit quotation",
+  "actionYousign": "YouSign",
+  "actionBilling": "Create billing",
+  "actionPdf": "Download PDF",
+  "actionDisable": "Disable quotation",
+  "actionEnable": "Enable quotation",
+  "actionRemove": "Delete permanently",
+
+  "confirmDisable": "Are you sure you want to disable this quotation?",
+  "confirmEnable": "Are you sure you want to enable this quotation?",
+  "confirmRemove": "Are you sure you want to permanently delete this quotation? This action cannot be undone.",
+
+  "billingDialogTitle": "Create Billing",
+  "billingDialogSendEmail": "Send email to customer?",
+  "billingDialogCreateAsset": "Create asset?",
+  "billingDialogConfirm": "Create",
+  "billingDialogCancel": "Cancel",
+
+  "successDisabled": "Quotation disabled",
+  "successEnabled": "Quotation enabled",
+  "successRemoved": "Quotation deleted",
+  "successBillingCreated": "Billing created successfully",
+  "errorAction": "An error occurred"
 }

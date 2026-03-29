@@ -17,6 +17,21 @@ import type {
   CreateContractData,
   UpdateContractData,
   FilterOptionsResponse,
+  ContractTabsResponse,
+  TabDataResponse,
+  ContractProductItem,
+  ContractCommentItem,
+  ContractEmailItem,
+  ContractSmsItem,
+  ContractDocumentItem,
+  ContractInstallationItem,
+  ContractLocalisation,
+  ContractBillingItem,
+  ContractWhatsAppItem,
+  ContractStepsData,
+  DocumentCheckerItem,
+  ContractRequestItem,
+  ContractAssetItem,
 } from '../../types';
 
 const CONTRACTS_BASE_URL = '/admin/customerscontracts/contracts';
@@ -285,6 +300,102 @@ export const contractsService = {
 
   async addComment(contractId: number, comment: string): Promise<ContractActionResponse> {
     const response = await apiClient.post<ContractActionResponse>(`${CONTRACTS_BASE_URL}/${contractId}/comments`, { comment });
+    return response.data;
+  },
+
+  // ─── Tab Data ───────────────────────────────────────────────
+
+  async getTabs(namespace = 'dashboard-site-customers-contract-view'): Promise<ContractTabsResponse> {
+    const response = await apiClient.get<ContractTabsResponse>(`${CONTRACTS_BASE_URL}/tabs`, {
+      params: { namespace },
+    });
+    return response.data;
+  },
+
+  async getContractProducts(contractId: number): Promise<TabDataResponse<ContractProductItem[]>> {
+    const response = await apiClient.get<TabDataResponse<ContractProductItem[]>>(`${CONTRACTS_BASE_URL}/${contractId}/products`);
+    return response.data;
+  },
+
+  async getContractComments(contractId: number, status = 'ACTIVE'): Promise<TabDataResponse<ContractCommentItem[]>> {
+    const response = await apiClient.get<TabDataResponse<ContractCommentItem[]>>(`${CONTRACTS_BASE_URL}/${contractId}/tab-comments`, {
+      params: { status },
+    });
+    return response.data;
+  },
+
+  async storeContractComment(contractId: number, comment: string): Promise<TabDataResponse<{ id: number }>> {
+    const response = await apiClient.post<TabDataResponse<{ id: number }>>(`${CONTRACTS_BASE_URL}/${contractId}/tab-comments`, { comment });
+    return response.data;
+  },
+
+  async deleteContractComment(contractId: number, commentId: number): Promise<TabDataResponse<null>> {
+    const response = await apiClient.delete<TabDataResponse<null>>(`${CONTRACTS_BASE_URL}/${contractId}/tab-comments/${commentId}`);
+    return response.data;
+  },
+
+  async getContractEmails(contractId: number): Promise<TabDataResponse<ContractEmailItem[]>> {
+    const response = await apiClient.get<TabDataResponse<ContractEmailItem[]>>(`${CONTRACTS_BASE_URL}/${contractId}/emails`);
+    return response.data;
+  },
+
+  async getContractSms(contractId: number): Promise<TabDataResponse<ContractSmsItem[]>> {
+    const response = await apiClient.get<TabDataResponse<ContractSmsItem[]>>(`${CONTRACTS_BASE_URL}/${contractId}/sms`);
+    return response.data;
+  },
+
+  async getContractDocuments(contractId: number): Promise<TabDataResponse<ContractDocumentItem[]>> {
+    const response = await apiClient.get<TabDataResponse<ContractDocumentItem[]>>(`${CONTRACTS_BASE_URL}/${contractId}/documents`);
+    return response.data;
+  },
+
+  async getContractInstallations(contractId: number): Promise<TabDataResponse<ContractInstallationItem[]>> {
+    const response = await apiClient.get<TabDataResponse<ContractInstallationItem[]>>(`${CONTRACTS_BASE_URL}/${contractId}/installations`);
+    return response.data;
+  },
+
+  async getContractLocalisation(contractId: number): Promise<TabDataResponse<ContractLocalisation | null>> {
+    const response = await apiClient.get<TabDataResponse<ContractLocalisation | null>>(`${CONTRACTS_BASE_URL}/${contractId}/localisation`);
+    return response.data;
+  },
+
+  async getContractBilling(contractId: number): Promise<TabDataResponse<ContractBillingItem[]>> {
+    const response = await apiClient.get<TabDataResponse<ContractBillingItem[]>>(`${CONTRACTS_BASE_URL}/${contractId}/billing`);
+    return response.data;
+  },
+
+  async getContractWhatsApp(contractId: number): Promise<TabDataResponse<ContractWhatsAppItem[]>> {
+    const response = await apiClient.get<TabDataResponse<ContractWhatsAppItem[]>>(`${CONTRACTS_BASE_URL}/${contractId}/whatsapp`);
+    return response.data;
+  },
+
+  async getContractPartnerWhatsApp(contractId: number): Promise<TabDataResponse<ContractWhatsAppItem[]>> {
+    const response = await apiClient.get<TabDataResponse<ContractWhatsAppItem[]>>(`${CONTRACTS_BASE_URL}/${contractId}/partner-whatsapp`);
+    return response.data;
+  },
+
+  async getContractDocCheck(contractId: number): Promise<TabDataResponse<DocumentCheckerItem[]>> {
+    const response = await apiClient.get<TabDataResponse<DocumentCheckerItem[]>>(`${CONTRACTS_BASE_URL}/${contractId}/doc-check`);
+    return response.data;
+  },
+
+  async getContractSteps(contractId: number): Promise<TabDataResponse<ContractStepsData>> {
+    const response = await apiClient.get<TabDataResponse<ContractStepsData>>(`${CONTRACTS_BASE_URL}/${contractId}/steps`);
+    return response.data;
+  },
+
+  async getContractRequests(contractId: number): Promise<TabDataResponse<ContractRequestItem[]>> {
+    const response = await apiClient.get<TabDataResponse<ContractRequestItem[]>>(`${CONTRACTS_BASE_URL}/${contractId}/requests`);
+    return response.data;
+  },
+
+  async getContractAssets(contractId: number): Promise<TabDataResponse<ContractAssetItem[]>> {
+    const response = await apiClient.get<TabDataResponse<ContractAssetItem[]>>(`${CONTRACTS_BASE_URL}/${contractId}/assets`);
+    return response.data;
+  },
+
+  async getContractAttributions(contractId: number): Promise<TabDataResponse<any>> {
+    const response = await apiClient.get<TabDataResponse<any>>(`${CONTRACTS_BASE_URL}/${contractId}/attributions`);
     return response.data;
   },
 };

@@ -427,6 +427,7 @@ export interface DomoprimeQuotation {
   calculation?: DomoprimeCalculation;
   subventionType?: DomoprimeSubventionType;
   products?: DomoprimeQuotationProduct[];
+  creator?: { id: number; firstname: string; lastname: string } | null;
 
   created_at: string;
   updated_at: string;
