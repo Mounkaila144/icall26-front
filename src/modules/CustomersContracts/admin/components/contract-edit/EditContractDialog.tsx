@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useCallback, useMemo } from 'react'
+
 import { useParams } from 'next/navigation'
 
 import Dialog from '@mui/material/Dialog'
@@ -20,6 +21,7 @@ import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 
 import type { AxiosError } from 'axios'
+import type { UseFormReturn } from 'react-hook-form'
 
 import { useEditContractState } from './useEditContractState'
 import { useEditPermissions } from './useEditPermissions'
@@ -29,9 +31,7 @@ import { useContractTabs } from '../../hooks/useContractTabs'
 import { useDomoprimeFilterOptions } from '@/modules/AppDomoprime'
 import { domoprimeIsoService } from '@/modules/AppDomoprime/admin/services/domoprimeService'
 import TabContractDetails from './tabs/TabContractDetails'
-import TabTeamAttribution from './tabs/TabTeamAttribution'
 import TabAttributions from './tabs/TabAttributions'
-import TabFinanceStatus from './tabs/TabFinanceStatus'
 import TabMeetingForms from './tabs/TabMeetingForms'
 import TabProducts from './tabs/TabProducts'
 import TabComments from './tabs/TabComments'
@@ -50,7 +50,9 @@ import TabRequests from './tabs/TabRequests'
 import TabAssets from './tabs/TabAssets'
 import TabPlaceholder from './tabs/TabPlaceholder'
 
-import type { CustomerContract, UpdateContractData, ContractTab } from '../../../types'
+import type { CustomerContract, UpdateContractData, ContractTab, ContractFilterOptions } from '../../../types'
+import type { TeamFinanceFormData } from './editFormSchema'
+import type { ContractTranslations } from '../../hooks/useContractTranslations'
 
 interface ApiValidationError {
   message: string
@@ -91,11 +93,11 @@ function renderDynamicTabContent(
   props: {
     contractId: number | null
     lang: string
-    teamFinanceForm: any
-    filterOptions: any
+    teamFinanceForm: UseFormReturn<TeamFinanceFormData>
+    filterOptions: ContractFilterOptions
     filterOptionsLoading: boolean
     onSave: () => Promise<void> | void
-    t: any
+    t: ContractTranslations
   },
 ) {
   switch (tab.component) {
@@ -248,13 +250,16 @@ export default function EditContractDialog({
   // Load contract when dialog opens
   useEffect(() => {
     if (isOpen && contractId) {
-      const fetchIsoData = async (id: number) => {
+      const fetchIsoData = async (id: number): Promise<Record<string, unknown> | null> => {
         try {
           const response = await domoprimeIsoService.getByContractId(id)
-          return response.success ? response.data : null
+
+          
+return response.success ? (response.data as unknown as Record<string, unknown>) : null
         } catch (error) {
           console.error('Failed to load ISO data:', error)
-          return null
+          
+return null
         }
       }
 

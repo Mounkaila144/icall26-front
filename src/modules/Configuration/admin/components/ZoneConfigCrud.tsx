@@ -57,7 +57,8 @@ const emptyForm: ZoneFormData = {
 const isYes = (val: unknown): boolean => {
   if (typeof val === 'boolean') return val
   if (typeof val === 'string') return val.toUpperCase() === 'YES'
-  return false
+  
+return false
 }
 
 // ─── Component ───────────────────────────────────────────
@@ -81,6 +82,7 @@ export default function ZoneConfigCrud() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
+
       const res = await apiClient.get<{ success: boolean; data: ZoneItem[] }>(
         '/admin/customerscontracts/config/zones',
       )

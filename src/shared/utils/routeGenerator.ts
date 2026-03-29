@@ -18,6 +18,7 @@ export interface RouteConfig {
  */
 function removeNumericPrefix(str: string): string {
   if (!str) return '';
+
   // Remove leading digits and underscore (e.g., "0010_" or "10_")
   return str.replace(/^\d+_/, '');
 }
@@ -66,22 +67,29 @@ export function generateAdminRoute(config: RouteConfig): string {
   if (menu && menu.trim()) {
     // Ensure it starts with /admin
     const cleanPath = menu.trim();
+
     if (cleanPath.startsWith('/admin')) {
       return cleanPath;
     }
-    return `/admin${cleanPath.startsWith('/') ? '' : '/'}${cleanPath}`;
+
+    
+return `/admin${cleanPath.startsWith('/') ? '' : '/'}${cleanPath}`;
   }
 
   // Priority 2: Generate from module + name
   if (module && module.trim()) {
     const moduleKebab = toKebabCase(module.trim());
     const nameKebab = toKebabCase(name.trim());
-    return `/admin/${moduleKebab}/${nameKebab}`;
+
+    
+return `/admin/${moduleKebab}/${nameKebab}`;
   }
 
   // Priority 3: Generate from name only
   const nameKebab = toKebabCase(name.trim());
-  return `/admin/${nameKebab}`;
+
+  
+return `/admin/${nameKebab}`;
 }
 
 /**
@@ -92,20 +100,27 @@ export function generateFrontendRoute(config: RouteConfig): string {
 
   if (menu && menu.trim()) {
     const cleanPath = menu.trim();
+
     if (cleanPath.startsWith('/')) {
       return cleanPath;
     }
-    return `/${cleanPath}`;
+
+    
+return `/${cleanPath}`;
   }
 
   if (module && module.trim()) {
     const moduleKebab = toKebabCase(module.trim());
     const nameKebab = toKebabCase(name.trim());
-    return `/${moduleKebab}/${nameKebab}`;
+
+    
+return `/${moduleKebab}/${nameKebab}`;
   }
 
   const nameKebab = toKebabCase(name.trim());
-  return `/${nameKebab}`;
+
+  
+return `/${nameKebab}`;
 }
 
 /**
@@ -116,20 +131,27 @@ export function generateSuperadminRoute(config: RouteConfig): string {
 
   if (menu && menu.trim()) {
     const cleanPath = menu.trim();
+
     if (cleanPath.startsWith('/superadmin')) {
       return cleanPath;
     }
-    return `/superadmin${cleanPath.startsWith('/') ? '' : '/'}${cleanPath}`;
+
+    
+return `/superadmin${cleanPath.startsWith('/') ? '' : '/'}${cleanPath}`;
   }
 
   if (module && module.trim()) {
     const moduleKebab = toKebabCase(module.trim());
     const nameKebab = toKebabCase(name.trim());
-    return `/superadmin/${moduleKebab}/${nameKebab}`;
+
+    
+return `/superadmin/${moduleKebab}/${nameKebab}`;
   }
 
   const nameKebab = toKebabCase(name.trim());
-  return `/superadmin/${nameKebab}`;
+
+  
+return `/superadmin/${nameKebab}`;
 }
 
 /**

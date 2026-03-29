@@ -20,6 +20,7 @@ import type { ContractTranslations } from '../../../hooks/useContractTranslation
 
 interface TabWhatsAppProps {
   contractId: number | null
+
   /** 'customer' for customer WhatsApp, 'partner' for partner WhatsApp */
   variant: 'customer' | 'partner'
   t: ContractTranslations
@@ -35,6 +36,7 @@ export default function TabWhatsApp({ contractId, variant, t }: TabWhatsAppProps
 
     try {
       setLoading(true)
+
       const response =
         variant === 'partner'
           ? await contractsService.getContractPartnerWhatsApp(contractId)

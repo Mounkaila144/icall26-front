@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import {
   Card,
   CardContent,
@@ -18,16 +19,20 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material';
+
 import type { TenantStats, HealthStatus } from '../../../types/health.types';
 
 /**
  * Props du composant TenantHealthTable
  */
 interface TenantHealthTableProps {
+
   /** Statistiques des tenants */
   tenantStats: TenantStats[];
+
   /** Callback au clic sur un tenant */
   onTenantClick?: (tenantId: number) => void;
+
   /** Afficher en mode compact */
   compact?: boolean;
 }
@@ -47,9 +52,12 @@ const healthConfig: Record<HealthStatus, { color: 'success' | 'warning' | 'error
  */
 function formatActivity(dateString?: string): string {
   if (!dateString) return 'Jamais';
+
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
+
+    
+return date.toLocaleDateString('fr-FR', {
       day: '2-digit',
       month: 'short',
       hour: '2-digit',
@@ -81,7 +89,9 @@ export function TenantHealthTable({
   // Trier par état de santé (critique en premier)
   const sortedTenants = [...tenantStats].sort((a, b) => {
     const order = { critical: 0, warning: 1, unknown: 2, healthy: 3 };
-    return order[a.health] - order[b.health];
+
+    
+return order[a.health] - order[b.health];
   });
 
   // En mode compact, limiter à 5 tenants
@@ -121,6 +131,7 @@ export function TenantHealthTable({
               <TableBody>
                 {displayTenants.map((tenant) => {
                   const config = healthConfig[tenant.health];
+
                   const modulePercent = tenant.totalModules > 0
                     ? Math.round((tenant.activeModules / tenant.totalModules) * 100)
                     : 0;

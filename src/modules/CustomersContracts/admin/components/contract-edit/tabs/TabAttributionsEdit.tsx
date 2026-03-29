@@ -59,7 +59,7 @@ interface TabAttributionsEditProps {
  * Edit form for attributions - contributors with user/team + attribution + payment_at.
  * Reproduces Symfony: customers_contracts_ajaxModifyAttributions2.tpl
  */
-export default function TabAttributionsEdit({ contractId, t, onSave }: TabAttributionsEditProps) {
+export default function TabAttributionsEdit({ contractId }: TabAttributionsEditProps) {
   const [formData, setFormData] = useState<AttributionsFormData | null>(null)
   const [values, setValues] = useState<Record<string, ContributorValues>>({})
   const [loading, setLoading] = useState(true)
@@ -69,6 +69,7 @@ export default function TabAttributionsEdit({ contractId, t, onSave }: TabAttrib
 
     try {
       setLoading(true)
+
       const response = await apiClient.get<{ success: boolean; data: AttributionsFormData }>(
         `/admin/customerscontracts/contracts/${contractId}/attributions/edit`,
       )
@@ -77,6 +78,7 @@ export default function TabAttributionsEdit({ contractId, t, onSave }: TabAttrib
         setFormData(response.data.data)
 
         const initial: Record<string, ContributorValues> = {}
+
         for (const c of response.data.data.contributors) {
           initial[c.type] = {
             user_id: c.user_id,
@@ -85,6 +87,7 @@ export default function TabAttributionsEdit({ contractId, t, onSave }: TabAttrib
             payment_at: c.payment_at,
           }
         }
+
         setValues(initial)
       }
     } catch {
@@ -139,6 +142,7 @@ export default function TabAttributionsEdit({ contractId, t, onSave }: TabAttrib
                     value={contributor.is_team ? (val.team_id ?? '') : (val.user_id ?? '')}
                     onChange={(e) => {
                       const id = e.target.value ? Number(e.target.value) : null
+
                       setValues((prev) => ({
                         ...prev,
                         [contributor.type]: {
@@ -168,6 +172,7 @@ export default function TabAttributionsEdit({ contractId, t, onSave }: TabAttrib
                     value={val.attribution_id ?? ''}
                     onChange={(e) => {
                       const attrId = e.target.value ? Number(e.target.value) : null
+
                       setValues((prev) => ({
                         ...prev,
                         [contributor.type]: { ...prev[contributor.type], attribution_id: attrId },

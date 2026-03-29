@@ -67,6 +67,7 @@ const EXT_COLORS: Record<string, 'error' | 'primary' | 'success' | 'warning' | '
 
 function formatDate(dateStr: string | null) {
   if (!dateStr || dateStr === '0000-00-00 00:00:00') return '—'
+
   try {
     return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
   } catch {
@@ -93,12 +94,15 @@ export default function TabDocuments({ contractId, t }: TabDocumentsProps) {
 
   const fetchDocuments = useCallback(async () => {
     if (!contractId) return
+
     try {
       setLoading(true)
+
       const response = await apiClient.get<{ success: boolean; data: { documents: DocumentItem[] } }>(
         `/admin/customersdocuments/contracts/${contractId}/documents`,
         { params: { status: statusFilter } },
       )
+
       if (response.data.success) {
         setDocuments(response.data.data.documents)
       }
@@ -115,18 +119,22 @@ export default function TabDocuments({ contractId, t }: TabDocumentsProps) {
 
   const handleDownload = async (docId: number, fileName: string, extension: string) => {
     if (!contractId) return
+
     try {
       const response = await apiClient.get(
         `/admin/customersdocuments/contracts/${contractId}/documents/${docId}/download`,
         { responseType: 'blob' },
       )
+
       const mimeMap: Record<string, string> = {
         pdf: 'application/pdf', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
         gif: 'image/gif', doc: 'application/msword', txt: 'text/plain',
       }
+
       const contentType = response.headers['content-type'] || mimeMap[extension?.toLowerCase()] || 'application/octet-stream'
       const blob = new Blob([response.data], { type: contentType })
       const url = window.URL.createObjectURL(blob)
+
       window.open(url, '_blank')
     } catch {
       setError('Impossible de télécharger le fichier')
@@ -135,6 +143,7 @@ export default function TabDocuments({ contractId, t }: TabDocumentsProps) {
 
   const handleDelete = async (docId: number, title: string) => {
     if (!contractId || !confirm(`Le document "${title}" sera supprimé. Confirmer ?`)) return
+
     try {
       await apiClient.delete(`/admin/customersdocuments/contracts/${contractId}/documents/${docId}`)
       setSuccessMsg('Document supprimé')
@@ -147,9 +156,11 @@ export default function TabDocuments({ contractId, t }: TabDocumentsProps) {
   const handleUpload = async (files: FileList) => {
     if (!contractId) return
     const formData = new FormData()
+
     for (let i = 0; i < files.length; i++) {
       formData.append('files[]', files[i])
     }
+
     try {
       await apiClient.post(`/admin/customersdocuments/contracts/${contractId}/documents/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -178,12 +189,16 @@ export default function TabDocuments({ contractId, t }: TabDocumentsProps) {
           sx={{ flex: 1, p: 2, border: '2px dashed', borderColor: 'divider', borderRadius: 1, textAlign: 'center', cursor: 'pointer', '&:hover': { borderColor: 'primary.main', bgcolor: 'action.hover' } }}
           onClick={() => {
             const input = document.createElement('input')
+
             input.type = 'file'
             input.multiple = true
+
             input.onchange = (e) => {
               const files = (e.target as HTMLInputElement).files
+
               if (files) handleUpload(files)
             }
+
             input.click()
           }}
         >

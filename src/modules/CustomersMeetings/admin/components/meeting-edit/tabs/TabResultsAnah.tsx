@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -115,12 +114,14 @@ export default function TabResultsAnah({ meetingId }: TabResultsAnahProps) {
 
   const formatNumber = (val: number | null | undefined) => {
     if (val === null || val === undefined) return '---'
-    return val.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 2 })
+    
+return val.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 2 })
   }
 
   const formatCurrency = (val: number | null | undefined) => {
     if (val === null || val === undefined) return '---'
-    return val.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    
+return val.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   }
 
   return (

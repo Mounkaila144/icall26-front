@@ -25,10 +25,7 @@ const ModuleMenu = () => {
   // Hooks
   const { lang: locale } = useParams()
   const pathname = usePathname()
-  const { t, locale: translationLocale } = useTranslation()
-
-  // Debug log
-  console.log('🔧 [ModuleMenu] URL locale:', locale, '| Translation locale:', translationLocale)
+  const { t } = useTranslation()
 
   // Detect current role from URL
   const currentRole: UserRole | undefined = useMemo(() => {
@@ -37,7 +34,9 @@ const ModuleMenu = () => {
     } else if (pathname?.includes('/admin')) {
       return 'admin'
     }
-    return undefined
+
+    
+return undefined
   }, [pathname])
 
   const { menus, isLoading } = useConfigMenus({ visibleOnly: true, role: currentRole })
@@ -62,7 +61,7 @@ const ModuleMenu = () => {
         return <span style={{ fontSize: '1.25rem' }}>{menu.icon.value}</span>
       }
 
-      if (menu.icon.type === 'iconify') {
+      if (menu.icon.type === 'icon-class') {
         return <i className={menu.icon.value} />
       }
 

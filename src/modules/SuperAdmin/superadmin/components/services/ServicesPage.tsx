@@ -1,7 +1,11 @@
 'use client';
 
 import React from 'react';
+
 import { useRouter, useParams } from 'next/navigation';
+
+import NextLink from 'next/link';
+
 import {
   Box,
   Card,
@@ -13,7 +17,7 @@ import {
   Breadcrumbs,
   Link,
 } from '@mui/material';
-import NextLink from 'next/link';
+
 import {
   SERVICE_LABELS,
   SERVICE_DESCRIPTIONS,

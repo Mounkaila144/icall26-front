@@ -1,24 +1,21 @@
 'use client'
 
 import { useEffect, useState, useMemo, useCallback } from 'react'
+
 import { createColumnHelper } from '@tanstack/react-table'
 
 // MUI Imports
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
-import Chip from '@mui/material/Chip'
 import TextField from '@mui/material/TextField'
-import Select from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
-import FormControl from '@mui/material/FormControl'
-import Box from '@mui/material/Box'
 
 // Services
+import type { ColumnDef } from '@tanstack/react-table'
+
 import { customersService } from '../services/customersService'
 
 // Types
 import type { Customer, CustomerFilters } from '../../types'
-import type { ColumnDef } from '@tanstack/react-table'
 
 // Shared Components
 import { DataTable, StandardMobileCard } from '@/components/shared/DataTable'
@@ -50,7 +47,8 @@ export default function Customers() {
   // States
   const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_error, setError] = useState<string | null>(null)
 
   // Pagination
   const [pagination, setPagination] = useState({
@@ -62,6 +60,7 @@ export default function Customers() {
 
   // Filters
   const [globalSearch, setGlobalSearch] = useState('')
+
   const [filters, setFilters] = useState<CustomerFilters>({
     status: 'ACTIVE',
     sort_by: 'created_at',
@@ -135,13 +134,13 @@ export default function Customers() {
           setPagination({
             current_page: response.meta.current_page || pagination.current_page,
             last_page: response.meta.last_page || 1,
-            per_page: response.meta.per_page || filters.per_page,
+            per_page: response.meta.per_page || filters.per_page || 15,
             total: response.meta.total || 0
           })
         }
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load customers')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load customers')
       console.error('Error loading customers:', err)
     } finally {
       setLoading(false)
@@ -162,8 +161,8 @@ export default function Customers() {
     try {
       await customersService.deleteCustomer(id)
       loadCustomers()
-    } catch (err: any) {
-      alert('Error deleting customer: ' + err.message)
+    } catch (err) {
+      alert('Error deleting customer: ' + (err instanceof Error ? err.message : 'An error occurred'))
     }
   }, [loadCustomers])
 
@@ -172,10 +171,15 @@ export default function Customers() {
     setColumnFilters(prev => {
       if (value === '' || value === null || value === undefined) {
         // Remove filter if empty
-        const { [columnId]: _, ...rest } = prev
-        return rest
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [columnId]: _removed, ...rest } = prev
+
+
+return rest
       }
-      return {
+
+      
+return {
         ...prev,
         [columnId]: value
       }

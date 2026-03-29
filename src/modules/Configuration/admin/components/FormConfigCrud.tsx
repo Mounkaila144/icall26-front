@@ -23,7 +23,6 @@ import Alert from '@mui/material/Alert'
 import Snackbar from '@mui/material/Snackbar'
 import CircularProgress from '@mui/material/CircularProgress'
 import Chip from '@mui/material/Chip'
-import Divider from '@mui/material/Divider'
 import Grid from '@mui/material/Grid'
 import Switch from '@mui/material/Switch'
 import FormControlLabel from '@mui/material/FormControlLabel'
@@ -88,6 +87,7 @@ export default function FormConfigCrud() {
 
   const loadForms = useCallback(async () => {
     setLoading(true)
+
     try {
       const res = await apiClient.get<{ success: boolean; data: FormTemplate[] }>(BASE_URL)
 
@@ -267,7 +267,7 @@ export default function FormConfigCrud() {
         {fieldsLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}><CircularProgress /></Box>
         ) : fields.length === 0 ? (
-          <Alert severity='info'>Aucun champ. Cliquez sur "Ajouter un champ" pour commencer.</Alert>
+          <Alert severity='info'>Aucun champ. Cliquez sur &quot;Ajouter un champ&quot; pour commencer.</Alert>
         ) : (
           fields.map((field, index) => (
             <Card key={field.id ?? `new-${index}`} variant='outlined' sx={{ mb: 2 }}>

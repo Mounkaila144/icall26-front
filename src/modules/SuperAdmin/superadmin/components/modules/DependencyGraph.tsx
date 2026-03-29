@@ -26,10 +26,13 @@ import { useDependencyGraph, type ModuleNode as ModuleNodeType } from '../../hoo
  * Props du composant DependencyGraph
  */
 interface DependencyGraphProps {
+
   /** Callback appelé lors du clic sur un noeud */
   onNodeClick?: (moduleName: string) => void;
+
   /** Nom du module à mettre en surbrillance */
   highlightModule?: string;
+
   /** Hauteur du conteneur (défaut: 100%) */
   height?: string | number;
 }

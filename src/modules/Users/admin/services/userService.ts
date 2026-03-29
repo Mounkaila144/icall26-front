@@ -2,7 +2,6 @@ import { createApiClient } from '@/shared/lib/api-client';
 import type { ApiResponse } from '@/shared/types/api.types';
 import type {
   User,
-  UserFilters,
   PaginatedUsersResponse,
   UserQueryParams,
   UserCreationOptions,
@@ -78,6 +77,7 @@ class UserService {
             if (value.from) {
               queryParams.append(`filter[range][${key}][from]`, value.from);
             }
+
             if (value.to) {
               queryParams.append(`filter[range][${key}][to]`, value.to);
             }
@@ -107,7 +107,9 @@ class UserService {
     try {
       const client = createApiClient(tenantId);
       const response = await client.get<ApiResponse<User>>(`/admin/users/${userId}`);
-      return response.data.data;
+
+      
+return response.data.data;
     } catch (error) {
       console.error(`Error fetching user ${userId}:`, error);
       throw error;
@@ -123,7 +125,9 @@ class UserService {
     try {
       const client = createApiClient(tenantId);
       const response = await client.get<ApiResponse<UserCreationOptions>>('/admin/users/creation-options');
-      return response.data.data;
+
+      
+return response.data.data;
     } catch (error) {
       console.error('Error fetching user creation options:', error);
       throw error;
@@ -140,7 +144,9 @@ class UserService {
     try {
       const client = createApiClient(tenantId);
       const response = await client.post<ApiResponse<User>>('/admin/users', userData);
-      return response.data.data;
+
+      
+return response.data.data;
     } catch (error) {
       console.error('Error creating user:', error);
       throw error;
@@ -158,7 +164,9 @@ class UserService {
     try {
       const client = createApiClient(tenantId);
       const response = await client.put<ApiResponse<User>>(`/admin/users/${userId}`, userData);
-      return response.data.data;
+
+      
+return response.data.data;
     } catch (error) {
       console.error(`Error updating user ${userId}:`, error);
       throw error;
@@ -174,6 +182,7 @@ class UserService {
   async deleteUser(userId: number, tenantId?: string): Promise<void> {
     try {
       const client = createApiClient(tenantId);
+
       await client.delete(`/admin/users/${userId}`);
     } catch (error) {
       console.error(`Error deleting user ${userId}:`, error);

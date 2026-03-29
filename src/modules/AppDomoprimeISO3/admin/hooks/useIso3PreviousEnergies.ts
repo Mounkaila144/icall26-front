@@ -19,6 +19,7 @@ export const useIso3PreviousEnergies = () => {
       setLoading(true);
       setError(null);
       const response = await iso3PreviousEnergyService.list();
+
       setPreviousEnergies(response.data);
     } catch (err) {
       console.error('Error fetching previous energies:', err);
@@ -32,8 +33,10 @@ export const useIso3PreviousEnergies = () => {
     try {
       setError(null);
       const response = await iso3PreviousEnergyService.store(data);
+
       setPreviousEnergies(prev => [...prev, response.data]);
-      return response;
+      
+return response;
     } catch (err) {
       console.error('Error creating previous energy:', err);
       setError('Failed to create previous energy');
@@ -45,10 +48,12 @@ export const useIso3PreviousEnergies = () => {
     try {
       setError(null);
       const response = await iso3PreviousEnergyService.update(id, data);
+
       setPreviousEnergies(prev =>
         prev.map(pe => pe.id === id ? response.data : pe)
       );
-      return response;
+      
+return response;
     } catch (err) {
       console.error(`Error updating previous energy ${id}:`, err);
       setError('Failed to update previous energy');

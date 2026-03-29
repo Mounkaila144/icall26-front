@@ -24,7 +24,7 @@ interface BillingDetailsTableProps {
   onDownloadPdf?: (id: number, ref: string) => void
   onSendEmail?: (id: number) => void
   onCreateAsset?: (id: number) => void
-  t: ContractTranslations
+  t: ContractTranslations & Record<string, string>
 }
 
 export default function BillingDetailsTable({

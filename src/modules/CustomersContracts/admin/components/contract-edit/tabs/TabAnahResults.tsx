@@ -33,7 +33,7 @@ interface TabAnahResultsProps {
  *   Engine, Polluter, Zone, Region, Energy, Revenue,
  *   Number of people, Number of parts, Level, Anah availability
  */
-export default function TabAnahResults({ contractId, lang, t }: TabAnahResultsProps) {
+export default function TabAnahResults({ contractId, lang }: TabAnahResultsProps) {
   const [results, setResults] = useState<Iso3AnahResultsData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -111,12 +111,14 @@ export default function TabAnahResults({ contractId, lang, t }: TabAnahResultsPr
 
   const formatNumber = (val: number | null | undefined) => {
     if (val === null || val === undefined) return '---'
-    return val.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 2 })
+    
+return val.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 2 })
   }
 
   const formatCurrency = (val: number | null | undefined) => {
     if (val === null || val === undefined) return '---'
-    return val.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    
+return val.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   }
 
   return (

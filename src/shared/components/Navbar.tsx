@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+
 import { useLanguage } from '../lib/language-context';
 import { useAuth } from '@/modules/UsersGuard';
 
@@ -25,6 +26,7 @@ export const Navbar: React.FC = () => {
   const handleLanguageChange = (langCode: string) => {
     setLanguage(langCode);
     setShowLangMenu(false);
+
     // Reload to fetch menus with new language
     window.location.reload();
   };

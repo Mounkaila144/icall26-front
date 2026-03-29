@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+
 import { deactivationService } from '../services/deactivationService';
 import type {
   DeactivationRequest,
@@ -68,10 +69,13 @@ export function useModuleDeactivation() {
 
       try {
         const impactResult = await deactivationService.analyzeImpact(tenantId, moduleName);
+
         setImpact(impactResult);
-        return impactResult;
+        
+return impactResult;
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
+
         setError(error);
         throw error;
       } finally {
@@ -91,10 +95,13 @@ export function useModuleDeactivation() {
 
       try {
         const deactivationResult = await deactivationService.deactivateModule(request);
+
         setResult(deactivationResult);
-        return deactivationResult;
+        
+return deactivationResult;
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
+
         setError(error);
 
         // Retourner un résultat d'échec
@@ -104,8 +111,10 @@ export function useModuleDeactivation() {
           steps: [],
           error: error.message,
         };
+
         setResult(failedResult);
-        return failedResult;
+        
+return failedResult;
       } finally {
         setIsDeactivating(false);
       }
@@ -146,6 +155,7 @@ export function useModuleDeactivation() {
     reset,
     resetResult,
     resetImpact,
+
     // États
     isAnalyzing,
     isDeactivating,

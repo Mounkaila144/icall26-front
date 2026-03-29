@@ -60,6 +60,7 @@ const SubMenuContent: ForwardRefRenderFunction<HTMLDivElement, SubMenuContentPro
 
       // Single layout read
       const height = target.offsetHeight
+
       cachedHeightRef.current = height
 
       // Batch all writes together
@@ -82,8 +83,10 @@ const SubMenuContent: ForwardRefRenderFunction<HTMLDivElement, SubMenuContentPro
   const animateClose = useCallback((target: HTMLDivElement, duration: number) => {
     requestAnimationFrame(() => {
       target.style.overflow = 'hidden'
+
       // Use cached height if available to avoid layout read
       const height = cachedHeightRef.current ?? target.offsetHeight
+
       target.style.blockSize = `${height}px`
 
       requestAnimationFrame(() => {
@@ -100,6 +103,7 @@ const SubMenuContent: ForwardRefRenderFunction<HTMLDivElement, SubMenuContentPro
   useEffect(() => {
     if (mounted) {
       const target = SubMenuContentRef?.current
+
       if (!target) return
 
       if (open || (open && isHovered)) {

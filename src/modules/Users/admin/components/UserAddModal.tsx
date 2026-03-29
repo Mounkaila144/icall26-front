@@ -38,7 +38,6 @@ import { userService } from '../services/userService'
 import type {
   UserCreationOptions,
   CreateUserPayload,
-  GroupOption,
   PermissionGroup
 } from '../../types/user.types'
 
@@ -233,18 +232,23 @@ const UserAddModal = ({ open, onClose, onSuccess }: UserAddModalProps) => {
       if (rawPayload.firstname && rawPayload.firstname.trim() !== '') {
         payload.firstname = rawPayload.firstname.trim()
       }
+
       if (rawPayload.lastname && rawPayload.lastname.trim() !== '') {
         payload.lastname = rawPayload.lastname.trim()
       }
+
       if (rawPayload.sex && rawPayload.sex !== '') {
         payload.sex = rawPayload.sex
       }
+
       if (rawPayload.phone && rawPayload.phone.trim() !== '') {
         payload.phone = rawPayload.phone.trim()
       }
+
       if (rawPayload.mobile && rawPayload.mobile.trim() !== '') {
         payload.mobile = rawPayload.mobile.trim()
       }
+
       if (rawPayload.birthday && rawPayload.birthday !== '') {
         payload.birthday = rawPayload.birthday
       }
@@ -253,9 +257,11 @@ const UserAddModal = ({ open, onClose, onSuccess }: UserAddModalProps) => {
       if (rawPayload.callcenter_id) {
         payload.callcenter_id = rawPayload.callcenter_id
       }
+
       if (rawPayload.team_id) {
         payload.team_id = rawPayload.team_id
       }
+
       if (rawPayload.company_id) {
         payload.company_id = rawPayload.company_id
       }
@@ -264,18 +270,23 @@ const UserAddModal = ({ open, onClose, onSuccess }: UserAddModalProps) => {
       if (rawPayload.group_ids && rawPayload.group_ids.length > 0) {
         payload.group_ids = rawPayload.group_ids
       }
+
       if (rawPayload.function_ids && rawPayload.function_ids.length > 0) {
         payload.function_ids = rawPayload.function_ids
       }
+
       if (rawPayload.profile_ids && rawPayload.profile_ids.length > 0) {
         payload.profile_ids = rawPayload.profile_ids
       }
+
       if (rawPayload.team_ids && rawPayload.team_ids.length > 0) {
         payload.team_ids = rawPayload.team_ids
       }
+
       if (rawPayload.attribution_ids && rawPayload.attribution_ids.length > 0) {
         payload.attribution_ids = rawPayload.attribution_ids
       }
+
       if (rawPayload.permission_ids && rawPayload.permission_ids.length > 0) {
         payload.permission_ids = rawPayload.permission_ids
       }

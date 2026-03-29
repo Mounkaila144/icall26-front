@@ -60,7 +60,7 @@ interface ResultsData {
  * 2. CUMAC: Qmac prices or error messages
  * 3. ANAH: Moteur, Pollueur, Nombre de parts, Niveau, Anah disponibilité
  */
-export default function TabCalculSubvention({ meetingId, t }: TabCalculSubventionProps) {
+export default function TabCalculSubvention({ meetingId }: TabCalculSubventionProps) {
   const [results, setResults] = useState<ResultsData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -134,12 +134,14 @@ export default function TabCalculSubvention({ meetingId, t }: TabCalculSubventio
 
   const formatNumber = (val: number | null | undefined) => {
     if (val === null || val === undefined) return '---'
-    return val.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 2 })
+    
+return val.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 2 })
   }
 
   const formatCurrency = (val: number | null | undefined) => {
     if (val === null || val === undefined) return '---'
-    return val.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    
+return val.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   }
 
   return (

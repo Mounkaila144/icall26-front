@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+
 import { healthService } from '../services/healthService';
 import type { SystemHealth, GlobalStats, SystemAlert } from '../../types/health.types';
 
@@ -8,14 +9,19 @@ import type { SystemHealth, GlobalStats, SystemAlert } from '../../types/health.
  * État du hook useSystemHealth
  */
 interface UseSystemHealthState {
+
   /** Données de santé complètes */
   health: SystemHealth | null;
+
   /** Statistiques globales (raccourci) */
   stats: GlobalStats | null;
+
   /** Alertes actives (raccourci) */
   alerts: SystemAlert[];
+
   /** Indicateur de chargement */
   isLoading: boolean;
+
   /** Erreur éventuelle */
   error: string | null;
 }
@@ -24,8 +30,10 @@ interface UseSystemHealthState {
  * Valeur de retour du hook useSystemHealth
  */
 interface UseSystemHealthReturn extends UseSystemHealthState {
+
   /** Rafraîchit les données */
   refresh: () => Promise<void>;
+
   /** Marque une alerte comme lue */
   markAlertAsRead: (alertId: string) => void;
 }
@@ -82,6 +90,7 @@ export function useSystemHealth(
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
+
       console.error('Error loading system health:', err);
       setState((prev) => ({
         ...prev,

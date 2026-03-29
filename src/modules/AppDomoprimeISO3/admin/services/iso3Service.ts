@@ -50,7 +50,9 @@ export const iso3ResultsService = {
         `${BASE_URL}/contracts/${contractId}/results`,
         { params: { lang } }
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error fetching ISO3 results for contract ${contractId}:`, error);
       throw error;
@@ -63,7 +65,9 @@ export const iso3ResultsService = {
         `${BASE_URL}/contracts/${contractId}/results-anah`,
         { params: { lang } }
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error fetching ANAH results for contract ${contractId}:`, error);
       throw error;
@@ -81,7 +85,9 @@ export const iso3SettingsService = {
       const response = await apiClient.get<Iso3TypeDateListResponse>(
         `${BASE_URL}/dates`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error('Error fetching ISO3 dates:', error);
       throw error;
@@ -94,7 +100,9 @@ export const iso3SettingsService = {
         `${BASE_URL}/dates`,
         { dates }
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error('Error saving ISO3 dates:', error);
       throw error;
@@ -112,7 +120,9 @@ export const iso3PreviousEnergyService = {
       const response = await apiClient.get<Iso3PreviousEnergyListResponse>(
         `${BASE_URL}/previous-energies`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error('Error fetching previous energies:', error);
       throw error;
@@ -125,7 +135,9 @@ export const iso3PreviousEnergyService = {
         `${BASE_URL}/previous-energies`,
         data
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error('Error creating previous energy:', error);
       throw error;
@@ -138,7 +150,9 @@ export const iso3PreviousEnergyService = {
         `${BASE_URL}/previous-energies/${id}`,
         data
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error updating previous energy ${id}:`, error);
       throw error;
@@ -150,7 +164,9 @@ export const iso3PreviousEnergyService = {
       const response = await apiClient.delete<{ success: boolean }>(
         `${BASE_URL}/previous-energies/${id}`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error deleting previous energy ${id}:`, error);
       throw error;
@@ -168,7 +184,9 @@ export const iso3PricingService = {
       const response = await apiClient.get<Iso3PolluterPricingListResponse>(
         `${BASE_URL}/polluters/${polluterId}/pricing`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error fetching pricing for polluter ${polluterId}:`, error);
       throw error;
@@ -184,7 +202,9 @@ export const iso3PricingService = {
         `${BASE_URL}/polluters/${polluterId}/pricing`,
         data
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error creating pricing for polluter ${polluterId}:`, error);
       throw error;
@@ -196,7 +216,9 @@ export const iso3PricingService = {
       const response = await apiClient.delete<{ success: boolean }>(
         `${BASE_URL}/pricing/${id}`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error deleting pricing ${id}:`, error);
       throw error;
@@ -212,7 +234,9 @@ export const iso3PricingService = {
         `${BASE_URL}/pricing/${priceId}/coefficients`,
         { coefficients }
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error updating coefficients for pricing ${priceId}:`, error);
       throw error;
@@ -222,13 +246,17 @@ export const iso3PricingService = {
   async importPricing(file: File): Promise<Iso3ImportResponse> {
     try {
       const formData = new FormData();
+
       formData.append('file', file);
+
       const response = await apiClient.post<Iso3ImportResponse>(
         `${BASE_URL}/pricing/import`,
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error('Error importing pricing:', error);
       throw error;
@@ -238,13 +266,17 @@ export const iso3PricingService = {
   async importSurfacePricing(file: File): Promise<Iso3ImportResponse> {
     try {
       const formData = new FormData();
+
       formData.append('file', file);
+
       const response = await apiClient.post<Iso3ImportResponse>(
         `${BASE_URL}/pricing/import-surface`,
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error('Error importing surface pricing:', error);
       throw error;
@@ -262,7 +294,9 @@ export const iso3QuotationService = {
       const response = await apiClient.get<Iso3MasterProductListResponse>(
         `${BASE_URL}/quotations/master-products`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error('Error fetching master products:', error);
       throw error;
@@ -274,7 +308,9 @@ export const iso3QuotationService = {
       const response = await apiClient.get<Iso3SubventionTypeListResponse>(
         `${BASE_URL}/quotations/subvention-types`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error('Error fetching subvention types:', error);
       throw error;
@@ -286,7 +322,9 @@ export const iso3QuotationService = {
       const response = await apiClient.get<Iso3PolluterPricingListResponse>(
         `${BASE_URL}/quotations/pricing`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error('Error fetching quotation pricing:', error);
       throw error;
@@ -298,7 +336,9 @@ export const iso3QuotationService = {
       const response = await apiClient.get<Iso3QuotationResponse>(
         `${BASE_URL}/quotations/${id}`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error fetching quotation ${id}:`, error);
       throw error;
@@ -311,7 +351,9 @@ export const iso3QuotationService = {
         `${BASE_URL}/quotations/meeting`,
         data
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error('Error creating quotation for meeting:', error);
       throw error;
@@ -324,7 +366,9 @@ export const iso3QuotationService = {
         `${BASE_URL}/quotations/meeting/auto`,
         data
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error('Error auto-creating quotation for meeting:', error);
       throw error;
@@ -337,7 +381,9 @@ export const iso3QuotationService = {
         `${BASE_URL}/quotations/meeting/${id}`,
         data
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error updating meeting quotation ${id}:`, error);
       throw error;
@@ -350,7 +396,9 @@ export const iso3QuotationService = {
         `${BASE_URL}/quotations/contract`,
         data
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error('Error creating quotation for contract:', error);
       throw error;
@@ -363,7 +411,9 @@ export const iso3QuotationService = {
         `${BASE_URL}/quotations/contract/${id}`,
         data
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error updating contract quotation ${id}:`, error);
       throw error;
@@ -376,7 +426,9 @@ export const iso3QuotationService = {
         `${BASE_URL}/quotations/simulate`,
         data
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error('Error running simulation:', error);
       throw error;
@@ -388,7 +440,9 @@ export const iso3QuotationService = {
       const response = await apiClient.get<Iso3QuotationResponse>(
         `${BASE_URL}/quotations/${id}/results`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error fetching results for quotation ${id}:`, error);
       throw error;
@@ -400,7 +454,9 @@ export const iso3QuotationService = {
       const response = await apiClient.get<Iso3QuotationListResponse>(
         `${BASE_URL}/contracts/${contractId}/quotations`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error fetching quotations for contract ${contractId}:`, error);
       throw error;
@@ -412,7 +468,9 @@ export const iso3QuotationService = {
       const response = await apiClient.get<Iso3QuotationListResponse>(
         `${BASE_URL}/meetings/${meetingId}/quotations`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error fetching quotations for meeting ${meetingId}:`, error);
       throw error;
@@ -424,7 +482,9 @@ export const iso3QuotationService = {
       const response = await apiClient.get<Iso3BillingListResponse>(
         `${BASE_URL}/contracts/${contractId}/billings`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error fetching billings for contract ${contractId}:`, error);
       throw error;
@@ -437,7 +497,9 @@ export const iso3QuotationService = {
         `${BASE_URL}/quotations/${id}`,
         data
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error updating quotation ${id}:`, error);
       throw error;
@@ -449,7 +511,9 @@ export const iso3QuotationService = {
       const response = await apiClient.patch<{ success: boolean }>(
         `${BASE_URL}/quotations/${id}/disable`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error disabling quotation ${id}:`, error);
       throw error;
@@ -461,7 +525,9 @@ export const iso3QuotationService = {
       const response = await apiClient.patch<{ success: boolean }>(
         `${BASE_URL}/quotations/${id}/enable`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error enabling quotation ${id}:`, error);
       throw error;
@@ -473,7 +539,9 @@ export const iso3QuotationService = {
       const response = await apiClient.delete<{ success: boolean }>(
         `${BASE_URL}/quotations/${id}`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error deleting quotation ${id}:`, error);
       throw error;
@@ -489,7 +557,9 @@ export const iso3QuotationService = {
         `${BASE_URL}/quotations/${id}/create-billing`,
         options
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error creating billing from quotation ${id}:`, error);
       throw error;
@@ -505,7 +575,9 @@ export const iso3QuotationService = {
         `${BASE_URL}/quotations/${id}/update-last-billing`,
         options
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error updating last billing from quotation ${id}:`, error);
       throw error;
@@ -521,7 +593,9 @@ export const iso3QuotationService = {
         `${BASE_URL}/quotations/${id}/send-email`,
         { model_email_id: modelEmailId }
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error sending quotation email ${id}:`, error);
       throw error;
@@ -533,7 +607,9 @@ export const iso3QuotationService = {
       const response = await apiClient.post<{ success: boolean; reference: string }>(
         `${BASE_URL}/quotations/${id}/refresh-reference`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error refreshing quotation reference ${id}:`, error);
       throw error;
@@ -545,7 +621,9 @@ export const iso3QuotationService = {
       const response = await apiClient.get<{ success: boolean; data: { id: number; subject: string }[] }>(
         `${BASE_URL}/contracts/${contractId}/quotation-email-models`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error fetching quotation email models for contract ${contractId}:`, error);
       throw error;
@@ -557,7 +635,9 @@ export const iso3QuotationService = {
       const response = await apiClient.post<{ success: boolean; message: string }>(
         `${BASE_URL}/billings/${billingId}/send-email`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error sending billing email ${billingId}:`, error);
       throw error;
@@ -569,7 +649,9 @@ export const iso3QuotationService = {
       const response = await apiClient.post<{ success: boolean; data: unknown }>(
         `${BASE_URL}/billings/${billingId}/create-asset`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error creating asset from billing ${billingId}:`, error);
       throw error;
@@ -588,7 +670,9 @@ export const iso3ExportService = {
         `${BASE_URL}/export/quotation/${quotationId}/pdf`,
         { responseType: 'blob' }
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error exporting PDF for quotation ${quotationId}:`, error);
       throw error;
@@ -601,7 +685,9 @@ export const iso3ExportService = {
         `${BASE_URL}/export/quotation/${quotationId}/all-pdf`,
         { responseType: 'blob' }
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error exporting all PDFs for quotation ${quotationId}:`, error);
       throw error;
@@ -614,7 +700,9 @@ export const iso3ExportService = {
         `${BASE_URL}/export/quotation/${quotationId}/signed-pdf`,
         { responseType: 'blob' }
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error exporting signed PDF for quotation ${quotationId}:`, error);
       throw error;
@@ -627,7 +715,9 @@ export const iso3ExportService = {
         `${BASE_URL}/export/billing/${billingId}/pdf`,
         { responseType: 'blob' }
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error exporting billing PDF ${billingId}:`, error);
       throw error;
@@ -640,7 +730,9 @@ export const iso3ExportService = {
         `${BASE_URL}/contracts/${contractId}/export/premeeting-pdf`,
         { responseType: 'blob' }
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error exporting pre-meeting PDF for contract ${contractId}:`, error);
       throw error;
@@ -653,7 +745,9 @@ export const iso3ExportService = {
         `${BASE_URL}/contracts/${contractId}/export/afterwork-pdf`,
         { responseType: 'blob' }
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error exporting after-work PDF for contract ${contractId}:`, error);
       throw error;
@@ -666,7 +760,9 @@ export const iso3ExportService = {
         `${BASE_URL}/contracts/${contractId}/export/all-documents-pdf`,
         { responseType: 'blob' }
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error exporting all documents PDF for contract ${contractId}:`, error);
       throw error;
@@ -679,7 +775,9 @@ export const iso3ExportService = {
         `${BASE_URL}/contracts/${contractId}/export/all-signed-pdf`,
         { responseType: 'blob' }
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error exporting all signed PDF for contract ${contractId}:`, error);
       throw error;
@@ -697,7 +795,9 @@ export const iso3CompanyDocsService = {
       const response = await apiClient.get<CompanyModelListResponse>(
         `${BASE_URL}/contracts/${contractId}/company-models`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error fetching company models for contract ${contractId}:`, error);
       throw error;
@@ -709,7 +809,9 @@ export const iso3CompanyDocsService = {
       const response = await apiClient.get<CompanyDocSignatureListResponse>(
         `${BASE_URL}/contracts/${contractId}/company-doc-signatures`
       );
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error fetching company doc signatures for contract ${contractId}:`, error);
       throw error;

@@ -1,21 +1,28 @@
 'use client';
 
 import React from 'react';
+
 import { Card, CardContent, Box, Typography, Chip, CircularProgress } from '@mui/material';
+
 import type { HealthStatus, GlobalStats } from '../../../types/health.types';
 
 /**
  * Props du composant HealthStatusCard
  */
 interface HealthStatusCardProps {
+
   /** Statut de santé global */
   status: HealthStatus;
+
   /** Statistiques globales */
   stats: GlobalStats | null;
+
   /** Dernière mise à jour */
   lastUpdated?: string;
+
   /** Indicateur de chargement */
   isLoading?: boolean;
+
   /** Callback de rafraîchissement */
   onRefresh?: () => void;
 }
@@ -55,6 +62,7 @@ const statusConfig: Record<HealthStatus, { color: string; icon: string; label: s
  */
 function formatLastUpdated(isoDate?: string): string {
   if (!isoDate) return 'Jamais';
+
   try {
     const date = new Date(isoDate);
     const now = new Date();
@@ -63,7 +71,8 @@ function formatLastUpdated(isoDate?: string): string {
     if (diff < 60000) return 'À l\'instant';
     if (diff < 3600000) return `Il y a ${Math.floor(diff / 60000)} min`;
     if (diff < 86400000) return `Il y a ${Math.floor(diff / 3600000)} h`;
-    return date.toLocaleDateString('fr-FR');
+    
+return date.toLocaleDateString('fr-FR');
   } catch {
     return 'Inconnu';
   }

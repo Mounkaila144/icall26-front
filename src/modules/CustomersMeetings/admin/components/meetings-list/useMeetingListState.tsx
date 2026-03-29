@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef, type SyntheticEvent } from 'react'
+
 import { createColumnHelper } from '@tanstack/react-table'
 import type { ColumnDef } from '@tanstack/react-table'
 
@@ -27,10 +28,12 @@ export const COLUMN_TO_BACKEND_FILTER: Record<string, string> = {
   customer_phone:    'search_phone',
   customer_city:     'search_city',
   customer_postcode: 'postcode',
+
   // Status columns
   meeting_status:    'state_id',
   status_call:       'status_call_id',
   status_lead:       'status_lead_id',
+
   // User columns
   sales:             'sales_id',
   sale2:             'sale2_id',
@@ -39,6 +42,7 @@ export const COLUMN_TO_BACKEND_FILTER: Record<string, string> = {
   creator:           'created_by_id',
   confirmator:       'confirmator_id',
   confirmed_by:      'confirmed_by_id',
+
   // Entity columns
   callcenter:        'callcenter_id',
   company:           'company_id',
@@ -47,24 +51,29 @@ export const COLUMN_TO_BACKEND_FILTER: Record<string, string> = {
   campaign:          'campaign_id',
   meeting_type:      'type_id',
   opc_range:         'opc_range_id',
+
   // Boolean columns
   is_confirmed:      'is_confirmed',
   is_hold:           'is_hold',
   is_hold_quote:     'is_hold_quote',
   is_qualified:      'is_qualified',
   status:            'status',
+
   // ── Sidebar date filters ──
   date_from:         'date_from',
   date_to:           'date_to',
   date_type:         'date_type',
+
   // ── Sidebar text search ──
   sidebar_search:    'search_lastname',
   sidebar_phone:     'search_phone',
   sidebar_postcode:  'postcode',
   sidebar_city:      'search_city',
+
   // ── Sidebar ranges ──
   sidebar_opc_range:    'opc_range_id',
   sidebar_in_at_range:  'in_at_range_id',
+
   // ── Sidebar team ──
   sidebar_telepro:      'telepro_id',
   sidebar_sales:        'sales_id',
@@ -72,10 +81,12 @@ export const COLUMN_TO_BACKEND_FILTER: Record<string, string> = {
   sidebar_assistant:    'assistant_id',
   sidebar_creator:      'created_by_id',
   sidebar_confirmator:  'confirmator_id',
+
   // ── Sidebar statuses ──
   sidebar_state:        'state_id',
   sidebar_status_call:  'status_call_id',
   sidebar_status_lead:  'status_lead_id',
+
   // ── Sidebar selections ──
   sidebar_campaign:      'campaign_id',
   sidebar_callcenter:    'callcenter_id',
@@ -83,6 +94,7 @@ export const COLUMN_TO_BACKEND_FILTER: Record<string, string> = {
   sidebar_company:       'company_id',
   sidebar_partner_layer: 'partner_layer_id',
   sidebar_meeting_type:  'type_id',
+
   // ── Sidebar flags ──
   sidebar_is_confirmed:   'is_confirmed',
   sidebar_is_hold:        'is_hold',
@@ -99,11 +111,12 @@ interface UseMeetingListStateParams {
   clearFilters: () => void
   permittedFields: Set<string>
   filterOptions: MeetingFilterOptions
+
   /** Sidebar filters read from URL search params (for persistence) */
   initialSidebarFilters?: Record<string, string>
 }
 
-export function useMeetingListState({ loading, deleteMeeting, updateMeeting, refreshMeetings, updateFilter, clearFilters, permittedFields, filterOptions, initialSidebarFilters }: UseMeetingListStateParams) {
+export function useMeetingListState({ loading, deleteMeeting, refreshMeetings, updateFilter, clearFilters, permittedFields, filterOptions, initialSidebarFilters }: UseMeetingListStateParams) {
   const { hasCredential } = usePermissions()
   const t = useMeetingTranslations()
 
@@ -114,7 +127,8 @@ export function useMeetingListState({ loading, deleteMeeting, updateMeeting, ref
   const permittedColumns = useMemo<MeetingColumnDef[]>(
     () => columnDefs.filter(col => {
       if (permittedFields.size === 0) return true
-      return permittedFields.has(col.id)
+      
+return permittedFields.has(col.id)
     }),
     [columnDefs, permittedFields]
   )
@@ -122,9 +136,11 @@ export function useMeetingListState({ loading, deleteMeeting, updateMeeting, ref
   // States
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedMeetingId, setSelectedMeetingId] = useState<number | null>(null)
+
   const [showFilters, setShowFilters] = useState(() => {
     return !!initialSidebarFilters && Object.keys(initialSidebarFilters).length > 0
   })
+
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>(
     () => initialSidebarFilters ?? {}
   )
@@ -150,12 +166,14 @@ export function useMeetingListState({ loading, deleteMeeting, updateMeeting, ref
 
   // On mount: sync URL-persisted sidebar filters to the backend
   const hasHydratedRef = useRef(false)
+
   useEffect(() => {
     if (hasHydratedRef.current || !initialSidebarFilters || Object.keys(initialSidebarFilters).length === 0) return
     hasHydratedRef.current = true
 
     for (const [columnId, value] of Object.entries(initialSidebarFilters)) {
       const backendParam = COLUMN_TO_BACKEND_FILTER[columnId]
+
       if (backendParam && value) {
         updateFilter(backendParam, value)
       }
@@ -167,12 +185,15 @@ export function useMeetingListState({ loading, deleteMeeting, updateMeeting, ref
 
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
+
       if (saved) return JSON.parse(saved)
     } catch { /* incognito / quota exceeded / disabled */ }
 
     const defaults: Record<string, boolean> = {}
+
     COLUMN_DEF_IDS.forEach(id => { defaults[id] = true })
-    return defaults
+    
+return defaults
   })
 
   const handleColumnVisibilityChange = useCallback((visibility: Record<string, boolean>) => {
@@ -189,6 +210,7 @@ export function useMeetingListState({ loading, deleteMeeting, updateMeeting, ref
       showNotification(t.actionSuccess, 'success')
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : String(err)
+
       showNotification(t.deleteError + errorMessage, 'error')
     }
   }, [deleteMeeting, t.confirmDelete, t.deleteError, t.actionSuccess, showNotification])
@@ -220,19 +242,27 @@ export function useMeetingListState({ loading, deleteMeeting, updateMeeting, ref
         case 'create_contract': result = await meetingsService.createContract(meetingId); break
 
         // Communication (open dialogs)
-        case 'send_sms':     setSmsDialogMeetingId(meetingId); return
-        case 'send_email':   setEmailDialogMeetingId(meetingId); return
-        case 'new_comment':  setCommentDialogMeetingId(meetingId); return
+        case 'send_sms':     setSmsDialogMeetingId(meetingId); 
+
+return
+        case 'send_email':   setEmailDialogMeetingId(meetingId); 
+
+return
+        case 'new_comment':  setCommentDialogMeetingId(meetingId); 
+
+return
 
         default:
           showNotification(t.actionNotImplemented, 'warning')
-          return
+          
+return
       }
 
       await refreshMeetings()
       showNotification(result?.message || t.actionSuccess, 'success')
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : String(err)
+
       showNotification(t.actionError + errorMessage, 'error')
     }
   }, [refreshMeetings, t, showNotification])
@@ -240,13 +270,19 @@ export function useMeetingListState({ loading, deleteMeeting, updateMeeting, ref
   const handleColumnFilterChange = useCallback((columnId: string, value: string) => {
     setColumnFilters(prev => {
       if (value === '' || value === null || value === undefined) {
-        const { [columnId]: _, ...rest } = prev
-        return rest
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [columnId]: _removed, ...rest } = prev
+
+
+return rest
       }
-      return { ...prev, [columnId]: value }
+
+      
+return { ...prev, [columnId]: value }
     })
 
     const backendParam = COLUMN_TO_BACKEND_FILTER[columnId]
+
     if (backendParam) {
       updateFilter(backendParam, value || undefined)
     }
@@ -256,6 +292,7 @@ export function useMeetingListState({ loading, deleteMeeting, updateMeeting, ref
     for (const backendParam of Object.values(COLUMN_TO_BACKEND_FILTER)) {
       updateFilter(backendParam, undefined)
     }
+
     setColumnFilters({})
     clearFilters()
   }, [clearFilters, updateFilter])
@@ -286,6 +323,7 @@ export function useMeetingListState({ loading, deleteMeeting, updateMeeting, ref
   // TanStack Column Definitions
   const columns = useMemo<ColumnDef<CustomerMeeting, any>[]>(() => {
     const showId = hasCredential([['superadmin', 'admin', 'meeting_view_list_id']])
+
     const idCols = showId ? [columnHelper.accessor('id', {
       id: 'id',
       header: '# ID',

@@ -8,9 +8,7 @@
 import { apiClient } from '@/shared/lib/api-client';
 
 import type {
-  DomoprimeIsoCustomerRequest,
   DomoprimeIsoRequestResponse,
-  DomoprimeIsoRequestListResponse,
   CreateIsoCustomerRequestData,
   UpdateIsoCustomerRequestData,
   DomoprimeCalculationResponse,

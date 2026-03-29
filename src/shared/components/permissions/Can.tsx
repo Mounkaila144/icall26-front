@@ -12,12 +12,16 @@
 import { usePermissions } from '@/shared/contexts/PermissionsContext'
 
 interface CanProps {
+
   /** Credential(s) to check - supports string, array, or nested array (Symfony 1 style) */
   credential: string | string[] | string[][]
+
   /** If true, all credentials must be present (AND logic). Default: false (OR logic) */
   requireAll?: boolean
+
   /** Content to display if user has permission */
   children: React.ReactNode
+
   /** Content to display if user doesn't have permission */
   fallback?: React.ReactNode
 }

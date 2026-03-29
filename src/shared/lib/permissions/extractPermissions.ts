@@ -119,16 +119,20 @@ export function savePermissionsToStorage(permissions: UserPermissions): void {
 export function loadPermissionsFromStorage(): UserPermissions | null {
   if (typeof window !== 'undefined') {
     const stored = localStorage.getItem('user_permissions')
+
     if (stored) {
       try {
         return JSON.parse(stored)
       } catch (e) {
         console.error('Failed to parse stored permissions:', e)
-        return null
+        
+return null
       }
     }
   }
-  return null
+
+  
+return null
 }
 
 /**

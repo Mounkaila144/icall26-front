@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+
 import { meetingsService } from '../services/meetingsService'
 import type { MeetingFilterOptions } from '../../types'
 

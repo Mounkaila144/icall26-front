@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
+
 import { useSearchParams } from 'next/navigation'
 
 import Box from '@mui/material/Box'
@@ -34,11 +35,15 @@ export default function ContractsList1() {
   // already includes persisted filters (avoids race condition with hydration effect)
   const initialBackendFilters = useMemo(() => {
     const mapped: Record<string, any> = {}
+
     for (const [key, value] of Object.entries(initialSidebarFilters)) {
       const backendKey = COLUMN_TO_BACKEND_FILTER[key]
+
       if (backendKey && value) mapped[backendKey] = value
     }
-    return mapped
+
+    
+return mapped
   }, [initialSidebarFilters])
 
   const {

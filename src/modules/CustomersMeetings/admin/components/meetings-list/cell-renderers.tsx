@@ -7,7 +7,7 @@ import Box from '@mui/material/Box'
 import type { MeetingTranslations } from '../../hooks/useMeetingTranslations'
 import type { CustomerMeeting } from '../../../types'
 import type { ChipColor } from './helpers'
-import { isYes, formatDate, formatDateTime } from './helpers'
+import { isYes, formatDateTime } from './helpers'
 
 export type HasCredentialFn = (credential: string | string[] | string[][], requireAll?: boolean) => boolean
 
@@ -29,7 +29,8 @@ export const booleanChip = (
 
 export const statusChip = (status: { name?: string; value?: string; color?: string } | null | undefined): ReactNode => {
   if (!status) return <Typography variant='body2'>-</Typography>
-  return (
+  
+return (
     <Chip
       label={status.value ?? status.name}
       size='small'
@@ -94,6 +95,7 @@ export const dateCellMultiLine = (
   for (const def of subDateDefs) {
     if (!hasCredential(def.credential)) continue
     const value = r[def.field] as string | null | undefined
+
     if (!value && !def.showAlways) continue
 
     subDates.push(
@@ -132,6 +134,7 @@ export const dateCellMultiLine = (
 
 export const customerCell = (r: CustomerMeeting): ReactNode => {
   const c = r.customer
+
   if (!c) return <Typography variant='body2'>-</Typography>
 
   const fullName = (c.lastname || c.firstname)
@@ -154,6 +157,7 @@ export const customerCell = (r: CustomerMeeting): ReactNode => {
 
 export const phoneCell = (r: CustomerMeeting): ReactNode => {
   const c = r.customer
+
   if (!c) return <Typography variant='body2'>-</Typography>
 
   return (

@@ -14,7 +14,7 @@ import Divider from '@mui/material/Divider'
 import ColumnVisibilityMenu from './ColumnVisibilityMenu'
 
 // Types
-import type { DataTableAction, ColumnConfig, FilterConfig } from './types'
+import type { DataTableAction, ColumnConfig } from './types'
 
 interface TableToolbarProps {
   searchPlaceholder?: string

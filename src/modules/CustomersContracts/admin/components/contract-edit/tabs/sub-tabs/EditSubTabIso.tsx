@@ -17,7 +17,7 @@ import { useWizardPermissions } from '../../../contract-wizard/useWizardPermissi
 import type { IsoEditFormData, VerifEditFormData } from '../../editFormSchema'
 import type { DomoprimeFilterOptions, FilterOption } from '@/modules/AppDomoprime/types'
 import type { ContractFilterOptions } from '../../../../../types'
-import type { ContractTranslations } from '../../../../../hooks/useContractTranslations'
+import type { ContractTranslations } from '../../../../hooks/useContractTranslations'
 
 interface EditSubTabIsoProps {
   form: UseFormReturn<IsoEditFormData>

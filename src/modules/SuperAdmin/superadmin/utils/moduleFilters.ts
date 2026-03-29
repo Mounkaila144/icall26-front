@@ -70,6 +70,7 @@ export function filterModules<T extends Module | TenantModule>(
     // Filtre par statut global (enabled/disabled)
     if (filters.status !== 'all') {
       const isEnabled = filters.status === 'enabled';
+
       if (module.enabled !== isEnabled) {
         return false;
       }
@@ -78,6 +79,7 @@ export function filterModules<T extends Module | TenantModule>(
     // Filtre par statut tenant (pour TenantModule uniquement)
     if (filters.tenantStatus && filters.tenantStatus !== 'all' && isTenantModule(module)) {
       const isActive = filters.tenantStatus === 'active';
+
       if (module.tenantStatus.isActive !== isActive) {
         return false;
       }
@@ -87,6 +89,7 @@ export function filterModules<T extends Module | TenantModule>(
     if (filters.hasDependencies !== 'all') {
       const hasDeps = module.dependencies.length > 0;
       const wantsDeps = filters.hasDependencies === 'yes';
+
       if (hasDeps !== wantsDeps) {
         return false;
       }

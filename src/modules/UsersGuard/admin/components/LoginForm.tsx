@@ -1,9 +1,12 @@
 
 'use client';
 
-import { useState, FormEvent, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
+import type { FormEvent} from 'react';
+import { useState, useEffect } from 'react';
+
 import Image from 'next/image';
+
+import { useAuth } from '../hooks/useAuth';
 
 export default function LoginForm() {
     const { login, isLoading, error } = useAuth();
@@ -16,6 +19,7 @@ export default function LoginForm() {
 
     const [showPassword, setShowPassword] = useState(false);
     const [isAnimated, setIsAnimated] = useState(false);
+
     const [fieldErrors, setFieldErrors] = useState({
         username: '',
         password: '',
@@ -41,10 +45,13 @@ export default function LoginForm() {
         if (name === 'username' && value.trim() && value.length < 3) {
             return 'Le nom d\'utilisateur doit contenir au moins 3 caractères';
         }
+
         if (name === 'password' && value.trim() && value.length < 3) {
             return 'Le mot de passe doit contenir au moins 3 caractères';
         }
-        return '';
+
+        
+return '';
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,6 +62,7 @@ export default function LoginForm() {
 
         if (type !== 'checkbox') {
             const error = validateField(name, value);
+
             setFieldErrors({ ...fieldErrors, [name]: error });
         }
     };
@@ -67,7 +75,8 @@ export default function LoginForm() {
 
         if (usernameError || passwordError) {
             setFieldErrors({ username: usernameError, password: passwordError });
-            return;
+            
+return;
         }
 
         try {
@@ -144,7 +153,7 @@ export default function LoginForm() {
                         {/* Username Field */}
                         <div>
                             <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-                                Nom d'utilisateur
+                                Nom d&apos;utilisateur
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -285,7 +294,7 @@ export default function LoginForm() {
 
                 {/* Bottom Help Text */}
                 <div className="text-center text-sm text-gray-600">
-                    <p>Besoin d'aide ? Contactez votre administrateur système</p>
+                    <p>Besoin d&apos;aide ? Contactez votre administrateur système</p>
                 </div>
             </div>
 

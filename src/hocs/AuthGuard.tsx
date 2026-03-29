@@ -1,8 +1,5 @@
 'use client'
 
-// React Imports
-import { useEffect } from 'react'
-
 // Type Imports
 import type { Locale } from '@configs/i18n'
 import type { ChildrenType } from '@core/types'

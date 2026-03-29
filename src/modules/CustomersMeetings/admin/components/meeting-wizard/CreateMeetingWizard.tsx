@@ -16,6 +16,8 @@ import LinearProgress from '@mui/material/LinearProgress'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
 
+import type { AxiosError } from 'axios'
+
 import StepperWrapper from '@core/styles/stepper'
 
 import { useMeetingWizardState } from './useMeetingWizardState'
@@ -27,7 +29,6 @@ import StepMeetingDetails from './steps/StepMeetingDetails'
 import StepTeam from './steps/StepTeam'
 import StepSummary from './steps/StepSummary'
 
-import type { AxiosError } from 'axios'
 
 import type { CreateMeetingData } from '../../../types'
 

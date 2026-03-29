@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 // Next Imports
 import Link from 'next/link'
-import { useParams, useSearchParams } from 'next/navigation'
+import { useParams } from 'next/navigation'
 
 // MUI Imports
 import Typography from '@mui/material/Typography'
@@ -15,7 +15,6 @@ import InputAdornment from '@mui/material/InputAdornment'
 import Checkbox from '@mui/material/Checkbox'
 import Button from '@mui/material/Button'
 import FormControlLabel from '@mui/material/FormControlLabel'
-import Divider from '@mui/material/Divider'
 import Alert from '@mui/material/Alert'
 
 // Third-party Imports
@@ -68,7 +67,6 @@ const Login = ({ mode }: { mode: Mode }) => {
   const borderedLightIllustration = '/images/illustrations/auth/v2-login-light-border.png'
 
   // Hooks
-  const searchParams = useSearchParams()
   const { lang: locale } = useParams()
   const { settings } = useSettings()
   const { login, isLoading, error } = useAuth()
@@ -80,8 +78,8 @@ const Login = ({ mode }: { mode: Mode }) => {
   } = useForm<FormData>({
     resolver: valibotResolver(schema),
     defaultValues: {
-      username: 'admin',
-      password: 'password'
+      username: '',
+      password: ''
     }
   })
 
@@ -104,10 +102,10 @@ const Login = ({ mode }: { mode: Mode }) => {
         password: data.password,
         application: 'admin'
       })
+
       // La redirection est gérée automatiquement par le hook useAuth
-    } catch (err) {
-      // L'erreur est gérée par le hook useAuth et affichée via la variable error
-      console.error('Login failed:', err)
+    } catch {
+      // Error handled by useAuth hook and displayed via the error variable
     }
   }
 
@@ -139,12 +137,6 @@ const Login = ({ mode }: { mode: Mode }) => {
             <Typography variant='h4'>{`Welcome to ${themeConfig.templateName}!👋🏻`}</Typography>
             <Typography>Please sign-in to your account and start the adventure</Typography>
           </div>
-          <Alert icon={false} className='bg-[var(--mui-palette-primary-lightOpacity)]'>
-            <Typography variant='body2' color='primary.main'>
-              Username: <span className='font-medium'>superadmin</span> / Pass:{' '}
-              <span className='font-medium'>123</span>
-            </Typography>
-          </Alert>
           {error && (
             <Alert severity='error'>
               <Typography variant='body2'>{error}</Typography>
@@ -153,7 +145,6 @@ const Login = ({ mode }: { mode: Mode }) => {
 
           <form
             noValidate
-            action={() => {}}
             autoComplete='off'
             onSubmit={handleSubmit(onSubmit)}
             className='flex flex-col gap-5'

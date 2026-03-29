@@ -1,6 +1,8 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
+import type { ReactNode} from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+
 import { useParams } from 'next/navigation';
 
 interface LanguageContextType {
@@ -19,21 +21,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   // Sync with URL locale — URL is the source of truth
   useEffect(() => {
     if (urlLocale && urlLocale !== language) {
-      console.log('📚 [LanguageProvider] Syncing with URL locale:', urlLocale);
       setLanguageState(urlLocale);
       localStorage.setItem('app_language', urlLocale);
     }
   }, [urlLocale]);
 
   const setLanguage = useCallback((lang: string) => {
-    console.log('📚 [LanguageProvider] Language changed:', lang);
     setLanguageState(lang);
     localStorage.setItem('app_language', lang);
   }, []);
-
-  useEffect(() => {
-    console.log('📚 [LanguageProvider] Current language:', language);
-  }, [language]);
 
   // Memoize the context value to prevent unnecessary re-renders
   const value = useMemo(() => ({
@@ -50,8 +46,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
 export function useLanguage() {
   const context = useContext(LanguageContext);
+
   if (context === undefined) {
     throw new Error('useLanguage must be used within a LanguageProvider');
   }
-  return context;
+
+  
+return context;
 }

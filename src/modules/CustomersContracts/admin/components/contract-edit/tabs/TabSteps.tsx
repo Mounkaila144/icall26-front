@@ -28,6 +28,7 @@ interface TabStepsProps {
 
 function fmtDate(dateStr: string | null | undefined) {
   if (!dateStr || dateStr === '0000-00-00' || dateStr === '0000-00-00 00:00:00') return '—'
+
   try {
     return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
   } catch {
@@ -37,13 +38,15 @@ function fmtDate(dateStr: string | null | undefined) {
 
 function fmtCur(val: number | null | undefined) {
   if (val === null || val === undefined) return '—'
-  return val.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'
+  
+return val.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'
 }
 
 // Date value for input[type=date]
 function dateVal(dateStr: string | null | undefined) {
   if (!dateStr || dateStr === '0000-00-00' || dateStr === '0000-00-00 00:00:00') return ''
-  return dateStr.split(' ')[0] // "2024-09-11 00:00:00" → "2024-09-11"
+  
+return dateStr.split(' ')[0] // "2024-09-11 00:00:00" → "2024-09-11"
 }
 
 function Field({ label, value }: { label: string; value: string | null | undefined }) {
@@ -123,9 +126,11 @@ export default function TabSteps({ contractId, t }: TabStepsProps) {
 
   const fetchSteps = useCallback(async () => {
     if (!contractId) return
+
     try {
       setLoading(true)
       const response = await contractsService.getContractSteps(contractId)
+
       if (response.success) setData(response.data)
     } catch (err) {
       setError(err instanceof Error ? err.message : String(t.tabErrorLoading))
@@ -146,10 +151,12 @@ export default function TabSteps({ contractId, t }: TabStepsProps) {
   const saveEdit = async (block: string) => {
     if (!contractId) return
     setSaving(true)
+
     try {
       if (block === 'erdf') {
         // Symfony saves ERDF contract + quotation together
         const { contract: contractData, quotation: quotationData } = editData
+
         await Promise.all([
           apiClient.put(`/admin/customerscontracts/contracts/${contractId}/steps/erdf`, { data: contractData || {} }),
           apiClient.put(`/admin/customerscontracts/contracts/${contractId}/steps/erdf_quotation`, { data: quotationData || {} }),
@@ -157,6 +164,7 @@ export default function TabSteps({ contractId, t }: TabStepsProps) {
       } else {
         await apiClient.put(`/admin/customerscontracts/contracts/${contractId}/steps/${block}`, { data: editData })
       }
+
       setSuccessMsg('Informations enregistrées')
       setEditing(null)
       fetchSteps()
@@ -179,6 +187,7 @@ export default function TabSteps({ contractId, t }: TabStepsProps) {
   if (loading) {
     return <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}><CircularProgress size={28} /></Box>
   }
+
   if (error) return <Alert severity='error'>{error}</Alert>
   if (!data) return null
 
@@ -193,6 +202,7 @@ export default function TabSteps({ contractId, t }: TabStepsProps) {
       <Grid container spacing={2}>
         {/* ERDF - Combined (Symfony: both columns edited together, Modify button in quotation block) */}
         {editing === 'erdf' ? (
+
           /* Edit mode: ERDF Contract + Quotation together (like Symfony ajaxModify.tpl) */
           <Grid item xs={12}>
             <Paper variant='outlined'>

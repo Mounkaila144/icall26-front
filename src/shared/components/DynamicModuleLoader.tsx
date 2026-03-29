@@ -1,6 +1,10 @@
 'use client';
 
-import React, { useEffect, useState, ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import React, { useEffect, useState } from 'react';
+
+import Link from 'next/link';
+
 import { toPascalCase } from "@/shared/utils/menu-route-generator";
 import { getComponent } from '@/shared/config/component-registry';
 
@@ -39,7 +43,7 @@ export function DynamicModuleLoader({ slug, context = 'admin' }: DynamicModuleLo
                 setError(null);
 
                 // Convert slug to module and component names
-                const { moduleName, componentName, importPath } = transformSlugToModule(slug, context);
+                const { moduleName, componentName } = transformSlugToModule(slug, context);
 
                 // Get component from registry
                 const LoadedComponent = getComponent(moduleName, componentName, context);
@@ -51,8 +55,8 @@ export function DynamicModuleLoader({ slug, context = 'admin' }: DynamicModuleLo
                 }
 
                 setComponent(() => LoadedComponent);
-            } catch (err: any) {
-                setError(err.message || 'Failed to load module');
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to load module');
             } finally {
                 setIsLoading(false);
             }
@@ -96,7 +100,9 @@ function transformSlugToModule(slug: string[], context: string = 'admin') {
     if (slug.length === 1) {
         // If already PascalCase, use it directly. Otherwise convert from snake_case
         const componentName = isPascalCase(slug[0]) ? slug[0] : toPascalCase(slug[0]);
-        return {
+
+        
+return {
             moduleName: componentName,
             componentName: componentName,
             importPath: `@/modules/${componentName}/${context}/components/${componentName}`,
@@ -333,7 +339,7 @@ function ErrorState({ error, slug, context = 'admin' }: { error: string; slug: s
                                     marginTop: '4px',
                                 }}
                             >
-                                '{moduleName}:{componentName}': YourComponent
+                                {`'${moduleName}:${componentName}': YourComponent`}
                             </code>
                         </li>
                         <li>Check that the file name matches exactly (case-sensitive)</li>
@@ -341,7 +347,7 @@ function ErrorState({ error, slug, context = 'admin' }: { error: string; slug: s
                 </div>
 
                 <div style={{ marginTop: '24px', textAlign: 'center' }}>
-                    <a
+                    <Link
                         href="/admin/dashboard"
                         style={{
                             display: 'inline-block',
@@ -355,7 +361,7 @@ function ErrorState({ error, slug, context = 'admin' }: { error: string; slug: s
                         }}
                     >
                         ← Back to Dashboard
-                    </a>
+                    </Link>
                 </div>
             </div>
         </div>

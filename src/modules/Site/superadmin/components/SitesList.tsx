@@ -9,6 +9,8 @@ import Alert from '@mui/material/Alert'
 import Snackbar from '@mui/material/Snackbar'
 
 // Component Imports
+import type { AxiosError } from 'axios'
+
 import SitesTable from './SitesTable'
 import SiteFormModal from './SiteFormModal'
 import { TenantModulesModal } from '@/modules/SuperAdmin'
@@ -28,7 +30,6 @@ import type {
   UpdateSiteData
 } from '../../types/site.types'
 
-import { AxiosError } from 'axios'
 
 // ============================================================================
 // Context Definition
@@ -90,6 +91,7 @@ export const SitesList = () => {
 
   // Filters
   const [globalSearch, setGlobalSearch] = useState('')
+
   const [filters, setFilters] = useState<SiteFilters>({
     sort_by: 'site_id',
     sort_order: 'desc',
@@ -244,6 +246,7 @@ export const SitesList = () => {
       await loadSites()
     } catch (err: unknown) {
       const axiosError = err as AxiosError<{ message: string }>
+
       setConnectionResult({
         show: true,
         success: false,

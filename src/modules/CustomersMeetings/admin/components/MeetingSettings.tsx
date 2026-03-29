@@ -45,7 +45,8 @@ interface SettingsOptions {
 const isYes = (val: unknown): boolean => {
   if (typeof val === 'boolean') return val
   if (typeof val === 'string') return val.toUpperCase() === 'YES'
-  return false
+  
+return false
 }
 
 const SETTINGS_URL = '/admin/customersmeetings/settings'
@@ -55,6 +56,7 @@ const SETTINGS_URL = '/admin/customersmeetings/settings'
 export default function MeetingSettings() {
   const t = useConfigTranslations()
   const [settings, setSettings] = useState<MeetingSettingsRaw | null>(null)
+
   const [options, setOptions] = useState<SettingsOptions>({
     meeting_statuses: [],
     status_calls: [],
@@ -62,6 +64,7 @@ export default function MeetingSettings() {
     companies: [],
     campaigns: [],
   })
+
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [dirty, setDirty] = useState(false)
@@ -71,6 +74,7 @@ export default function MeetingSettings() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
+
       const [settingsRes, optionsRes] = await Promise.all([
         apiClient.get<{ success: boolean; data: MeetingSettingsRaw }>(SETTINGS_URL),
         apiClient.get<{ success: boolean; data: SettingsOptions }>(`${SETTINGS_URL}/options`),

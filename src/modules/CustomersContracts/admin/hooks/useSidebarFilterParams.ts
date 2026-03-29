@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 
 /** All sidebar filter keys shared across components */
@@ -35,9 +36,12 @@ function saveToStorage(filters: Record<string, string>) {
 function readFromStorage(): Record<string, string> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
+
     if (raw) return JSON.parse(raw)
   } catch { /* ignore */ }
-  return {}
+
+  
+return {}
 }
 
 function clearStorage() {
@@ -52,10 +56,13 @@ export function readSidebarFiltersFromParams(
 ): Record<string, string> {
   // 1. Try URL search params
   const fromUrl: Record<string, string> = {}
+
   for (const key of SIDEBAR_KEYS) {
     const val = searchParams.get(key)
+
     if (val) fromUrl[key] = val
   }
+
   if (Object.keys(fromUrl).length > 0) return fromUrl
 
   // 2. Fallback: localStorage
@@ -74,21 +81,28 @@ export function useSidebarFilterParams() {
   const writeToUrl = useCallback((filters: Record<string, string>) => {
     // Persist to localStorage (survives navigation)
     const toStore: Record<string, string> = {}
+
     for (const key of SIDEBAR_KEYS) {
       if (filters[key]) toStore[key] = filters[key]
     }
+
     saveToStorage(toStore)
 
     // Also write to URL (for shareability / bookmarks)
     const params = new URLSearchParams(searchParams.toString())
+
     for (const key of SIDEBAR_KEYS) {
       params.delete(key)
     }
+
     for (const key of SIDEBAR_KEYS) {
       const value = filters[key]
+
       if (value) params.set(key, value)
     }
+
     const qs = params.toString()
+
     router.replace(`${pathname}${qs ? '?' + qs : ''}`, { scroll: false })
   }, [searchParams, router, pathname])
 
@@ -97,10 +111,13 @@ export function useSidebarFilterParams() {
     clearStorage()
 
     const params = new URLSearchParams(searchParams.toString())
+
     for (const key of SIDEBAR_KEYS) {
       params.delete(key)
     }
+
     const qs = params.toString()
+
     router.replace(`${pathname}${qs ? '?' + qs : ''}`, { scroll: false })
   }, [searchParams, router, pathname])
 

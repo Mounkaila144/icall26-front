@@ -11,11 +11,10 @@ import Divider from '@mui/material/Divider'
 import Box from '@mui/material/Box'
 
 import { useEditPermissions } from '../../useEditPermissions'
-import type { MeetingDetailsEditFormData, DomoprimeEditFormData } from '../../editFormSchema'
+import type { MeetingDetailsEditFormData, DomoprimeEditFormData , TeamEditFormData } from '../../editFormSchema'
 import type { MeetingFilterOptions, FilterOption } from '../../../../../types'
 import type { MeetingTranslations } from '../../../../hooks/useMeetingTranslations'
 
-import type { TeamEditFormData } from '../../editFormSchema'
 
 interface EditSubTabWorkTypeProps {
   detailsForm: UseFormReturn<MeetingDetailsEditFormData>

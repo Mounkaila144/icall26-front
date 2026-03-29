@@ -2,6 +2,7 @@
  * Menu item icon configuration
  */
 export interface MenuIcon {
+
   /**
    * Icon type
    */
@@ -36,6 +37,7 @@ export interface BackendMenuItem {
  * Frontend menu item (transformed from backend)
  */
 export interface MenuItem {
+
   /**
    * Unique identifier
    */

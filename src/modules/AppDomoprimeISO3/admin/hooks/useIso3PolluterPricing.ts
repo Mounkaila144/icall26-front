@@ -19,6 +19,7 @@ export const useIso3PolluterPricing = () => {
       setLoading(true);
       setError(null);
       const response = await iso3PricingService.listForPolluter(polluterId);
+
       setPricing(response.data);
     } catch (err) {
       console.error(`Error fetching pricing for polluter ${polluterId}:`, err);
@@ -35,8 +36,10 @@ export const useIso3PolluterPricing = () => {
     try {
       setError(null);
       const response = await iso3PricingService.storeForPolluter(polluterId, data);
+
       setPricing(prev => [...prev, response.data]);
-      return response;
+      
+return response;
     } catch (err) {
       console.error('Error creating pricing:', err);
       setError('Failed to create pricing');
@@ -63,10 +66,12 @@ export const useIso3PolluterPricing = () => {
     try {
       setError(null);
       const response = await iso3PricingService.updateCoefficients(priceId, coefficients);
+
       setPricing(prev =>
         prev.map(p => p.id === priceId ? response.data : p)
       );
-      return response;
+      
+return response;
     } catch (err) {
       console.error(`Error updating coefficients for pricing ${priceId}:`, err);
       setError('Failed to update coefficients');
@@ -77,7 +82,8 @@ export const useIso3PolluterPricing = () => {
   const importPricing = useCallback(async (file: File) => {
     try {
       setError(null);
-      return await iso3PricingService.importPricing(file);
+      
+return await iso3PricingService.importPricing(file);
     } catch (err) {
       console.error('Error importing pricing:', err);
       setError('Failed to import pricing');
@@ -88,7 +94,8 @@ export const useIso3PolluterPricing = () => {
   const importSurfacePricing = useCallback(async (file: File) => {
     try {
       setError(null);
-      return await iso3PricingService.importSurfacePricing(file);
+      
+return await iso3PricingService.importSurfacePricing(file);
     } catch (err) {
       console.error('Error importing surface pricing:', err);
       setError('Failed to import surface pricing');

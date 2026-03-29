@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 // Next Imports
 import Link from 'next/link'
-import { useParams, useSearchParams } from 'next/navigation'
+import { useParams } from 'next/navigation'
 
 // MUI Imports
 import Typography from '@mui/material/Typography'
@@ -15,7 +15,6 @@ import InputAdornment from '@mui/material/InputAdornment'
 import Checkbox from '@mui/material/Checkbox'
 import Button from '@mui/material/Button'
 import FormControlLabel from '@mui/material/FormControlLabel'
-import Divider from '@mui/material/Divider'
 import Alert from '@mui/material/Alert'
 
 // Third-party Imports
@@ -32,9 +31,6 @@ import type { Locale } from '@/configs/i18n'
 
 // Component Imports
 import Logo from '@components/layout/shared/Logo'
-
-// Config Imports
-import themeConfig from '@configs/themeConfig'
 
 // Hook Imports
 import { useImageVariant } from '@core/hooks/useImageVariant'
@@ -68,7 +64,6 @@ const LoginSuperAdmin = ({ mode }: { mode: Mode }) => {
   const borderedLightIllustration = '/images/illustrations/auth/v2-login-light-border.png'
 
   // Hooks
-  const searchParams = useSearchParams()
   const { lang: locale } = useParams()
   const { settings } = useSettings()
   const { login, isLoading, error } = useAuth()
@@ -80,8 +75,8 @@ const LoginSuperAdmin = ({ mode }: { mode: Mode }) => {
   } = useForm<FormData>({
     resolver: valibotResolver(schema),
     defaultValues: {
-      username: 'superadmin',
-      password: '123'
+      username: '',
+      password: ''
     }
   })
 
@@ -104,10 +99,10 @@ const LoginSuperAdmin = ({ mode }: { mode: Mode }) => {
         password: data.password,
         application: 'superadmin'
       })
+
       // La redirection est gérée automatiquement par le hook useAuth
-    } catch (err) {
-      // L'erreur est gérée par le hook useAuth et affichée via la variable error
-      console.error('Super Admin Login failed:', err)
+    } catch {
+      // Error handled by useAuth hook and displayed via the error variable
     }
   }
 
@@ -139,12 +134,6 @@ const LoginSuperAdmin = ({ mode }: { mode: Mode }) => {
             <Typography variant='h4'>{`Super Admin Access`}</Typography>
             <Typography>Please sign-in with your Super Admin credentials</Typography>
           </div>
-          <Alert icon={false} className='bg-[var(--mui-palette-primary-lightOpacity)]'>
-            <Typography variant='body2' color='primary.main'>
-              Username: <span className='font-medium'>superadmin</span> / Pass:{' '}
-              <span className='font-medium'>123</span>
-            </Typography>
-          </Alert>
           {error && (
             <Alert severity='error'>
               <Typography variant='body2'>{error}</Typography>
@@ -153,7 +142,6 @@ const LoginSuperAdmin = ({ mode }: { mode: Mode }) => {
 
           <form
             noValidate
-            action={() => {}}
             autoComplete='off'
             onSubmit={handleSubmit(onSubmit)}
             className='flex flex-col gap-5'

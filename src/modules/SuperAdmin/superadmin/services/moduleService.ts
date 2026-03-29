@@ -29,8 +29,10 @@ interface ApiTenantModule {
   installedAt: string | null;
   uninstalledAt: string | null;
   config: Record<string, any>;
+
   /** Version installée (depuis les mises à jour legacy) */
   installedVersion?: string | null;
+
   /** Historique des versions */
   versionHistory?: Array<{
     action: string;
@@ -98,6 +100,7 @@ class ModuleService {
       hasConfig: apiModule.config && Object.keys(apiModule.config).length > 0,
       hasMigrations: false,
       hasSeeds: false,
+
       // Propriétés de TenantModule
       tenantStatus: {
         isActive: apiModule.status === 'active',
@@ -108,6 +111,7 @@ class ModuleService {
       },
     }));
   }
+
   /**
    * Récupère la liste de tous les modules disponibles dans le système
    * @returns {Promise<Module[]>} Liste des modules ou tableau vide en cas d'erreur
@@ -122,6 +126,7 @@ class ModuleService {
   async getAvailableModules(): Promise<Module[]> {
     try {
       const client = createApiClient();
+
       const response = await client.get<ApiResponse<Record<string, ApiModule>>>(
         '/superadmin/modules'
       );
@@ -135,8 +140,10 @@ class ModuleService {
         // Si c'est un objet avec des modules comme propriétés
         if (modulesData && typeof modulesData === 'object' && !Array.isArray(modulesData)) {
           const modules = this.transformModulesObject(modulesData);
+
           console.log('Transformed modules:', modules);
-          return modules;
+          
+return modules;
         }
 
         // Si c'est déjà un tableau
@@ -145,7 +152,8 @@ class ModuleService {
         }
 
         console.error('API returned data in unexpected format:', modulesData);
-        return [];
+        
+return [];
       }
 
       // Si la réponse est directement un objet de modules
@@ -159,7 +167,8 @@ class ModuleService {
       }
 
       console.error('Unexpected API response format:', response.data);
-      return [];
+      
+return [];
     } catch (error) {
       console.error('Error fetching available modules:', error);
 
@@ -186,10 +195,12 @@ class ModuleService {
       // Validation du tenantId
       if (!tenantId || tenantId <= 0) {
         console.error('Invalid tenantId:', tenantId);
-        return [];
+        
+return [];
       }
 
       const client = createApiClient();
+
       const response = await client.get<ApiResponse<Record<string, ApiTenantModule>>>(
         `/superadmin/sites/${tenantId}/modules`
       );
@@ -203,8 +214,10 @@ class ModuleService {
         // Si c'est un objet avec des modules comme propriétés
         if (modulesData && typeof modulesData === 'object' && !Array.isArray(modulesData)) {
           const modules = this.transformTenantModulesObject(modulesData);
+
           console.log('Transformed tenant modules:', modules);
-          return modules;
+          
+return modules;
         }
 
         // Si c'est déjà un tableau (cas alternatif)
@@ -213,7 +226,8 @@ class ModuleService {
         }
 
         console.error('API returned tenant modules in unexpected format:', modulesData);
-        return [];
+        
+return [];
       }
 
       // Si la réponse est directement un objet de modules
@@ -227,7 +241,8 @@ class ModuleService {
       }
 
       console.error('Unexpected tenant modules API response format:', response.data);
-      return [];
+      
+return [];
     } catch (error) {
       console.error(`Error fetching modules for tenant ${tenantId}:`, error);
 

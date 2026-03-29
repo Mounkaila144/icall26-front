@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+
 import {
   Dialog,
   DialogTitle,
@@ -21,6 +22,7 @@ import {
   Chip,
   Stack,
 } from '@mui/material';
+
 import { useModuleActivation } from '../../hooks/useModuleActivation';
 import { dependencyService } from '../../services/dependencyService';
 import { SagaStepsList } from './SagaStepsList';
@@ -33,16 +35,22 @@ import { activationService } from '../../services/activationService';
  * Props du composant ActivationWizard
  */
 interface ActivationWizardProps {
+
   /** Contrôle l'ouverture du modal */
   open: boolean;
+
   /** Callback de fermeture */
   onClose: () => void;
+
   /** Module à activer */
   module: TenantModule;
+
   /** ID du tenant */
   tenantId: number;
+
   /** Nom du tenant */
   tenantName: string;
+
   /** Callback appelé après activation réussie */
   onSuccess?: () => void;
 }
@@ -81,7 +89,7 @@ export function ActivationWizard({
   const [config, setConfig] = useState<ActivationConfig>({});
 
   // Hook d'activation
-  const { activate, isActivating, result, error, reset } = useModuleActivation();
+  const { activate, isActivating, result, reset } = useModuleActivation();
 
   // Réinitialiser quand le modal s'ouvre
   useEffect(() => {
@@ -104,8 +112,10 @@ export function ActivationWizard({
   // Vérifier les dépendances
   const checkDependencies = useCallback(async () => {
     setCheckingDeps(true);
+
     try {
       const resolution = await dependencyService.resolveDependencies([module.name]);
+
       setDependencies(resolution);
     } catch (err) {
       console.error('Error checking dependencies:', err);
@@ -162,11 +172,14 @@ export function ActivationWizard({
     if (activeStep === 1) {
       // Step des dépendances
       if (!dependencies) return false;
+
       if (dependencies.missingDependencies.length > 0 && !autoInstallDeps) {
         return false;
       }
     }
-    return true;
+
+    
+return true;
   }, [activeStep, dependencies, autoInstallDeps]);
 
   // Rendu des steps
@@ -269,7 +282,7 @@ export function ActivationWizard({
                 {dependencies.installOrder.length > 1 && (
                   <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
                     <Typography variant="caption" color="text.secondary" gutterBottom>
-                      Ordre d'installation recommandé :
+                      Ordre d&apos;installation recommandé :
                     </Typography>
                     <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
                       {dependencies.installOrder.map((mod, index) => (
@@ -309,7 +322,7 @@ export function ActivationWizard({
             {!isActivating && !result && (
               <>
                 <Typography variant="subtitle1" gutterBottom>
-                  Confirmer l'activation
+                  Confirmer l&apos;activation
                 </Typography>
                 <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1, mb: 2 }}>
                   <Typography variant="body2">
@@ -353,7 +366,7 @@ export function ActivationWizard({
                     {result.steps.length > 0 && (
                       <Box>
                         <Typography variant="subtitle2" gutterBottom>
-                          Étapes d'activation
+                          Étapes d&apos;activation
                         </Typography>
                         <SagaStepsList steps={result.steps} showDuration showSummary />
                       </Box>
@@ -367,7 +380,7 @@ export function ActivationWizard({
                 ) : (
                   <>
                     <Alert severity="error" sx={{ mb: 3 }}>
-                      <Typography variant="subtitle2">Échec de l'activation</Typography>
+                      <Typography variant="subtitle2">Échec de l&apos;activation</Typography>
                       <Typography variant="caption" component="div">
                         {result.error || 'Une erreur est survenue lors de l\'activation du module.'}
                       </Typography>
@@ -405,7 +418,7 @@ export function ActivationWizard({
 
       <DialogContent>
         <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-          {steps.map((label, index) => (
+          {steps.map((label) => (
             <Step key={label}>
               <StepLabel>{label}</StepLabel>
             </Step>

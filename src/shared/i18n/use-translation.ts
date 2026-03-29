@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
+
 import { useTranslationContext } from './translation-provider';
-import { UseTranslationReturn, TranslationKeys } from './types';
+import type { UseTranslationReturn, TranslationKeys } from './types';
 
 /**
  * Load translations for a specific module and locale
@@ -15,9 +16,11 @@ async function loadModuleTranslations(
     const translations = await import(
       `@/modules/${moduleName}/translations/${locale}.json`
     );
-    return translations.default;
-  } catch (error) {
-    console.error(`Failed to load module translations for ${moduleName}/${locale}:`, error);
+
+    
+return translations.default;
+  } catch {
+    // Module translation file not available for this locale
     return null;
   }
 }
@@ -30,9 +33,11 @@ async function loadGlobalTranslations(
 ): Promise<TranslationKeys | null> {
   try {
     const translations = await import(`./translations/${locale}.json`);
-    return translations.default;
-  } catch (error) {
-    console.error(`Failed to load global translations for ${locale}:`, error);
+
+    
+return translations.default;
+  } catch {
+    // Global translation file not available for this locale
     return null;
   }
 }
@@ -115,6 +120,7 @@ export function useTranslation(moduleName?: string): UseTranslationReturn {
       if (moduleTranslations) {
         // Use defaultText as the key
         const value = moduleTranslations[defaultText];
+
         if (value && typeof value === 'string') {
           return interpolate(value, params);
         }
@@ -128,6 +134,7 @@ export function useTranslation(moduleName?: string): UseTranslationReturn {
     if (globalTranslations) {
       // Use defaultText as the key
       const value = globalTranslations[defaultText];
+
       if (value && typeof value === 'string') {
         return interpolate(value, params);
       }
@@ -142,41 +149,41 @@ export function useTranslation(moduleName?: string): UseTranslationReturn {
   React.useEffect(() => {
     if (locale === 'en') {
       forceUpdate(); // Force re-render for English
-      return; // No need to load translations for English
+      
+return; // No need to load translations for English
     }
 
     const loadTranslations = async () => {
-      console.log(`🔄 Loading translations for module: ${moduleName || 'global'}, locale: ${locale}`);
-
       let translationsChanged = false;
 
       // Load module translations
       if (moduleName) {
         const moduleKey = `${moduleName}_${locale}`;
+
         if (!translationCache[moduleKey]) {
           const moduleTranslations = await loadModuleTranslations(moduleName, locale);
+
           if (moduleTranslations) {
             translationCache[moduleKey] = moduleTranslations;
             translationsChanged = true;
-            console.log(`✅ Loaded ${Object.keys(moduleTranslations).length} module translations for ${moduleName}/${locale}`);
           }
         }
       }
 
       // Load global translations
       const globalKey = `global_${locale}`;
+
       if (!translationCache[globalKey]) {
         const globalTranslations = await loadGlobalTranslations(locale);
+
         if (globalTranslations) {
           translationCache[globalKey] = globalTranslations;
           translationsChanged = true;
-          console.log(`✅ Loaded ${Object.keys(globalTranslations).length} global translations for ${locale}`);
         }
       }
 
       // Force re-render after translations are loaded
       if (translationsChanged) {
-        console.log(`🔄 Forcing re-render for locale: ${locale}`);
         forceUpdate();
       }
     };

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+
 import { serviceConfigService } from '../services/serviceConfigService';
 import {
   SERVICE_EDITABLE,
@@ -15,26 +16,37 @@ import type {
  * Interface pour le retour du hook useServiceConfig
  */
 export interface UseServiceConfigReturn<T = ServiceConfig> {
+
   /** Configuration actuelle du service */
   config: T | null;
+
   /** Indique si la configuration est en cours de chargement */
   isLoading: boolean;
+
   /** Erreur de chargement */
   error: string | null;
+
   /** Fonction pour sauvegarder la configuration */
   save: (data: Partial<T>) => Promise<boolean>;
+
   /** Indique si la sauvegarde est en cours */
   isSaving: boolean;
+
   /** Fonction pour tester la connexion (utilise la config sauvegardée) */
   test: () => Promise<void>;
+
   /** Indique si le test est en cours */
   isTesting: boolean;
+
   /** Résultat du dernier test */
   testResult: TestResult | null;
+
   /** Fonction pour recharger la configuration */
   refresh: () => Promise<void>;
+
   /** Indique si le service est modifiable */
   isEditable: boolean;
+
   /** Note explicative (pour les configs read-only) */
   note: string | null;
 }
@@ -85,10 +97,12 @@ export function useServiceConfig<T = ServiceConfig>(
 
     try {
       const response = await serviceConfigService.getConfig<T>(service);
+
       setConfig(response.data);
       setNote(response.note || null);
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'Erreur de chargement';
+
       setError(errorMessage);
       console.error(`Failed to load ${service} config:`, err);
     } finally {
@@ -103,7 +117,8 @@ export function useServiceConfig<T = ServiceConfig>(
     async (data: Partial<T>): Promise<boolean> => {
       if (!isEditable) {
         setError('Ce service ne peut pas être modifié (configuration via .env)');
-        return false;
+        
+return false;
       }
 
       setIsSaving(true);
@@ -111,17 +126,21 @@ export function useServiceConfig<T = ServiceConfig>(
 
       try {
         const response = await serviceConfigService.updateConfig<T>(service, data);
+
         setConfig(response.data);
-        return true;
+        
+return true;
       } catch (err: any) {
         const errorMessage =
           err.response?.data?.message ||
           err.response?.data?.errors
             ? Object.values(err.response.data.errors).flat().join(', ')
             : err.message || 'Erreur de sauvegarde';
+
         setError(errorMessage);
         console.error(`Failed to save ${service} config:`, err);
-        return false;
+        
+return false;
       } finally {
         setIsSaving(false);
       }
@@ -139,6 +158,7 @@ export function useServiceConfig<T = ServiceConfig>(
 
       try {
         const result = await serviceConfigService.testConnection(service);
+
         setTestResult(result);
       } catch (err: any) {
         // Le service retourne déjà un résultat d'erreur formaté

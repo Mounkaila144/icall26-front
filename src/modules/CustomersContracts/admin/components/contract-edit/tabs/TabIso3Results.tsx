@@ -109,12 +109,14 @@ export default function TabIso3Results({ contractId, lang, t }: TabIso3ResultsPr
 
   const formatNumber = (val: number | null | undefined) => {
     if (val === null || val === undefined) return '---'
-    return val.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 2 })
+    
+return val.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 2 })
   }
 
   const formatCurrency = (val: number | null | undefined) => {
     if (val === null || val === undefined) return '---'
-    return val.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    
+return val.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   }
 
   return (

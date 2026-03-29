@@ -33,7 +33,8 @@ class HealthService {
       // Vérifier le cache
       if (this.healthCache && Date.now() - this.cacheTimestamp < this.CACHE_TTL) {
         console.log('Returning cached system health');
-        return this.healthCache;
+        
+return this.healthCache;
       }
 
       const client = createApiClient();
@@ -42,13 +43,15 @@ class HealthService {
       if (response.data && response.data.success && response.data.data) {
         this.healthCache = response.data.data;
         this.cacheTimestamp = Date.now();
-        return response.data.data;
+        
+return response.data.data;
       }
 
       // Fallback: générer des données depuis les APIs existantes
       return this.generateHealthFromApis();
     } catch (error) {
       console.error('Error fetching system health:', error);
+
       // Fallback: générer des données depuis les APIs existantes
       return this.generateHealthFromApis();
     }
@@ -74,6 +77,7 @@ class HealthService {
 
       // Modules: peut être un objet (clé -> module) ou un tableau
       const modulesData = modulesResponse.data?.data || modulesResponse.data || {};
+
       const modules = Array.isArray(modulesData)
         ? modulesData
         : Object.values(modulesData);
@@ -150,6 +154,7 @@ class HealthService {
     const activeSites = sites.filter((s) =>
       s.available === true || s.is_active === true || s.status === 'active'
     ).length;
+
     const inactiveSites = sites.length - activeSites;
 
     // Calculer le nombre total d'activations
@@ -158,6 +163,7 @@ class HealthService {
     const totalActivations = activeModules.length * activeSites; // Estimation
 
     const maxPossibleActivations = sites.length * modules.length;
+
     const moduleUsagePercent = maxPossibleActivations > 0
       ? Math.round((totalActivations / maxPossibleActivations) * 100)
       : 0;
@@ -181,6 +187,7 @@ class HealthService {
       // Pour l'instant, si le module est activé globalement (isEnabled), on considère
       // qu'il est potentiellement utilisable par tous les sites actifs
       const isEnabled = module.isEnabled === true || module.is_enabled === true;
+
       const activeSitesCount = sites.filter((s) =>
         s.available === true || s.is_active === true || s.status === 'active'
       ).length;
@@ -238,10 +245,12 @@ class HealthService {
   private determineTenantHealth(activeModules: number, totalModules: number, site: any): HealthStatus {
     if (site.status === 'suspended') return 'critical';
     const isActive = site.available === true || site.is_active === true || site.status === 'active';
+
     if (!isActive) return 'warning';
     if (activeModules === 0 && totalModules > 0) return 'warning';
     if (totalModules > 0 && activeModules < totalModules * 0.3) return 'warning';
-    return 'healthy';
+    
+return 'healthy';
   }
 
   /**
@@ -256,7 +265,8 @@ class HealthService {
 
     if (criticalCount > 0) return 'critical';
     if (warningCount > tenantStats.length * 0.3) return 'warning';
-    return 'healthy';
+    
+return 'healthy';
   }
 
   /**
@@ -354,7 +364,9 @@ class HealthService {
    */
   async getGlobalStats(): Promise<GlobalStats> {
     const health = await this.getSystemHealth();
-    return health.stats;
+
+    
+return health.stats;
   }
 
   /**
@@ -363,7 +375,9 @@ class HealthService {
    */
   async getActiveAlerts(): Promise<SystemAlert[]> {
     const health = await this.getSystemHealth();
-    return health.alerts.filter((a) => !a.read);
+
+    
+return health.alerts.filter((a) => !a.read);
   }
 
   /**
@@ -373,6 +387,7 @@ class HealthService {
   markAlertAsRead(alertId: string): void {
     if (this.healthCache) {
       const alert = this.healthCache.alerts.find((a) => a.id === alertId);
+
       if (alert) {
         alert.read = true;
       }
@@ -394,7 +409,8 @@ class HealthService {
    */
   async refresh(): Promise<SystemHealth> {
     this.clearCache();
-    return this.getSystemHealth();
+    
+return this.getSystemHealth();
   }
 }
 

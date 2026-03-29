@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import {
   Card,
   CardContent,
@@ -12,14 +13,17 @@ import {
   Box,
   Stack,
 } from '@mui/material';
+
 import type { Module } from '../../../types/module.types';
 
 /**
  * Props du composant ModuleCard
  */
 interface ModuleCardProps {
+
   /** Module à afficher */
   module: Module;
+
   /** Callback appelé lors du clic sur "Voir détails" */
   onViewDetails?: (module: Module) => void;
 }
@@ -49,7 +53,8 @@ const getCategoryColor = (category: string): 'primary' | 'secondary' | 'success'
  */
 const truncate = (text: string, maxLength: number): string => {
   if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength) + '...';
+  
+return text.slice(0, maxLength) + '...';
 };
 
 /**

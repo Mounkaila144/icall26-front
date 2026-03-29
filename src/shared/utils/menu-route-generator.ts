@@ -68,6 +68,7 @@ export function generateRoutePath(
 
   // Build route
   const parts = [baseRoute];
+
   if (moduleKebab) parts.push(moduleKebab);
   if (nameKebab) parts.push(nameKebab);
 
@@ -129,7 +130,9 @@ export function generateModulePath(
  */
 export function getModuleKey(module: string, name: string): string {
   const { moduleName, componentName } = generateModuleInfo(module, name);
-  return `${moduleName}/${componentName}`;
+
+  
+return `${moduleName}/${componentName}`;
 }
 
 /**

@@ -12,6 +12,7 @@ export type ModuleCategory = 'core' | 'business' | 'integration' | 'ui' | 'utili
  * Interface représentant un module du système
  */
 export interface Module {
+
   /** Nom technique du module (ex: 'user-management') */
   name: string;
 
@@ -57,6 +58,7 @@ export interface Module {
  * @template T Type des données de la réponse
  */
 export interface ApiResponse<T> {
+
   /** Données de la réponse */
   data: T;
 
@@ -74,6 +76,7 @@ export interface ApiResponse<T> {
  * Entrée dans l'historique des versions d'un module
  */
 export interface ModuleVersionHistoryEntry {
+
   /** Type d'action effectuée */
   action: 'install' | 'reactivate' | 'upgrade' | 'downgrade';
 
@@ -94,6 +97,7 @@ export interface ModuleVersionHistoryEntry {
  * Statut d'un module pour un tenant spécifique
  */
 export interface TenantModuleStatus {
+
   /** Indique si le module est activé pour ce tenant */
   isActive: boolean;
 
@@ -115,6 +119,7 @@ export interface TenantModuleStatus {
  * Étend l'interface Module de base avec les informations spécifiques au tenant
  */
 export interface TenantModule extends Module {
+
   /** Statut et configuration du module pour le tenant */
   tenantStatus: TenantModuleStatus;
 }

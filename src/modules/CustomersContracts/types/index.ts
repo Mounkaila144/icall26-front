@@ -411,6 +411,7 @@ export interface ContractActionResponse {
 // ----------------------------------------------------------------------------
 
 export interface ContractFilters {
+
   // Search & Basic Filters
   reference?: string;
   customer_id?: number;
@@ -637,6 +638,7 @@ export interface CreateContractData {
 
   // ISO / Domoprime data (sent as separate object, matches Symfony params.CustomerContract.iso)
   iso?: {
+
     // Fiscal
     ana_prime?: number;
     number_of_people?: number;

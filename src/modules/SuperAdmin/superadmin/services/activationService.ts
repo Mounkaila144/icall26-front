@@ -46,6 +46,7 @@ class ActivationService {
       console.log(`Activating module "${moduleName}" for tenant ${tenantId}...`, config);
 
       const client = createApiClient();
+
       const response = await client.post<ActivationResponse>(
         `/superadmin/sites/${tenantId}/modules/${moduleName}`,
         { config: config || {} }
@@ -66,7 +67,9 @@ class ActivationService {
         // Format standard avec success explicite
         if (responseData.success && responseData.data) {
           const result = responseData.data;
-          return {
+
+          
+return {
             ...result,
             duration,
           };
@@ -152,7 +155,9 @@ class ActivationService {
     try {
       const start = new Date(step.startedAt).getTime();
       const end = new Date(step.completedAt).getTime();
-      return end - start;
+
+      
+return end - start;
     } catch {
       return null;
     }
@@ -169,7 +174,9 @@ class ActivationService {
     }
 
     const seconds = ms / 1000;
-    return `${seconds.toFixed(1)}s`;
+
+    
+return `${seconds.toFixed(1)}s`;
   }
 }
 

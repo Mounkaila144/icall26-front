@@ -5,11 +5,18 @@
 
 import { apiClient } from '@/shared/lib/api-client';
 import type {
+  Customer,
   CustomerListResponse,
   CustomerDetailResponse,
   CustomerStatsResponse,
   CustomerFilters,
 } from '../../types';
+
+/** Fields accepted when creating a new customer. */
+export type CreateCustomerData = Omit<Customer, 'id' | 'full_name' | 'display_name' | 'created_at' | 'updated_at'>;
+
+/** Fields accepted when updating an existing customer (all optional). */
+export type UpdateCustomerData = Partial<CreateCustomerData>;
 
 const CUSTOMERS_BASE_URL = '/admin/customers';
 
@@ -30,9 +37,6 @@ export const customersService = {
     const url = `${CUSTOMERS_BASE_URL}${params.toString() ? `?${params.toString()}` : ''}`;
     const response = await apiClient.get<CustomerListResponse>(url);
 
-    console.log('🔍 Service - Raw axios response:', response);
-    console.log('🔍 Service - response.data:', response.data);
-
     return response.data;
   },
 
@@ -41,7 +45,9 @@ export const customersService = {
    */
   async getCustomer(id: number): Promise<CustomerDetailResponse> {
     const response = await apiClient.get<CustomerDetailResponse>(`${CUSTOMERS_BASE_URL}/${id}`);
-    return response.data;
+
+    
+return response.data;
   },
 
   /**
@@ -49,23 +55,29 @@ export const customersService = {
    */
   async getStats(): Promise<CustomerStatsResponse> {
     const response = await apiClient.get<CustomerStatsResponse>(`${CUSTOMERS_BASE_URL}/stats`);
-    return response.data;
+
+    
+return response.data;
   },
 
   /**
    * Create a new customer
    */
-  async createCustomer(data: any): Promise<CustomerDetailResponse> {
+  async createCustomer(data: CreateCustomerData): Promise<CustomerDetailResponse> {
     const response = await apiClient.post<CustomerDetailResponse>(CUSTOMERS_BASE_URL, data);
-    return response.data;
+
+    
+return response.data;
   },
 
   /**
    * Update a customer
    */
-  async updateCustomer(id: number, data: any): Promise<CustomerDetailResponse> {
+  async updateCustomer(id: number, data: UpdateCustomerData): Promise<CustomerDetailResponse> {
     const response = await apiClient.put<CustomerDetailResponse>(`${CUSTOMERS_BASE_URL}/${id}`, data);
-    return response.data;
+
+    
+return response.data;
   },
 
   /**
@@ -73,6 +85,8 @@ export const customersService = {
    */
   async deleteCustomer(id: number): Promise<{ success: boolean; message: string }> {
     const response = await apiClient.delete(`${CUSTOMERS_BASE_URL}/${id}`);
-    return response.data;
+
+    
+return response.data;
   },
 };

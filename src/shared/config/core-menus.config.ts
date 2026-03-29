@@ -28,6 +28,7 @@ export const coreMenusConfig: ModuleMenuConfig = {
       },
       order: 1,
       module: 'Core',
+
       // No permission required - everyone can see dashboard
     },
     {
@@ -40,6 +41,7 @@ export const coreMenusConfig: ModuleMenuConfig = {
       },
       order: 1000, // Apparaît en dernier
       module: 'Core',
+
       // No permission required for now
       // permission: ['settings.view'],
     },

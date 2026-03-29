@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import {
   Dialog,
   DialogTitle,
@@ -8,18 +9,23 @@ import {
   IconButton,
   Box,
 } from '@mui/material';
+
 import { TenantModulesView } from './TenantModulesView';
 
 /**
  * Props du composant TenantModulesModal
  */
 interface TenantModulesModalProps {
+
   /** Contrôle l'ouverture du modal */
   isOpen: boolean;
+
   /** Callback de fermeture du modal */
   onClose: () => void;
+
   /** ID du tenant */
   tenantId: number;
+
   /** Nom du tenant (pour l'affichage) */
   tenantName: string;
 }

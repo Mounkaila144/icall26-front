@@ -39,20 +39,19 @@ export default function MeetingActionsCell({ meeting, onAction, onEdit, onDelete
     if (!hasCredential([['meeting_list_owner']])) return true
 
     const userId = permissions?.user_id
+
     if (userId != null) {
       if (userId === meeting.assistant_id) return true
       if (userId === meeting.telepro_id) return true
       if (userId === meeting.sales_id) return true
       if (userId === meeting.sale2_id) return true
     }
-    return false
+
+    
+return false
   }, [hasCredential, permissions?.user_id, meeting.assistant_id, meeting.telepro_id, meeting.sales_id, meeting.sale2_id])
 
   const canViewActions = isAuthorized || hasCredential([['meeting_list_view_actions']])
-
-  if (!canViewActions) {
-    return <Typography variant='body2' color='text.disabled'>---</Typography>
-  }
 
   const handleOpen = useCallback((e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget), [])
   const handleClose = useCallback(() => setAnchorEl(null), [])
@@ -64,6 +63,10 @@ export default function MeetingActionsCell({ meeting, onAction, onEdit, onDelete
     else if (action === 'copy_ref') navigator.clipboard.writeText(meeting.registration)
     else onAction(meeting.id, action)
   }, [handleClose, meeting.id, meeting.registration, onAction, onEdit, onDelete])
+
+  if (!canViewActions) {
+    return <Typography variant='body2' color='text.disabled'>---</Typography>
+  }
 
   const isHold = meeting.is_hold === 'YES'
   const isConfirmed = meeting.is_confirmed === 'YES'
@@ -97,6 +100,7 @@ export default function MeetingActionsCell({ meeting, onAction, onEdit, onDelete
     '& .MuiListItemIcon-root': { color: 'inherit', minWidth: 32 },
     '& .MuiListItemText-root': { color: 'inherit' },
   }
+
   const iconSx = { fontSize: '1.125rem' }
 
   return (

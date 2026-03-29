@@ -15,6 +15,7 @@ export const useIso3Dates = () => {
       setLoading(true);
       setError(null);
       const response = await iso3SettingsService.listDates();
+
       setDates(response.data);
     } catch (err) {
       console.error('Error fetching ISO3 dates:', err);
@@ -28,8 +29,10 @@ export const useIso3Dates = () => {
     try {
       setError(null);
       const response = await iso3SettingsService.saveDates(data);
+
       setDates(response.data);
-      return response;
+      
+return response;
     } catch (err) {
       console.error('Error saving ISO3 dates:', err);
       setError('Failed to save dates');

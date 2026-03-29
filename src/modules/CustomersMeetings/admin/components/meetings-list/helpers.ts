@@ -6,10 +6,12 @@ export const isYes = (val: any): boolean => val === 'YES' || val === 'Y' || val 
 
 export const getCustomerFullName = (meeting: CustomerMeeting): string => {
   const c = meeting.customer
+
   if (!c) return '-'
   if (c.company) return c.company
   if (c.lastname || c.firstname) return `${c.lastname || ''} ${c.firstname || ''}`.trim().toUpperCase()
-  return '-'
+  
+return '-'
 }
 
 export const formatDate = (v: string | null | undefined) =>

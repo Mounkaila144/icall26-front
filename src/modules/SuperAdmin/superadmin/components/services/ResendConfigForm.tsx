@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+
 import {
   Box,
   TextField,
@@ -15,6 +16,7 @@ import {
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+
 import { TestResultAlert } from './TestResultAlert';
 import type { ResendConfig, TestResult } from '../../../types/service-config.types';
 
@@ -26,6 +28,7 @@ const MASKED_VALUE = '********';
  */
 const isMaskedValue = (value: string | undefined | null): boolean => {
   if (!value) return false;
+
   // Vérifie si la valeur est exactement la valeur masquée ou contient uniquement des caractères de masquage
   return value === MASKED_VALUE || /^[*●•]+$/.test(value);
 };

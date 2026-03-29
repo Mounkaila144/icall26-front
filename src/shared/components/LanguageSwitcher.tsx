@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import { useLanguage } from '../lib/language-context';
 
 /**
@@ -18,6 +19,7 @@ export const LanguageSwitcher: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setLanguage(e.target.value);
+
     // Note: No reload needed - translations update automatically via React Context
   };
 

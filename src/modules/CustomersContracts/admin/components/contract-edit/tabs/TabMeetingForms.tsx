@@ -14,7 +14,6 @@ import TextField from '@mui/material/TextField'
 import MenuItem from '@mui/material/MenuItem'
 import Checkbox from '@mui/material/Checkbox'
 import FormControlLabel from '@mui/material/FormControlLabel'
-import FormGroup from '@mui/material/FormGroup'
 import Radio from '@mui/material/Radio'
 import RadioGroup from '@mui/material/RadioGroup'
 import Button from '@mui/material/Button'
@@ -72,6 +71,7 @@ export default function TabMeetingForms({ contractId, t }: TabMeetingFormsProps)
 
     try {
       setLoading(true)
+
       const response = await apiClient.get<{ success: boolean; data: MeetingFormsData }>(
         `/admin/customersmeetingsforms/contracts/${contractId}/forms`,
       )

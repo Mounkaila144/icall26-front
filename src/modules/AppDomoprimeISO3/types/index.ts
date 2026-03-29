@@ -14,7 +14,7 @@ import type {
   DomoprimeQuotationProduct,
   DomoprimeBilling,
   FilterOption,
-} from '@/src/modules/AppDomoprime';
+} from '@/modules/AppDomoprime';
 
 // Re-export shared types used by this module
 export type {

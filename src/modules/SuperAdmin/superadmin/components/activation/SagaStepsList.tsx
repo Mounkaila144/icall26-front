@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
+
 import {
   List,
   ListItem,
@@ -12,9 +13,9 @@ import {
   CircularProgress,
   Grid,
   Paper,
-  Divider,
   Stack,
 } from '@mui/material';
+
 import type { SagaStep, SagaStepStatus } from '../../../types/activation.types';
 import { activationService } from '../../services/activationService';
 
@@ -22,12 +23,16 @@ import { activationService } from '../../services/activationService';
  * Props du composant SagaStepsList
  */
 interface SagaStepsListProps {
+
   /** Liste des étapes Saga à afficher */
   steps: SagaStep[];
+
   /** Afficher les durées d'exécution */
   showDuration?: boolean;
+
   /** Afficher le résumé statistique */
   showSummary?: boolean;
+
   /** Mode d'affichage côte-à-côte pour les rollbacks (si assez d'espace) */
   sideBySideRollback?: boolean;
 }
@@ -102,7 +107,7 @@ function StepsSummary({ stats }: { stats: SagaStepsStats }) {
   return (
     <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
       <Typography variant="subtitle2" gutterBottom>
-        Résumé de l'exécution
+        Résumé de l&apos;exécution
       </Typography>
       <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
         <Box sx={{ textAlign: 'center', minWidth: 60 }}>
@@ -326,7 +331,7 @@ export function SagaStepsList({
               </Typography>
               {failedStep && (
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-                  Suite à l'échec de : <strong>{failedStep.name}</strong>
+                  Suite à l&apos;échec de : <strong>{failedStep.name}</strong>
                 </Typography>
               )}
               {renderStepsList(rolledBackSteps)}
@@ -347,7 +352,7 @@ export function SagaStepsList({
               </Typography>
               {failedStep && (
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                  Suite à l'échec de : <strong>{failedStep.name}</strong>
+                  Suite à l&apos;échec de : <strong>{failedStep.name}</strong>
                 </Typography>
               )}
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>

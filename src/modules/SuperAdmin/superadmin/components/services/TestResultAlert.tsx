@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import {
   Alert,
   AlertTitle,
@@ -10,14 +11,17 @@ import {
   Collapse,
   Chip,
 } from '@mui/material';
+
 import type { TestResult } from '../../../types/service-config.types';
 
 /**
  * Props du composant TestResultAlert
  */
 interface TestResultAlertProps {
+
   /** Résultat du test de connexion */
   result: TestResult | null;
+
   /** Indique si le test est en cours */
   isLoading?: boolean;
 }
@@ -28,7 +32,8 @@ interface TestResultAlertProps {
 function formatLatency(latencyMs?: number): string {
   if (latencyMs === undefined) return '';
   if (latencyMs < 1000) return `${Math.round(latencyMs)} ms`;
-  return `${(latencyMs / 1000).toFixed(2)} s`;
+  
+return `${(latencyMs / 1000).toFixed(2)} s`;
 }
 
 /**
@@ -37,7 +42,9 @@ function formatLatency(latencyMs?: number): string {
 function formatCheckedAt(isoDate: string): string {
   try {
     const date = new Date(isoDate);
-    return date.toLocaleString('fr-FR', {
+
+    
+return date.toLocaleString('fr-FR', {
       dateStyle: 'short',
       timeStyle: 'medium',
     });
@@ -78,6 +85,7 @@ export function TestResultAlert({ result, isLoading = false }: TestResultAlertPr
   }
 
   const severity = result.healthy ? 'success' : 'error';
+
   const icon = result.healthy ? (
     <i className="tabler-circle-check" style={{ fontSize: 20 }} />
   ) : (

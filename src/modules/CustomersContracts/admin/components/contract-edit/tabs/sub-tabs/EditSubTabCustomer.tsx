@@ -12,7 +12,7 @@ import Box from '@mui/material/Box'
 import { useWizardPermissions } from '../../../contract-wizard/useWizardPermissions'
 import type { CustomerEditFormData } from '../../editFormSchema'
 import type { CustomerContract } from '../../../../../types'
-import type { ContractTranslations } from '../../../../../hooks/useContractTranslations'
+import type { ContractTranslations } from '../../../../hooks/useContractTranslations'
 
 interface EditSubTabCustomerProps {
   form: UseFormReturn<CustomerEditFormData>

@@ -84,6 +84,7 @@ export default function StatusConfigCrud({ type, title, baseUrl: baseUrlProp }: 
     try {
       setLoading(true)
       setError(null)
+
       const res = await apiClient.get<{ success: boolean; data: StatusItem[] }>(baseUrl, {
         params: { lang: 'fr' },
       })

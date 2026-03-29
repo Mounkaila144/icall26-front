@@ -1,4 +1,4 @@
-import { ModuleMenuConfig } from '@/shared/types/menu-config.types';
+import type { ModuleMenuConfig } from '@/shared/types/menu-config.types';
 
 /**
  * Dashboard Module Menu Configuration
@@ -9,19 +9,6 @@ import { ModuleMenuConfig } from '@/shared/types/menu-config.types';
 export const dashboardMenuConfig: ModuleMenuConfig = {
   module: 'Dashboard',
   menus: [
-    {
-      id: 'dashboard-admin',
-      label: 'Dashboard',
-      route: '/admin/dashboard',
-      icon: {
-        type: 'emoji',
-        value: '📊',
-      },
-      order: 1,
-      module: 'Dashboard',
-      roles: ['admin'],
-      isVisible: true,
-      isActive: true,
-    }
+
   ],
 };

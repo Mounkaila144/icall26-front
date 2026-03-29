@@ -1,6 +1,9 @@
 'use client';
 
 import React from 'react';
+
+import NextLink from 'next/link';
+
 import {
   Box,
   Card,
@@ -11,22 +14,27 @@ import {
   Alert,
   Skeleton,
 } from '@mui/material';
-import NextLink from 'next/link';
 
 /**
  * Props du composant ServiceConfigLayout
  */
 interface ServiceConfigLayoutProps {
+
   /** Titre de la page de configuration */
   title: string;
+
   /** Description du service */
   description: string;
+
   /** Contenu du formulaire */
   children: React.ReactNode;
+
   /** Indique si la configuration est en lecture seule */
   readOnly?: boolean;
+
   /** Indique si le contenu est en cours de chargement */
   isLoading?: boolean;
+
   /** Langue pour les liens (optionnel) */
   lang?: string;
 }
@@ -94,9 +102,9 @@ export function ServiceConfigLayout({
           icon={<i className="tabler-info-circle" style={{ fontSize: 20 }} />}
           sx={{ mb: 3 }}
         >
-          Cette configuration est gérée via les variables d'environnement (.env).
+          Cette configuration est gérée via les variables d&apos;environnement (.env).
           Les valeurs affichées sont en lecture seule. Pour modifier cette configuration,
-          veuillez mettre à jour le fichier .env et redémarrer l'application.
+          veuillez mettre à jour le fichier .env et redémarrer l&apos;application.
         </Alert>
       )}
 

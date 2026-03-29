@@ -57,6 +57,7 @@ class DependencyService {
     // Si aucun module fourni, impossible de résoudre
     if (!modulesData || modulesData.length === 0) {
       console.log('Local resolution: No modules data provided, using module names as install order');
+
       // Fallback simple: utiliser l'ordre des modules fournis
       return {
         canInstall: true,
@@ -68,6 +69,7 @@ class DependencyService {
 
     // Créer une map des modules par nom
     const moduleMap = new Map<string, ModuleWithDeps>();
+
     modulesData.forEach((m) => moduleMap.set(m.name, m));
 
     // Collecter toutes les dépendances
@@ -76,6 +78,7 @@ class DependencyService {
 
     moduleNames.forEach((name) => {
       const mod = moduleMap.get(name);
+
       if (mod && mod.dependencies) {
         mod.dependencies.forEach((dep) => allDependencies.add(dep));
       }
@@ -83,13 +86,16 @@ class DependencyService {
 
     // Identifier les dépendances manquantes
     const missingDependencies: string[] = [];
+
     allDependencies.forEach((dep) => {
       // Une dépendance est manquante si elle n'est pas dans la sélection
       // et qu'elle n'est pas déjà active (pour TenantModule)
       if (!selectedModulesSet.has(dep)) {
         const depModule = moduleMap.get(dep);
+
         // Vérifier si le module est actif (pour TenantModule)
         const isActive = depModule && 'tenantStatus' in depModule && depModule.tenantStatus?.isActive;
+
         if (!isActive) {
           missingDependencies.push(dep);
         }
@@ -129,15 +135,18 @@ class DependencyService {
 
     const visit = (name: string) => {
       if (visited.has(name)) return;
+
       if (visiting.has(name)) {
         // Cycle détecté, ignorer
         console.warn(`Cycle detected in dependencies for module: ${name}`);
-        return;
+        
+return;
       }
 
       visiting.add(name);
 
       const mod = moduleMap.get(name);
+
       if (mod && mod.dependencies) {
         mod.dependencies.forEach((dep) => {
           if (moduleNames.includes(dep)) {
@@ -181,9 +190,11 @@ class DependencyService {
     try {
       // Vérifier le cache
       const cacheKey = this.getCacheKey(modules);
+
       if (this.resolutionCache.has(cacheKey)) {
         console.log('Returning cached dependency resolution for:', modules);
-        return this.resolutionCache.get(cacheKey)!;
+        
+return this.resolutionCache.get(cacheKey)!;
       }
 
       const client = createApiClient();
@@ -208,16 +219,20 @@ class DependencyService {
       // Fallback: résolution locale
       console.log('API returned invalid response, using local resolution');
       const localResolution = this.resolveLocalDependencies(modules, modulesData);
+
       this.resolutionCache.set(cacheKey, localResolution);
-      return localResolution;
+      
+return localResolution;
     } catch (error) {
       console.error('Error resolving dependencies via API, using local fallback:', error);
 
       // Fallback: résolution locale
       const localResolution = this.resolveLocalDependencies(modules, modulesData);
       const cacheKey = this.getCacheKey(modules);
+
       this.resolutionCache.set(cacheKey, localResolution);
-      return localResolution;
+      
+return localResolution;
     }
   }
 
@@ -241,10 +256,12 @@ class DependencyService {
       // Vérifier le cache
       if (this.graphCache.has(moduleName)) {
         console.log('Returning cached dependency graph for:', moduleName);
-        return this.graphCache.get(moduleName)!;
+        
+return this.graphCache.get(moduleName)!;
       }
 
       const client = createApiClient();
+
       const response = await client.get<DependencyGraphResponse>(
         `/superadmin/modules/${moduleName}/dependencies/graph`
       );
@@ -296,10 +313,12 @@ class DependencyService {
       // Vérifier le cache
       if (this.dependentsCache.has(moduleName)) {
         console.log('Returning cached dependent modules for:', moduleName);
-        return this.dependentsCache.get(moduleName)!;
+        
+return this.dependentsCache.get(moduleName)!;
       }
 
       const client = createApiClient();
+
       const response = await client.get<DependentModulesResponse>(
         `/superadmin/modules/${moduleName}/dependents`
       );

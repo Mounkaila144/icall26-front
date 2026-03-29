@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 
 // Next Imports
@@ -17,6 +17,7 @@ import { Title, Description } from '@radix-ui/react-dialog'
 
 // Type Imports
 import type { Locale } from '@configs/i18n'
+import type { MenuConfig } from '@/shared/types/menu-config.types'
 
 // Component Imports
 import DefaultSuggestions from './DefaultSuggestions'
@@ -25,6 +26,7 @@ import NoResult from './NoResult'
 // Hook Imports
 import useVerticalNav from '@menu/hooks/useVerticalNav'
 import { useSettings } from '@core/hooks/useSettings'
+import { useConfigMenus } from '@/shared/hooks/useConfigMenus'
 
 // Util Imports
 import { getLocalizedUrl } from '@/utils/i18n'
@@ -32,15 +34,13 @@ import { getLocalizedUrl } from '@/utils/i18n'
 // Style Imports
 import './styles.css'
 
-// Data Imports
-import data from '@/data/searchData'
-
 type Item = {
   id: string
   name: string
   url: string
   excludeLang?: boolean
   icon: string
+  iconType?: 'emoji' | 'icon-class' | 'svg' | 'lucide'
   shortcut?: string
 }
 
@@ -58,27 +58,22 @@ type SearchItemProps = {
   onSelect?: () => void
 }
 
-// Transform the data to group items by their sections
-const transformedData = data.reduce((acc: Section[], item) => {
-  const existingSection = acc.find(section => section.title === item.section)
+/** Flatten hierarchical menus to items with routes */
+const flattenMenuItems = (items: MenuConfig[]): MenuConfig[] => {
+  const result: MenuConfig[] = []
 
-  const newItem = {
-    id: item.id,
-    name: item.name,
-    url: item.url,
-    excludeLang: item.excludeLang,
-    icon: item.icon,
-    shortcut: item.shortcut
+  for (const item of items) {
+    if (item.route) {
+      result.push(item)
+    }
+
+    if (item.children) {
+      result.push(...flattenMenuItems(item.children))
+    }
   }
 
-  if (existingSection) {
-    existingSection.items.push(newItem)
-  } else {
-    acc.push({ title: item.section, items: [newItem] })
-  }
-
-  return acc
-}, [])
+  return result
+}
 
 // SearchItem Component for introduce the shortcut keys
 const SearchItem = ({ children, shortcut, value, currentPath, url, onSelect = () => {} }: SearchItemProps) => {
@@ -150,6 +145,30 @@ const NavSearch = () => {
   const { settings } = useSettings()
   const { lang: locale } = useParams()
   const { isBreakpointReached } = useVerticalNav()
+  const { menus } = useConfigMenus({ visibleOnly: true })
+
+  // Build search sections dynamically from real menus
+  const menuSections = useMemo<Section[]>(() => {
+    const allItems = flattenMenuItems(menus)
+
+    const grouped = allItems.reduce<Record<string, Item[]>>((acc, menu) => {
+      const section = menu.module || 'Other'
+
+      if (!acc[section]) acc[section] = []
+
+      acc[section].push({
+        id: menu.id,
+        name: menu.label,
+        url: menu.route!,
+        icon: menu.icon?.value ?? '',
+        iconType: menu.icon?.type,
+      })
+
+      return acc
+    }, {})
+
+    return Object.entries(grouped).map(([title, items]) => ({ title, items }))
+  }, [menus])
 
   // When an item is selected from the search results
   const onSearchItemSelect = (item: Item) => {
@@ -186,7 +205,22 @@ const NavSearch = () => {
       }))
   }
 
-  const limitedData = getFilteredResults(filteredData(transformedData, searchValue))
+  const limitedData = getFilteredResults(filteredData(menuSections, searchValue))
+
+  // Render icon based on type (emoji vs icon-class)
+  const renderIcon = (item: Item) => {
+    if (!item.icon) return null
+
+    if (item.iconType === 'emoji') {
+      return <span className='text-xl'>{item.icon}</span>
+    }
+
+    return (
+      <div className='flex text-xl'>
+        <i className={item.icon} />
+      </div>
+    )
+  }
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
@@ -238,21 +272,17 @@ const NavSearch = () => {
             limitedData.length > 0 ? (
               limitedData.map((section, index) => (
                 <CommandGroup key={index} heading={section.title.toUpperCase()} className='text-xs'>
-                  {section.items.map((item, index) => {
+                  {section.items.map((item, i) => {
                     return (
                       <SearchItem
                         shortcut={item.shortcut}
-                        key={index}
+                        key={i}
                         currentPath={pathName}
                         url={getLocalizedUrl(item.url, locale as Locale)}
-                        value={`${item.name} ${section.title} ${item.shortcut}`}
+                        value={`${item.name} ${section.title} ${item.shortcut ?? ''}`}
                         onSelect={() => onSearchItemSelect(item)}
                       >
-                        {item.icon && (
-                          <div className='flex text-xl'>
-                            <i className={item.icon} />
-                          </div>
-                        )}
+                        {renderIcon(item)}
                         {item.name}
                       </SearchItem>
                     )

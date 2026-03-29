@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+
 import { moduleService } from '../services/moduleService';
 import type { TenantModule } from '../../types/module.types';
 
@@ -8,12 +9,16 @@ import type { TenantModule } from '../../types/module.types';
  * Interface de retour du hook useTenantModules
  */
 interface UseTenantModulesReturn {
+
   /** Liste des modules du tenant avec leur statut */
   modules: TenantModule[];
+
   /** Indique si les données sont en cours de chargement */
   loading: boolean;
+
   /** Erreur survenue lors du chargement */
   error: Error | null;
+
   /** Fonction pour recharger les modules du tenant */
   refresh: () => Promise<void>;
 }
@@ -49,7 +54,8 @@ export function useTenantModules(tenantId: number): UseTenantModulesReturn {
       setError(new Error('ID de tenant invalide'));
       setLoading(false);
       setModules([]);
-      return;
+      
+return;
     }
 
     try {
@@ -67,6 +73,7 @@ export function useTenantModules(tenantId: number): UseTenantModulesReturn {
       }
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Erreur lors du chargement des modules du tenant');
+
       setError(error);
       console.error('Error in useTenantModules:', error);
       setModules([]); // Garantir un tableau vide en cas d'erreur

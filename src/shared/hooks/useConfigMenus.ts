@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { MenuConfig, UserRole } from '@/shared/types/menu-config.types';
+
+import type { MenuConfig, UserRole } from '@/shared/types/menu-config.types';
 import { getAllMenus, getVisibleMenus, getModuleMenus, getMenusByRole } from '@/shared/config/menu-registry';
 
 /**
@@ -14,10 +15,13 @@ import { getAllMenus, getVisibleMenus, getModuleMenus, getMenusByRole } from '@/
  * @returns Menu state and utilities
  */
 export function useConfigMenus(options: {
+
   /** Only return visible and active menus */
   visibleOnly?: boolean;
+
   /** Filter by specific module */
   module?: string;
+
   /** Filter by user role */
   role?: UserRole;
 } = {}) {
@@ -87,6 +91,7 @@ export function useConfigMenus(options: {
 
         if (item.children) {
           const activeChild = findActive(item.children);
+
           if (activeChild) {
             return activeChild;
           }
@@ -111,7 +116,8 @@ export function useConfigMenus(options: {
 
         if (item.route && currentPath.startsWith(item.route)) {
           breadcrumbs.push(...newPath);
-          return true;
+          
+return true;
         }
 
         if (item.children && findPath(item.children, newPath)) {
@@ -123,7 +129,8 @@ export function useConfigMenus(options: {
     };
 
     findPath(menus);
-    return breadcrumbs;
+    
+return breadcrumbs;
   };
 
   /**

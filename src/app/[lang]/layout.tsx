@@ -29,23 +29,24 @@ import '@/app/globals.css'
 import '@assets/iconify-icons/generated-icons.css'
 
 export const metadata = {
-  title: 'Icall26 - Material Next.js Admin Template',
-  description: 'Icall26 - Material Next.js Admin Template'
+  title: 'Icall26',
+  description: 'Icall26 - Plateforme de gestion'
 }
 
-const RootLayout = async (props: ChildrenType & { params: Promise<{ lang: Locale }> }) => {
+const RootLayout = async (props: ChildrenType & { params: Promise<{ lang: string }> }) => {
   const params = await props.params
+  const lang = params.lang as Locale
 
   const { children } = props
 
   // Vars
   const headersList = await headers()
   const systemMode = await getSystemMode()
-  const direction = i18n.langDirection[params.lang]
+  const direction = i18n.langDirection[lang]
 
   return (
-    <TranslationWrapper headersList={headersList} lang={params.lang}>
-      <html id='__next' lang={params.lang} dir={direction} suppressHydrationWarning>
+    <TranslationWrapper headersList={headersList} lang={lang}>
+      <html id='__next' lang={lang} dir={direction} suppressHydrationWarning>
         <body className='flex is-full min-bs-full flex-auto flex-col'>
           <InitColorSchemeScript attribute='data' defaultMode={systemMode} />
           {children}

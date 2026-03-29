@@ -14,7 +14,7 @@ interface NotificationState {
   severity: 'success' | 'error'
 }
 
-export function useDocumentState(contractId: number | null, t: ContractTranslations) {
+export function useDocumentState(contractId: number | null, t: ContractTranslations & Record<string, string>) {
   const [quotations, setQuotations] = useState<DomoprimeQuotation[]>([])
   const [billings, setBillings] = useState<DomoprimeBilling[]>([])
   const [loading, setLoading] = useState(false)
@@ -211,9 +211,12 @@ export function useDocumentState(contractId: number | null, t: ContractTranslati
   // Billing action handlers
   const handleDownloadBillingPdf = useCallback(async (billingId: number, ref: string) => {
     const key = `billing-pdf-${billingId}`
+
     setDownloading(key)
+
     try {
       const blob = await iso3ExportService.exportBillingPdf(billingId)
+
       downloadBlob(blob, `facture_${ref || billingId}.pdf`)
     } catch {
       showNotification(t.docDownloadError ?? 'Erreur lors du téléchargement', 'error')
@@ -276,9 +279,12 @@ export function useDocumentState(contractId: number | null, t: ContractTranslati
   const handleDownloadPreMeetingPdf = useCallback(async () => {
     if (!contractId) return
     const key = `premeeting-${contractId}`
+
     setDownloading(key)
+
     try {
       const blob = await iso3ExportService.exportPreMeetingPdf(contractId)
+
       downloadBlob(blob, `document_pre_visite_${contractId}.pdf`)
     } catch {
       showNotification(t.docDownloadError ?? 'Erreur lors du téléchargement', 'error')
@@ -290,9 +296,12 @@ export function useDocumentState(contractId: number | null, t: ContractTranslati
   const handleDownloadAfterWorkPdf = useCallback(async () => {
     if (!contractId) return
     const key = `afterwork-${contractId}`
+
     setDownloading(key)
+
     try {
       const blob = await iso3ExportService.exportAfterWorkPdf(contractId)
+
       downloadBlob(blob, `document_fin_travaux_${contractId}.pdf`)
     } catch {
       showNotification(t.docDownloadError ?? 'Erreur lors du téléchargement', 'error')
@@ -304,9 +313,12 @@ export function useDocumentState(contractId: number | null, t: ContractTranslati
   const handleDownloadAllDocsPdf = useCallback(async () => {
     if (!contractId) return
     const key = `alldocs-${contractId}`
+
     setDownloading(key)
+
     try {
       const blob = await iso3ExportService.exportAllDocumentsByContractPdf(contractId)
+
       downloadBlob(blob, `tous_documents_${contractId}.pdf`)
     } catch {
       showNotification(t.docDownloadError ?? 'Erreur lors du téléchargement', 'error')
@@ -318,9 +330,12 @@ export function useDocumentState(contractId: number | null, t: ContractTranslati
   const handleDownloadAllSignedPdf = useCallback(async () => {
     if (!contractId) return
     const key = `allsigned-${contractId}`
+
     setDownloading(key)
+
     try {
       const blob = await iso3ExportService.exportAllSignedByContractPdf(contractId)
+
       downloadBlob(blob, `documents_signes_${contractId}.pdf`)
     } catch {
       showNotification(t.docDownloadError ?? 'Erreur lors du téléchargement', 'error')

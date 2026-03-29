@@ -11,28 +11,38 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
+
+import type {
+  UserPermissions} from '@/shared/lib/permissions/extractPermissions';
 import {
-  UserPermissions,
   loadPermissionsFromStorage,
   savePermissionsToStorage,
   clearPermissionsFromStorage
 } from '@/shared/lib/permissions/extractPermissions'
 
 interface PermissionsContextType {
+
   /** Current user permissions or null if not loaded */
   permissions: UserPermissions | null
+
   /** Loading state during initialization */
   loading: boolean
+
   /** Check if user has a credential (group OR permission) - Symfony 1 style */
   hasCredential: (credential: string | string[] | string[][], requireAll?: boolean) => boolean
+
   /** Check if user belongs to a group */
   hasGroup: (group: string) => boolean
+
   /** Check if user is superadmin */
   isSuperadmin: () => boolean
+
   /** Check if user is admin (or superadmin) */
   isAdmin: () => boolean
+
   /** Set permissions (called after login) */
   setPermissions: (permissions: UserPermissions) => void
+
   /** Clear permissions (called on logout) */
   clearPermissions: () => void
 }
@@ -68,6 +78,7 @@ export function PermissionsProvider({ children }: { children: React.ReactNode })
     () => new Set(permissions?.permissions ?? []),
     [permissions]
   )
+
   const groupSet = useMemo<Set<string>>(
     () => new Set(permissions?.groups ?? []),
     [permissions]
@@ -76,9 +87,11 @@ export function PermissionsProvider({ children }: { children: React.ReactNode })
   // Au montage du composant, charger depuis localStorage
   useEffect(() => {
     const stored = loadPermissionsFromStorage()
+
     if (stored) {
       setPermissionsState(stored)
     }
+
     setLoading(false)
   }, [])
 
@@ -145,7 +158,8 @@ export function PermissionsProvider({ children }: { children: React.ReactNode })
    */
   const hasGroup = useCallback((group: string): boolean => {
     if (!permissions) return false
-    return groupSet.has(group)
+    
+return groupSet.has(group)
   }, [permissions, groupSet])
 
   /**
@@ -205,10 +219,13 @@ export function PermissionsProvider({ children }: { children: React.ReactNode })
  */
 export function usePermissions() {
   const context = useContext(PermissionsContext)
+
   if (!context) {
     throw new Error('usePermissions must be used within PermissionsProvider')
   }
-  return context
+
+  
+return context
 }
 
 /**

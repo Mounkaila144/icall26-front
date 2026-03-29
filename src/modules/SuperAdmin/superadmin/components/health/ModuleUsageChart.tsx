@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import {
   Card,
   CardContent,
@@ -11,14 +12,17 @@ import {
   Stack,
   Chip,
 } from '@mui/material';
+
 import type { ModuleStats } from '../../../types/health.types';
 
 /**
  * Props du composant ModuleUsageChart
  */
 interface ModuleUsageChartProps {
+
   /** Statistiques des modules */
   moduleStats: ModuleStats[];
+
   /** Afficher en mode compact */
   compact?: boolean;
 }
@@ -30,7 +34,8 @@ function getAdoptionColor(rate: number): 'success' | 'warning' | 'error' | 'info
   if (rate >= 70) return 'success';
   if (rate >= 40) return 'info';
   if (rate >= 20) return 'warning';
-  return 'error';
+  
+return 'error';
 }
 
 /**

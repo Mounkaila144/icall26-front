@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+
 import {
   Dialog,
   DialogTitle,
@@ -19,7 +20,6 @@ import {
   IconButton,
   Divider,
   Chip,
-  Stack,
   List,
   ListItem,
   ListItemIcon,
@@ -28,8 +28,8 @@ import {
   Paper,
   TextField,
 } from '@mui/material';
+
 import { useModuleDeactivation } from '../../hooks/useModuleDeactivation';
-import { SagaStepsList } from '../activation/SagaStepsList';
 import type { TenantModule } from '../../../types/module.types';
 import type { DeactivationResult, DeactivationOptions } from '../../../types/deactivation.types';
 import { deactivationService } from '../../services/deactivationService';
@@ -38,16 +38,22 @@ import { deactivationService } from '../../services/deactivationService';
  * Props du composant BatchDeactivationWizard
  */
 interface BatchDeactivationWizardProps {
+
   /** Contrôle l'ouverture du modal */
   open: boolean;
+
   /** Callback de fermeture */
   onClose: () => void;
+
   /** Modules à désactiver */
   modules: TenantModule[];
+
   /** ID du tenant */
   tenantId: number;
+
   /** Nom du tenant */
   tenantName: string;
+
   /** Callback appelé après désactivation réussie */
   onSuccess?: () => void;
 }
@@ -92,10 +98,12 @@ export function BatchDeactivationWizard({
   // State du wizard
   const [activeStep, setActiveStep] = useState(0);
   const [selectedModules, setSelectedModules] = useState<TenantModule[]>(modules);
+
   const [options, setOptions] = useState<DeactivationOptions>({
     backup: true,
     force: false,
   });
+
   const [confirmationText, setConfirmationText] = useState('');
   const [moduleStates, setModuleStates] = useState<ModuleDeactivationState[]>([]);
   const [currentModuleIndex, setCurrentModuleIndex] = useState(-1);
@@ -127,6 +135,7 @@ export function BatchDeactivationWizard({
   const toggleModuleSelection = useCallback((module: TenantModule) => {
     setSelectedModules((prev) => {
       const isSelected = prev.some((m) => m.name === module.name);
+
       if (isSelected) {
         return prev.filter((m) => m.name !== module.name);
       } else {
@@ -154,6 +163,7 @@ export function BatchDeactivationWizard({
       module,
       status: 'pending',
     }));
+
     setModuleStates(initialStates);
 
     // Désactiver chaque module
@@ -220,6 +230,7 @@ export function BatchDeactivationWizard({
       if (batchComplete && moduleStates.some((s) => s.status === 'success') && onSuccess) {
         onSuccess();
       }
+
       onClose();
     }
   }, [isDeactivating, batchComplete, moduleStates, onSuccess, onClose]);
@@ -230,7 +241,9 @@ export function BatchDeactivationWizard({
     const failed = moduleStates.filter((s) => s.status === 'failed').length;
     const skipped = moduleStates.filter((s) => s.status === 'skipped').length;
     const pending = moduleStates.filter((s) => s.status === 'pending' || s.status === 'deactivating').length;
-    return { success, failed, skipped, pending, total: moduleStates.length };
+
+    
+return { success, failed, skipped, pending, total: moduleStates.length };
   }, [moduleStates]);
 
   // Vérifier si la confirmation est valide
@@ -241,10 +254,13 @@ export function BatchDeactivationWizard({
     if (activeStep === 0) {
       return selectedModules.length > 0;
     }
+
     if (activeStep === 2) {
       return isConfirmationValid;
     }
-    return true;
+
+    
+return true;
   }, [activeStep, selectedModules, isConfirmationValid]);
 
   // Rendu des steps
@@ -265,7 +281,9 @@ export function BatchDeactivationWizard({
               <List dense>
                 {modules.map((module) => {
                   const isSelected = selectedModules.some((m) => m.name === module.name);
-                  return (
+
+                  
+return (
                     <ListItem
                       key={module.name}
                       button
@@ -341,7 +359,7 @@ export function BatchDeactivationWizard({
                 }
                 label={
                   <Box>
-                    <Typography variant="body2" color="error">Continuer en cas d'échec</Typography>
+                    <Typography variant="body2" color="error">Continuer en cas d&apos;échec</Typography>
                     <Typography variant="caption" color="text.secondary">
                       Si un module échoue, continuer avec les autres modules
                     </Typography>

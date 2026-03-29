@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import {
   Card,
   CardContent,
@@ -15,24 +16,32 @@ import {
 } from '@mui/material';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+
 import type { TenantModule } from '../../../types/module.types';
 
 /**
  * Props du composant TenantModuleCard
  */
 interface TenantModuleCardProps {
+
   /** Module à afficher avec son statut tenant */
   module: TenantModule;
+
   /** Callback appelé lors du clic sur "Activer" */
   onActivate?: (module: TenantModule) => void;
+
   /** Callback appelé lors du clic sur "Désactiver" */
   onDeactivate?: (module: TenantModule) => void;
+
   /** Callback appelé lors du clic sur "Configurer" */
   onConfigure?: (module: TenantModule) => void;
+
   /** Callback appelé lors du clic sur "Voir détails" */
   onViewDetails?: (module: TenantModule) => void;
+
   /** Callback appelé lors du clic sur la carte (mode sélection) */
   onClick?: () => void;
+
   /** Si la carte est sélectionnée (mode batch) */
   selected?: boolean;
 }
@@ -62,7 +71,8 @@ const getCategoryColor = (category: string): 'primary' | 'secondary' | 'success'
  */
 const truncate = (text: string, maxLength: number): string => {
   if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength) + '...';
+  
+return text.slice(0, maxLength) + '...';
 };
 
 /**
@@ -73,10 +83,13 @@ const formatInstalledDate = (dateString: string | null): string => {
 
   try {
     const date = new Date(dateString);
-    return formatDistanceToNow(date, { addSuffix: true, locale: fr });
+
+    
+return formatDistanceToNow(date, { addSuffix: true, locale: fr });
   } catch (error) {
     console.error('Error formatting date:', error);
-    return '';
+    
+return '';
   }
 };
 

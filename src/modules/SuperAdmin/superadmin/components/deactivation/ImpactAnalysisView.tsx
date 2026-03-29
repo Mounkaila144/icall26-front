@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import {
   Box,
   Typography,
@@ -11,9 +12,9 @@ import {
   ListItemText,
   Chip,
   Paper,
-  Divider,
   Stack,
 } from '@mui/material';
+
 import type { ImpactAnalysis } from '../../../types/deactivation.types';
 import { deactivationService } from '../../services/deactivationService';
 
@@ -21,8 +22,10 @@ import { deactivationService } from '../../services/deactivationService';
  * Props du composant ImpactAnalysisView
  */
 interface ImpactAnalysisViewProps {
+
   /** Analyse d'impact à afficher */
   impact: ImpactAnalysis;
+
   /** Mode compact (moins de détails) */
   compact?: boolean;
 }
@@ -92,7 +95,7 @@ export function ImpactAnalysisView({ impact, compact = false }: ImpactAnalysisVi
           </Typography>
         ) : (
           <Typography variant="caption">
-            La désactivation est bloquée. Résolvez d'abord les problèmes ci-dessous.
+            La désactivation est bloquée. Résolvez d&apos;abord les problèmes ci-dessous.
           </Typography>
         )}
       </Alert>

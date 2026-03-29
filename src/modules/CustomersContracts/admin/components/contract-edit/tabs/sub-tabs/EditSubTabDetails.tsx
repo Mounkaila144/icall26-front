@@ -16,7 +16,7 @@ import { useWizardPermissions } from '../../../contract-wizard/useWizardPermissi
 import { useEditPermissions } from '../../useEditPermissions'
 import type { ContractDetailsFormData } from '../../editFormSchema'
 import type { ContractFilterOptions, FilterOption } from '../../../../../types'
-import type { ContractTranslations } from '../../../../../hooks/useContractTranslations'
+import type { ContractTranslations } from '../../../../hooks/useContractTranslations'
 
 interface EditSubTabDetailsProps {
   form: UseFormReturn<ContractDetailsFormData>

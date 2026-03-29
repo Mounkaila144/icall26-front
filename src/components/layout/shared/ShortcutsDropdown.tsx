@@ -46,7 +46,7 @@ export type ShortcutsType = {
   subtitle: string
 }
 
-const ScrollWrapper = ({ children, hidden }: { children: ReactNode; hidden: boolean }) => {
+const ScrollWrapper = ({ children }: { children: ReactNode }) => {
   // Use native scroll for better performance - eliminates PerfectScrollbar forced reflows
   return (
     <div
@@ -70,7 +70,6 @@ const ShortcutsDropdown = ({ shortcuts }: { shortcuts: ShortcutsType[] }) => {
   const ref = useRef<HTMLDivElement | null>(null)
 
   // Hooks
-  const hidden = useMediaQuery((theme: Theme) => theme.breakpoints.down('lg'))
   const isSmallScreen = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'))
   const { settings } = useSettings()
   const { lang: locale } = useParams()
@@ -151,7 +150,7 @@ const ShortcutsDropdown = ({ shortcuts }: { shortcuts: ShortcutsType[] }) => {
                     </Tooltip>
                   </div>
                   <Divider />
-                  <ScrollWrapper hidden={hidden}>
+                  <ScrollWrapper>
                     <Grid container>
                       {shortcuts.map((shortcut, index) => (
                         <Grid

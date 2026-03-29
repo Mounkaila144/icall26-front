@@ -1,36 +1,38 @@
 'use client';
 
 import React, { useState } from 'react';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+
 import { useConfigMenus } from '@/shared/hooks/useConfigMenus';
 import { useSidebar } from '@/shared/lib/sidebar-context';
 import type { MenuConfig } from '@/shared/types/menu-config.types';
 
 const FALLBACK_ICONS: React.ReactElement[] = [
   (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
+    <svg key="icon-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
       <path d="M4 19h16" />
       <path d="M5 15l4-4 3 3 5-5 2 2" />
     </svg>
   ),
   (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
+    <svg key="icon-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
       <rect x="3" y="4" width="18" height="16" rx="2" />
       <path d="M3 9h18" />
       <path d="M7 13h4" />
     </svg>
   ),
   (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
+    <svg key="icon-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
       <path d="M4 12h16" />
       <path d="M12 4v16" />
       <circle cx="12" cy="12" r="9" />
     </svg>
   ),
   (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
+    <svg key="icon-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
       <path d="M12 2v4" />
       <path d="M12 18v4" />
       <path d="M4.93 4.93l2.83 2.83" />
@@ -42,40 +44,56 @@ const FALLBACK_ICONS: React.ReactElement[] = [
     </svg>
   ),
   (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
+    <svg key="icon-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
       <path d="M4 4h6l2 3h8a2 2 0 0 1 2 2v6" />
       <path d="M3 13h2" />
       <path d="M12 22a5 5 0 0 0 5-5v-1H7v1a5 5 0 0 0 5 5z" />
     </svg>
   ),
   (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
+    <svg key="icon-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
       <circle cx="12" cy="12" r="8" />
       <path d="M9 12l2 2 4-4" />
     </svg>
   ),
   (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
+    <svg key="icon-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
       <path d="M5 3v18" />
       <path d="M19 3v18" />
       <rect x="9" y="7" width="6" height="10" rx="1" />
     </svg>
   ),
   (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
+    <svg key="icon-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
       <path d="M12 6v6l4 2" />
       <circle cx="12" cy="12" r="10" />
     </svg>
   ),
 ];
 
+/**
+ * Sanitize SVG string to prevent XSS attacks.
+ * Strips event handlers (onload, onclick, etc.), script tags, and javascript: URIs.
+ */
+const sanitizeSvg = (svg: string): string => {
+  return svg
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/\bon\w+\s*=\s*["'][^"']*["']/gi, '')
+    .replace(/\bon\w+\s*=\s*[^\s>]*/gi, '')
+    .replace(/javascript\s*:/gi, '')
+    .replace(/data\s*:\s*text\/html/gi, '')
+};
+
 const hashString = (value: string): number => {
   let hash = 0;
+
   for (let i = 0; i < value.length; i += 1) {
     hash = (hash << 5) - hash + value.charCodeAt(i);
     hash |= 0; // Convert to 32bit integer
   }
-  return Math.abs(hash);
+
+  
+return Math.abs(hash);
 };
 
 /**
@@ -89,28 +107,12 @@ export const Sidebar: React.FC = () => {
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
   const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
 
-  // Debug: Track component lifecycle
-  React.useEffect(() => {
-    const mountId = Math.random().toString(36).substr(2, 9);
-    console.log(`🟢 [Sidebar] MOUNTED - ID: ${mountId}`);
-
-    return () => {
-      console.log(`🔴 [Sidebar] UNMOUNTED - ID: ${mountId}`);
-    };
-  }, []);
-
-  // Track state changes
-  React.useEffect(() => {
-    console.log('📊 [Sidebar] State:', { isLoading, menusCount: menus?.length });
-  }, [isLoading, menus?.length]);
-
-  // Ouvrir automatiquement le deuxième menu (index 1) par défaut - Run only once when menus are loaded
+  // Auto-expand the second menu by default when menus are loaded
   React.useEffect(() => {
     if (menus.length > 1 && menus[1].children && menus[1].children.length > 0 && expandedMenus.size === 0) {
-      console.log('🔽 [Sidebar] Auto-expanding second menu:', menus[1].label);
       setExpandedMenus(new Set([menus[1].id]));
     }
-  }, [menus.length]); // Only depend on menus.length, not the entire menus array
+  }, [menus.length]);
 
   const palette = React.useMemo(() => ({
     accentGradient: '#2563eb',
@@ -128,18 +130,23 @@ export const Sidebar: React.FC = () => {
     const seed = `${menu.id}|${menu.route ?? ''}|${menu.label}|${menu.icon?.value ?? ''}`;
     const index = hashString(seed) % FALLBACK_ICONS.length;
     const template = FALLBACK_ICONS[index];
-    return React.cloneElement(template, { key: `${menu.id}-${index}` });
+
+    
+return React.cloneElement(template, { key: `${menu.id}-${index}` });
   }, []);
 
   const toggleExpand = React.useCallback((menuId: string) => {
     setExpandedMenus((prev) => {
       const next = new Set(prev);
+
       if (next.has(menuId)) {
         next.delete(menuId);
       } else {
         next.add(menuId);
       }
-      return next;
+
+      
+return next;
     });
   }, []);
 
@@ -147,10 +154,13 @@ export const Sidebar: React.FC = () => {
     if (menu.route === pathname) {
       return true;
     }
+
     if (menu.children) {
       return menu.children.some((child) => isActive(child));
     }
-    return false;
+
+    
+return false;
   };
 
   // Calculate menus to render - MUST be before early returns to maintain Hook order
@@ -163,7 +173,9 @@ export const Sidebar: React.FC = () => {
           if (menu.children && menu.children.length > 0) {
             return [menu, ...menu.children];
           }
-          return [menu];
+
+          
+return [menu];
         })
       : menus;
   }, [menus, isCollapsed]);
@@ -185,6 +197,7 @@ export const Sidebar: React.FC = () => {
     const isHovered = hoveredMenu === menu.id;
 
     const badgeVariant = menu.badge?.variant ?? 'primary';
+
     const badgeColors: Record<string, { background: string; color: string; border: string }> = {
       primary: {
         background: 'rgba(37, 99, 235, 0.18)',
@@ -316,7 +329,7 @@ export const Sidebar: React.FC = () => {
             <span
               aria-hidden
               style={{ display: 'inline-flex', width: '100%', height: '100%' }}
-              dangerouslySetInnerHTML={{ __html: menu.icon.value }}
+              dangerouslySetInnerHTML={{ __html: sanitizeSvg(menu.icon.value) }}
             />
           );
         case 'lucide':

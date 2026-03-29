@@ -42,16 +42,22 @@ export type ModuleNode = Node<ModuleNodeData>;
  * Interface de retour du hook useDependencyGraph
  */
 interface UseDependencyGraphReturn {
+
   /** Données brutes du graphe */
   graph: ModuleGraphItem[];
+
   /** Noeuds formatés pour React Flow */
   nodes: ModuleNode[];
+
   /** Arêtes formatées pour React Flow */
   edges: Edge[];
+
   /** Indique si les données sont en cours de chargement */
   isLoading: boolean;
+
   /** Erreur survenue lors du chargement */
   error: Error | null;
+
   /** Fonction pour recharger les données */
   refresh: () => Promise<void>;
 }

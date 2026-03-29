@@ -26,7 +26,7 @@ interface TabDocumentsProps {
  * Features: file upload (dropzone), document list with status, download, delete.
  * Currently a structured placeholder - API integration pending CustomersDocuments module migration.
  */
-export default function TabDocuments({ meetingId, t }: TabDocumentsProps) {
+export default function TabDocuments({ t }: TabDocumentsProps) {
   const [dragOver, setDragOver] = useState(false)
   const tR = t as Record<string, string>
 

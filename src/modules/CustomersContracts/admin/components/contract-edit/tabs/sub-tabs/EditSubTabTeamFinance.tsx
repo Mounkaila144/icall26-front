@@ -15,7 +15,7 @@ import InputAdornment from '@mui/material/InputAdornment'
 import { useWizardPermissions } from '../../../contract-wizard/useWizardPermissions'
 import type { TeamFinanceFormData } from '../../editFormSchema'
 import type { ContractFilterOptions, FilterOption } from '../../../../../types'
-import type { ContractTranslations } from '../../../../../hooks/useContractTranslations'
+import type { ContractTranslations } from '../../../../hooks/useContractTranslations'
 
 interface EditSubTabTeamFinanceProps {
   form: UseFormReturn<TeamFinanceFormData>

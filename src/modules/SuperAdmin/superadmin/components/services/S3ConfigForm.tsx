@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+
 import {
   Box,
   TextField,
@@ -16,6 +17,7 @@ import {
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+
 import { TestResultAlert } from './TestResultAlert';
 import type { S3Config, TestResult } from '../../../types/service-config.types';
 
@@ -44,18 +46,25 @@ type S3FormData = yup.InferType<typeof s3Schema>;
  * Props du composant S3ConfigForm
  */
 interface S3ConfigFormProps {
+
   /** Configuration S3 actuelle */
   config: S3Config | null;
+
   /** Callback appelé lors de la sauvegarde */
   onSave: (data: Partial<S3Config>) => Promise<boolean>;
+
   /** Indique si la sauvegarde est en cours */
   isSaving?: boolean;
+
   /** Callback appelé pour tester la connexion (utilise la config sauvegardée) */
   onTest: () => Promise<void>;
+
   /** Indique si le test est en cours */
   isTesting?: boolean;
+
   /** Résultat du dernier test */
   testResult: TestResult | null;
+
   /** Erreur globale */
   error?: string | null;
 }
@@ -93,7 +102,7 @@ export function S3ConfigForm({
     control,
     handleSubmit,
     reset,
-    formState: { errors, isDirty, isValid },
+    formState: { errors, isDirty },
   } = useForm<S3FormData>({
     resolver: yupResolver(s3Schema),
     defaultValues: {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+
 import { meetingsService } from '../services/meetingsService'
 import type {
   CustomerMeeting,
@@ -49,6 +50,7 @@ export const useMeetings = (initialFilters?: Partial<MeetingFilters> | Record<st
   const [total, setTotal] = useState<number>(0)
   const [perPage, setPerPage] = useState<number>(15)
   const [permittedFields, setPermittedFields] = useState<Set<string>>(new Set())
+
   const [filters, setFilters] = useState<MeetingFilters>({
     ...defaultFilters,
     ...initialFilters,
@@ -82,6 +84,7 @@ export const useMeetings = (initialFilters?: Partial<MeetingFilters> | Record<st
         setMeetings(meetingsData)
 
         const paginationMeta = response.meta || response.data?.pagination
+
         if (paginationMeta) {
           setTotalPages(paginationMeta.last_page)
           setTotal(paginationMeta.total)
@@ -123,23 +126,30 @@ export const useMeetings = (initialFilters?: Partial<MeetingFilters> | Record<st
   const deleteMeeting = useCallback(async (id: number): Promise<boolean> => {
     try {
       const confirmed = window.confirm('Are you sure you want to delete this meeting?')
+
       if (!confirmed) return false
 
       const response = await meetingsService.deleteMeeting(id)
+
       if (response.success) {
         await loadMeetings()
-        return true
+        
+return true
       }
-      return false
+
+      
+return false
     } catch (err) {
       console.error(`Error deleting meeting ${id}:`, err)
       setError(err instanceof Error ? err.message : 'Failed to delete meeting')
-      return false
+      
+return false
     }
   }, [loadMeetings])
 
   const createMeeting = useCallback(async (data: CreateMeetingData): Promise<void> => {
     const response = await meetingsService.createMeeting(data)
+
     if (response.success) {
       await loadMeetings()
     } else {
@@ -149,6 +159,7 @@ export const useMeetings = (initialFilters?: Partial<MeetingFilters> | Record<st
 
   const updateMeeting = useCallback(async (id: number, data: UpdateMeetingData): Promise<void> => {
     const response = await meetingsService.updateMeeting(id, data)
+
     if (response.success) {
       await loadMeetings()
     } else {
@@ -159,10 +170,13 @@ export const useMeetings = (initialFilters?: Partial<MeetingFilters> | Record<st
   const getMeeting = useCallback(async (id: number): Promise<CustomerMeeting | null> => {
     try {
       const response = await meetingsService.getMeeting(id)
-      return response.success ? response.data : null
+
+      
+return response.success ? response.data : null
     } catch (err) {
       console.error(`Error fetching meeting ${id}:`, err)
-      return null
+      
+return null
     }
   }, [])
 
@@ -174,7 +188,9 @@ export const useMeetings = (initialFilters?: Partial<MeetingFilters> | Record<st
   useEffect(() => {
     mountedRef.current = true
     loadMeetings()
-    return () => {
+
+    
+return () => {
       mountedRef.current = false
     }
   }, [loadMeetings])

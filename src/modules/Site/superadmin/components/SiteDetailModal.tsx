@@ -1,7 +1,8 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
-import { Site } from '../../types/site.types';
+
+import type { Site } from '../../types/site.types';
 
 interface SiteDetailModalProps {
   isOpen: boolean;

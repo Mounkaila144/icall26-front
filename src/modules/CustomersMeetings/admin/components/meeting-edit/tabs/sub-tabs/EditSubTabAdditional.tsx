@@ -28,7 +28,7 @@ interface EditSubTabAdditionalProps {
 }
 
 export default function EditSubTabAdditional({ detailsForm, teamForm, domoprimeForm, filterOptions, t }: EditSubTabAdditionalProps) {
-  const { canEdit, canEditSuper, shouldHide } = useEditPermissions()
+  const { canEdit, canEditSuper } = useEditPermissions()
 
   const showAssistant = canEdit('meeting_modify_assistant')
   const canEditCampaign = canEdit('meeting_modify_campaign')

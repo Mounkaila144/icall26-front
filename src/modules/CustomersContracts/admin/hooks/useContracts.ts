@@ -7,6 +7,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+
 import { contractsService } from '../services/contractsService';
 import type {
   CustomerContract,
@@ -17,6 +18,7 @@ import type {
 } from '../../types';
 
 interface UseContractsReturn {
+
   // Data
   contracts: CustomerContract[];
   stats: ContractStatsResponse['data'] | null;
@@ -115,6 +117,7 @@ export const useContracts = (initialFilters?: Partial<ContractFilters>): UseCont
 
         // Handle pagination from meta or data.pagination
         const paginationMeta = response.meta || response.data?.pagination;
+
         if (paginationMeta) {
           setTotalPages(paginationMeta.last_page);
           setTotal(paginationMeta.total);
@@ -143,11 +146,13 @@ export const useContracts = (initialFilters?: Partial<ContractFilters>): UseCont
   const loadStats = useCallback(async () => {
     try {
       const response = await contractsService.getStatistics();
+
       if (response.success) {
         setStats(response.data);
       }
     } catch (err) {
       console.error('Error loading contract statistics:', err);
+
       // Don't set error state for stats, as it's not critical
     }
   }, []);
@@ -197,14 +202,16 @@ export const useContracts = (initialFilters?: Partial<ContractFilters>): UseCont
         if (response.success) {
           // Reload contracts after deletion
           await loadContracts();
-          return true;
+          
+return true;
         }
 
         return false;
       } catch (err) {
         console.error(`Error deleting contract ${id}:`, err);
         setError(err instanceof Error ? err.message : 'Failed to delete contract');
-        return false;
+        
+return false;
       }
     },
     [loadContracts]
@@ -269,7 +276,8 @@ export const useContracts = (initialFilters?: Partial<ContractFilters>): UseCont
         }
       } catch (err) {
         console.error(`Error fetching contract ${id}:`, err);
-        return null;
+        
+return null;
       }
     },
     []

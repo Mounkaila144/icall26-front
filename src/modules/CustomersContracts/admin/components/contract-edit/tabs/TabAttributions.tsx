@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
@@ -28,6 +28,7 @@ interface Contributor {
   type_label: string
   user: string | null
   attribution: string | null
+  payment_at: string | null
 }
 
 interface AttributionsData {
@@ -55,8 +56,7 @@ export default function TabAttributions({ contractId, t }: TabAttributionsProps)
   const [saving, setSaving] = useState(false)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
-  // Ref to get current edit values from the child component
-  const editValuesRef = useRef<Record<string, { user_id: number | null; attribution_id: number | null }>>({})
+  // Note: edit values are passed via static property on TabAttributionsEdit (see handleSaveAttributions)
 
   const fetchAttributions = useCallback(async () => {
     if (!contractId) return
@@ -144,6 +144,7 @@ export default function TabAttributions({ contractId, t }: TabAttributionsProps)
             onClick={() => {
               // Get values from the edit component via the static ref
               const currentValues = (TabAttributionsEdit as any)._currentValues || {}
+
               handleSaveAttributions(currentValues)
             }}
           >
@@ -221,7 +222,7 @@ export default function TabAttributions({ contractId, t }: TabAttributionsProps)
                 </TableCell>
               </TableRow>
             ) : null}
-            {data.contributors.map((c: any) => (
+            {data.contributors.map((c: Contributor) => (
               <TableRow key={c.id} hover>
                 <TableCell sx={{ fontWeight: 500 }}>{c.type_label}</TableCell>
                 <TableCell>{c.user || '—'}</TableCell>

@@ -28,6 +28,7 @@ export const usersGuardMenuConfig: ModuleMenuConfig = {
       },
       order: 10,
       module: 'UsersGuard',
+
       // permission: ['users.view'], // Décommenter pour activer les permissions
     },
     {
@@ -40,6 +41,7 @@ export const usersGuardMenuConfig: ModuleMenuConfig = {
       },
       order: 20,
       module: 'UsersGuard',
+
       // permission: ['roles.view'], // Décommenter pour activer les permissions
     },
   ],
@@ -58,6 +60,7 @@ export const usersGuardMenuConfig: ModuleMenuConfig = {
       order: 10,
       category: 'Sécurité',
       module: 'UsersGuard',
+
       // permission: ['settings.auth.manage'], // Décommenter pour activer les permissions
     },
     {
@@ -72,6 +75,7 @@ export const usersGuardMenuConfig: ModuleMenuConfig = {
       order: 20,
       category: 'Sécurité',
       module: 'UsersGuard',
+
       // permission: ['settings.security.manage'], // Décommenter pour activer les permissions
     },
     {
@@ -86,6 +90,7 @@ export const usersGuardMenuConfig: ModuleMenuConfig = {
       order: 30,
       category: 'Sécurité',
       module: 'UsersGuard',
+
       // permission: ['settings.security.manage'], // Décommenter pour activer les permissions
     },
   ],

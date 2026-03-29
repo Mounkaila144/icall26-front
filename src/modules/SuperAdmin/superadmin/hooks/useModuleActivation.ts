@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+
 import { activationService } from '../services/activationService';
 import type { ActivationRequest, ActivationResult } from '../../types/activation.types';
 
@@ -6,14 +7,19 @@ import type { ActivationRequest, ActivationResult } from '../../types/activation
  * Valeur de retour du hook useModuleActivation
  */
 export interface UseModuleActivationReturn {
+
   /** Fonction pour activer un module */
   activate: (request: ActivationRequest) => Promise<ActivationResult>;
+
   /** Si l'activation est en cours */
   isActivating: boolean;
+
   /** Résultat de la dernière activation */
   result: ActivationResult | null;
+
   /** Erreur de la dernière activation */
   error: Error | null;
+
   /** Réinitialiser l'état */
   reset: () => void;
 }
@@ -66,6 +72,7 @@ export function useModuleActivation(): UseModuleActivationReturn {
       return activationResult;
     } catch (err) {
       const errorObj = err instanceof Error ? err : new Error('Erreur inconnue');
+
       setError(errorObj);
 
       // Retourner un résultat d'échec
@@ -77,7 +84,8 @@ export function useModuleActivation(): UseModuleActivationReturn {
       };
 
       setResult(failedResult);
-      return failedResult;
+      
+return failedResult;
     } finally {
       setIsActivating(false);
     }

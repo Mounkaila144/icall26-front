@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { ColumnDef } from '@tanstack/react-table';
+
+import type { ColumnDef } from '@tanstack/react-table';
 import {
   Chip,
   Avatar,
@@ -14,6 +15,7 @@ import {
 } from '@mui/material';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+
 import { DataTable, StandardMobileCard } from '@/components/shared/DataTable';
 import type { DataTableConfig } from '@/components/shared/DataTable';
 import type { TenantModule } from '../../../types/module.types';
@@ -22,26 +24,37 @@ import type { TenantModule } from '../../../types/module.types';
  * Props du composant TenantModulesTable
  */
 interface TenantModulesTableProps {
+
   /** Liste des modules à afficher */
   modules: TenantModule[];
+
   /** Indique si les données sont en cours de chargement */
   loading?: boolean;
+
   /** Callback appelé lors du clic sur "Activer" */
   onActivate?: (module: TenantModule) => void;
+
   /** Callback appelé lors du clic sur "Désactiver" */
   onDeactivate?: (module: TenantModule) => void;
+
   /** Callback appelé lors du clic sur "Configurer" */
   onConfigure?: (module: TenantModule) => void;
+
   /** Callback appelé lors du clic sur "Voir détails" */
   onViewDetails?: (module: TenantModule) => void;
+
   /** Mode sélection batch activé */
   batchMode?: boolean;
+
   /** Modules sélectionnés */
   selectedModules?: Set<string>;
+
   /** Callback pour toggle la sélection */
   onToggleSelection?: (moduleName: string) => void;
+
   /** Type de tableau (actifs ou disponibles) */
   variant?: 'active' | 'available';
+
   /** Message si aucun module */
   emptyMessage?: string;
 }
@@ -94,10 +107,13 @@ const formatInstalledDate = (dateString: string | null): string => {
 
   try {
     const date = new Date(dateString);
-    return formatDistanceToNow(date, { addSuffix: true, locale: fr });
+
+    
+return formatDistanceToNow(date, { addSuffix: true, locale: fr });
   } catch (error) {
     console.error('Error formatting date:', error);
-    return '-';
+    
+return '-';
   }
 };
 
@@ -146,9 +162,9 @@ export function TenantModulesTable({
         accessorKey: 'displayName',
         header: 'Module',
         cell: ({ row }) => {
-          const module = row.original;
-          const avatarContent = module.icon || module.displayName.charAt(0).toUpperCase();
-          const isActive = module.tenantStatus.isActive;
+          const moduleData = row.original;
+          const avatarContent = moduleData.icon || moduleData.displayName.charAt(0).toUpperCase();
+          const isActive = moduleData.tenantStatus.isActive;
 
           return (
             <Stack direction="row" spacing={2} alignItems="center">
@@ -163,10 +179,10 @@ export function TenantModulesTable({
               </Avatar>
               <Box>
                 <Typography variant="body2" fontWeight={500}>
-                  {module.displayName}
+                  {moduleData.displayName}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {module.name}
+                  {moduleData.name}
                 </Typography>
               </Box>
             </Stack>
@@ -242,7 +258,9 @@ export function TenantModulesTable({
         header: 'Dépendances',
         cell: ({ getValue }) => {
           const deps = getValue() as string[];
-          return deps.length > 0 ? (
+
+          
+return deps.length > 0 ? (
             <Chip
               label={`${deps.length} dép.`}
               color="info"
@@ -276,8 +294,8 @@ export function TenantModulesTable({
       id: 'actions',
       header: 'Actions',
       cell: ({ row }) => {
-        const module = row.original;
-        const isActive = module.tenantStatus.isActive;
+        const moduleData = row.original;
+        const isActive = moduleData.tenantStatus.isActive;
 
         // En mode batch, pas d'actions individuelles
         if (batchMode) {
@@ -291,7 +309,7 @@ export function TenantModulesTable({
                 <IconButton
                   size="small"
                   color="default"
-                  onClick={() => onViewDetails(module)}
+                  onClick={() => onViewDetails(moduleData)}
                 >
                   <i className="ri-eye-line" />
                 </IconButton>
@@ -303,7 +321,7 @@ export function TenantModulesTable({
                 <IconButton
                   size="small"
                   color="success"
-                  onClick={() => onActivate(module)}
+                  onClick={() => onActivate(moduleData)}
                 >
                   <i className="ri-play-circle-line" />
                 </IconButton>
@@ -312,12 +330,12 @@ export function TenantModulesTable({
 
             {isActive && (
               <>
-                {module.hasConfig && onConfigure && (
+                {moduleData.hasConfig && onConfigure && (
                   <Tooltip title="Configurer">
                     <IconButton
                       size="small"
                       color="primary"
-                      onClick={() => onConfigure(module)}
+                      onClick={() => onConfigure(moduleData)}
                     >
                       <i className="ri-settings-3-line" />
                     </IconButton>
@@ -329,7 +347,7 @@ export function TenantModulesTable({
                     <IconButton
                       size="small"
                       color="error"
-                      onClick={() => onDeactivate(module)}
+                      onClick={() => onDeactivate(moduleData)}
                     >
                       <i className="ri-stop-circle-line" />
                     </IconButton>

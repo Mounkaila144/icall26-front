@@ -31,6 +31,19 @@ import { useAuth } from '@/modules/UsersGuard/admin/hooks/useAuth'
 // Util Imports
 import { getLocalizedUrl } from '@/utils/i18n'
 
+/** Get user initials (max 2 characters) from username */
+const getInitials = (name?: string): string => {
+  if (!name) return '?'
+
+  const parts = name.trim().split(/\s+/)
+
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase()
+  }
+
+  return name.slice(0, 2).toUpperCase()
+}
+
 // Styled component for badge content
 const BadgeContentSpan = styled('span')({
   width: 8,
@@ -94,10 +107,12 @@ const UserDropdown = () => {
         <Avatar
           ref={anchorRef}
           alt={user?.username || ''}
-          src={'/images/avatars/1.png'}
           onClick={handleDropdownOpen}
           className='cursor-pointer bs-[38px] is-[38px]'
-        />
+          sx={{ bgcolor: 'primary.main', fontSize: '0.875rem', fontWeight: 600 }}
+        >
+          {getInitials(user?.username)}
+        </Avatar>
       </Badge>
       <Popper
         open={open}
@@ -121,7 +136,12 @@ const UserDropdown = () => {
               <ClickAwayListener onClickAway={e => handleDropdownClose(e as MouseEvent | TouchEvent)}>
                 <MenuList>
                   <div className='flex items-center plb-2 pli-4 gap-2' tabIndex={-1}>
-                    <Avatar alt={user?.username || ''} src={user?.avatar || ''} />
+                    <Avatar
+                      alt={user?.username || ''}
+                      sx={{ bgcolor: 'primary.main', fontSize: '0.875rem', fontWeight: 600 }}
+                    >
+                      {getInitials(user?.username)}
+                    </Avatar>
                     <div className='flex items-start flex-col'>
                       <Typography variant='body2' className='font-medium' color='text.primary'>
                         {user?.username || ''}

@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+
 import { useTenant } from '@/shared/lib/tenant-context';
 import { menuService } from '../services/menuService';
-import type { MenuItem, MenuFormData, MenuReorderItem } from '../../types';
+import type { MenuItem, MenuFormData } from '../../types';
 
 /**
  * Hook to manage menus with CRUD operations
@@ -20,15 +21,14 @@ export const useMenus = () => {
    */
   const fetchMenus = useCallback(async () => {
     try {
-      console.log('📡 [useMenus] Fetching menus, tenantId:', tenantId);
       setIsLoading(true);
       setError(null);
       const data = await menuService.getMenuTree(tenantId || undefined);
-      console.log('✅ [useMenus] Fetched', data?.length, 'root menus');
+
       setMenus(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch menus';
-      console.error('❌ [useMenus] Fetch error:', err);
+
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -42,9 +42,11 @@ export const useMenus = () => {
     try {
       setError(null);
       const data = await menuService.getMenusFlat(tenantId || undefined);
+
       setFlatMenus(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch flat menus';
+
       setError(errorMessage);
     }
   }, [tenantId]);
@@ -57,12 +59,16 @@ export const useMenus = () => {
       try {
         setError(null);
         const newMenu = await menuService.createMenu(data, tenantId || undefined);
+
         await fetchMenus(); // Refresh list
-        return newMenu;
+        
+return newMenu;
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to create menu';
+
         setError(errorMessage);
-        return null;
+        
+return null;
       }
     },
     [tenantId, fetchMenus]
@@ -76,12 +82,16 @@ export const useMenus = () => {
       try {
         setError(null);
         const updatedMenu = await menuService.updateMenu(id, data, tenantId || undefined);
+
         await fetchMenus(); // Refresh list
-        return updatedMenu;
+        
+return updatedMenu;
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to update menu';
+
         setError(errorMessage);
-        return null;
+        
+return null;
       }
     },
     [tenantId, fetchMenus]
@@ -96,11 +106,14 @@ export const useMenus = () => {
         setError(null);
         await menuService.deleteMenu(id, tenantId || undefined);
         await fetchMenus(); // Refresh list
-        return true;
+        
+return true;
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to delete menu';
+
         setError(errorMessage);
-        return false;
+        
+return false;
       }
     },
     [tenantId, fetchMenus]
@@ -116,11 +129,14 @@ export const useMenus = () => {
         setError(null);
         await menuService.toggleVisibility(id, currentVisibility, tenantId || undefined);
         await fetchMenus(); // Refresh list
-        return true;
+        
+return true;
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to toggle visibility';
+
         setError(errorMessage);
-        return false;
+        
+return false;
       }
     },
     [tenantId, fetchMenus]
@@ -135,11 +151,14 @@ export const useMenus = () => {
         setError(null);
         await menuService.toggleActive(id, currentActive, tenantId || undefined);
         await fetchMenus(); // Refresh list
-        return true;
+        
+return true;
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to toggle active state';
+
         setError(errorMessage);
-        return false;
+        
+return false;
       }
     },
     [tenantId, fetchMenus]
@@ -154,11 +173,14 @@ export const useMenus = () => {
         setError(null);
         await menuService.moveMenu(id, parentId, tenantId || undefined);
         await fetchMenus(); // Refresh list
-        return true;
+        
+return true;
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to move menu';
+
         setError(errorMessage);
-        return false;
+        
+return false;
       }
     },
     [tenantId, fetchMenus]
@@ -174,15 +196,8 @@ export const useMenus = () => {
 
   // Initial fetch - Run only once on mount
   useEffect(() => {
-    const mountId = Math.random().toString(36).substr(2, 9);
-    console.log(`🟢 [useMenus] MOUNTED - ID: ${mountId}, tenantId: ${tenantId}`);
-
     fetchMenus();
     fetchFlatMenus();
-
-    return () => {
-      console.log(`🔴 [useMenus] UNMOUNTED - ID: ${mountId}`);
-    };
   }, []); // Empty dependency array - fetch only on mount
 
   return {
@@ -215,9 +230,11 @@ export const useMenu = (id: string) => {
         setIsLoading(true);
         setError(null);
         const data = await menuService.getMenuById(id, tenantId || undefined);
+
         setMenu(data);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to fetch menu';
+
         setError(errorMessage);
       } finally {
         setIsLoading(false);

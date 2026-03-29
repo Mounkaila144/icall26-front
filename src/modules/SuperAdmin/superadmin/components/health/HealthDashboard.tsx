@@ -1,7 +1,9 @@
 'use client';
 
 import React from 'react';
+
 import { Box, Grid, Skeleton, Alert } from '@mui/material';
+
 import { useSystemHealth } from '../../hooks/useSystemHealth';
 import { HealthStatusCard } from './HealthStatusCard';
 import { ModuleUsageChart } from './ModuleUsageChart';
@@ -13,10 +15,13 @@ import { ActivityTimeline } from './ActivityTimeline';
  * Props du composant HealthDashboard
  */
 interface HealthDashboardProps {
+
   /** Callback au clic sur un tenant */
   onTenantClick?: (tenantId: number) => void;
+
   /** Active le rafraîchissement automatique */
   autoRefresh?: boolean;
+
   /** Intervalle de rafraîchissement en ms */
   refreshInterval?: number;
 }

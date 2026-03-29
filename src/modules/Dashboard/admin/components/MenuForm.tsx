@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+
 import { useMenus } from '../hooks/useMenus';
 import type { MenuFormData, MenuItem } from '../../types';
 
@@ -56,6 +57,7 @@ export const MenuForm: React.FC<MenuFormProps> = ({ menu, onSuccess, onCancel })
 
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
+
       setFormData((prev) => ({
         ...prev,
         [name]: checked,
@@ -87,6 +89,7 @@ export const MenuForm: React.FC<MenuFormProps> = ({ menu, onSuccess, onCancel })
       if (menu) {
         // Update existing menu
         const updated = await updateMenu(menu.id, formData);
+
         if (updated) {
           onSuccess?.();
         } else {
@@ -95,6 +98,7 @@ export const MenuForm: React.FC<MenuFormProps> = ({ menu, onSuccess, onCancel })
       } else {
         // Create new menu
         const created = await createMenu(formData);
+
         if (created) {
           // Reset form
           setFormData({

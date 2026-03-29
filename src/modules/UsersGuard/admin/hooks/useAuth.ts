@@ -2,10 +2,13 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+
 import { useRouter } from 'next/navigation';
+
+import type { AxiosError } from 'axios';
+
 import { adminAuthService } from '../services/authService';
 import type { AuthState, LoginCredentials } from '../../types/auth.types';
-import type { AxiosError } from 'axios';
 import { usePermissionsOptional } from '@/shared/contexts/PermissionsContext';
 import { extractPermissionsFromLogin } from '@/shared/lib/permissions/extractPermissions';
 import { isTokenExpired, isTokenExpiringSoon } from '@/shared/lib/api-client';
@@ -62,6 +65,7 @@ export const useAuth = (): UseAuthReturn => {
         const user = adminAuthService.getStoredUser();
         const tenantStr = localStorage.getItem('tenant');
         let tenant = null;
+
         if (tenantStr) {
             try {
                 tenant = JSON.parse(tenantStr);
@@ -86,8 +90,10 @@ export const useAuth = (): UseAuthReturn => {
         if (!isTokenExpiringSoon(false)) return;
 
         refreshingRef.current = true;
+
         try {
             const newToken = await adminAuthService.refreshToken();
+
             if (newToken) {
                 setState(prev => ({ ...prev, token: newToken }));
             }
@@ -108,6 +114,7 @@ export const useAuth = (): UseAuthReturn => {
                 proactiveRefresh();
             }
         };
+
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
         return () => {
@@ -136,16 +143,8 @@ export const useAuth = (): UseAuthReturn => {
                 // Extract and store permissions (NO additional API request!)
                 if (permissionsContext) {
                     const permissions = extractPermissionsFromLogin(response);
-                    permissionsContext.setPermissions(permissions);
 
-                    console.log('[useAuth] Permissions extracted:', {
-                        total_permissions: permissions.permissions.length,
-                        groups: permissions.groups,
-                        is_admin: permissions.is_admin,
-                        is_superadmin: permissions.is_superadmin,
-                    });
-                } else {
-                    console.warn('[useAuth] PermissionsContext not available, skipping permissions extraction');
+                    permissionsContext.setPermissions(permissions);
                 }
 
                 router.push('/admin/users');
@@ -174,8 +173,8 @@ export const useAuth = (): UseAuthReturn => {
 
         try {
             await adminAuthService.logout();
-        } catch (err) {
-            console.error('Logout error:', err);
+        } catch {
+            // Logout failed; proceed with local cleanup
         } finally {
             // Clear permissions
             if (permissionsContext) {
@@ -193,6 +192,7 @@ export const useAuth = (): UseAuthReturn => {
             // Get current locale from URL
             const currentPath = window.location.pathname;
             const locale = currentPath.split('/')[1] || 'en';
+
             router.push(`/${locale}/login`);
         }
     }, [router, permissionsContext]);
@@ -203,9 +203,9 @@ export const useAuth = (): UseAuthReturn => {
 
         try {
             const user = await adminAuthService.getCurrentUser();
+
             setState(prev => ({ ...prev, user }));
         } catch (err) {
-            console.error('Failed to refresh user:', err);
             if ((err as AxiosError).response?.status === 401) {
                 await logout();
             }

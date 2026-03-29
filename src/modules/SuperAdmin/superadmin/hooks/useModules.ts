@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+
 import { moduleService } from '../services/moduleService';
 import type { Module } from '../../types/module.types';
 
@@ -8,12 +9,16 @@ import type { Module } from '../../types/module.types';
  * Interface de retour du hook useModules
  */
 interface UseModulesReturn {
+
   /** Liste des modules chargés */
   modules: Module[];
+
   /** Indique si les données sont en cours de chargement */
   loading: boolean;
+
   /** Erreur survenue lors du chargement */
   error: Error | null;
+
   /** Fonction pour recharger les modules */
   refresh: () => Promise<void>;
 }
@@ -56,6 +61,7 @@ export function useModules(): UseModulesReturn {
       }
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Erreur lors du chargement des modules');
+
       setError(error);
       console.error('Error in useModules:', error);
       setModules([]); // Garantir un tableau vide en cas d'erreur

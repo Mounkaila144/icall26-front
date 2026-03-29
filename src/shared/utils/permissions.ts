@@ -1,4 +1,4 @@
-import { User, Permission } from '@/modules/UsersGuard';
+import type { User, Permission } from '@/modules/UsersGuard';
 
 /**
  * Extract permission slugs from user
@@ -31,7 +31,9 @@ export function getUserPermissions(user: User | null): string[] {
  */
 export function userHasPermission(user: User | null, permission: string): boolean {
   const userPermissions = getUserPermissions(user);
-  return userPermissions.includes(permission);
+
+  
+return userPermissions.includes(permission);
 }
 
 /**
@@ -39,7 +41,9 @@ export function userHasPermission(user: User | null, permission: string): boolea
  */
 export function userHasAllPermissions(user: User | null, permissions: string[]): boolean {
   const userPermissions = getUserPermissions(user);
-  return permissions.every((permission) => userPermissions.includes(permission));
+
+  
+return permissions.every((permission) => userPermissions.includes(permission));
 }
 
 /**
@@ -47,5 +51,7 @@ export function userHasAllPermissions(user: User | null, permissions: string[]):
  */
 export function userHasAnyPermission(user: User | null, permissions: string[]): boolean {
   const userPermissions = getUserPermissions(user);
-  return permissions.some((permission) => userPermissions.includes(permission));
+
+  
+return permissions.some((permission) => userPermissions.includes(permission));
 }

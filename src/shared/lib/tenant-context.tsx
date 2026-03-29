@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useContext, ReactNode, useState, useEffect, useMemo, useCallback } from 'react';
+import type { ReactNode} from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 
 interface TenantContextType {
     tenantId: string | null;
@@ -16,12 +17,10 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     const [domain, setDomainState] = useState<string | null>(null);
 
     const setTenantId = useCallback((id: string | null) => {
-        console.log('🏢 [TenantProvider] setTenantId called:', id);
         setTenantIdState(id);
     }, []);
 
     const setDomain = useCallback((d: string | null) => {
-        console.log('🌐 [TenantProvider] setDomain called:', d);
         setDomainState(d);
     }, []);
 
@@ -31,9 +30,8 @@ export function TenantProvider({ children }: { children: ReactNode }) {
             const storedTenantId = localStorage.getItem('tenant_id');
             const storedDomain = localStorage.getItem('tenant_domain');
 
-            console.log('🔄 [TenantProvider] Loading from storage:', { storedTenantId, storedDomain });
-
             if (storedTenantId) setTenantId(storedTenantId);
+
             if (storedDomain) {
                 setDomain(storedDomain);
             } else {
@@ -71,8 +69,6 @@ export function TenantProvider({ children }: { children: ReactNode }) {
         setDomain
     }), [tenantId, domain, setTenantId, setDomain]);
 
-    console.log('🔁 [TenantProvider] Rendering with:', { tenantId, domain });
-
     return (
         <TenantContext.Provider value={value}>
             {children}
@@ -82,8 +78,11 @@ export function TenantProvider({ children }: { children: ReactNode }) {
 
 export const useTenant = () => {
     const context = useContext(TenantContext);
+
     if (!context) {
         throw new Error('useTenant must be used within TenantProvider');
     }
-    return context;
+
+    
+return context;
 };

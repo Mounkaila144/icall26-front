@@ -1,4 +1,11 @@
 {
+  "Users": "Utilisateurs",
+  "Customers": "Clients",
+  "Contract": "Contrats",
+  "Meeting": "Réunions",
+  "Configuration": "Configuration",
+  "Sites": "Sites",
+  "Services": "Services",
   "Save": "Enregistrer",
   "Cancel": "Annuler",
   "Delete": "Supprimer",

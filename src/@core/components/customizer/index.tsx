@@ -138,7 +138,10 @@ const Customizer = ({ breakpoint = 'lg', dir = 'ltr', disableDirection = false }
 
   const breakpointReached = useMedia(`(max-width: ${breakpointValue})`, false)
   const isMobileScreen = useMedia('(max-width: 600px)', false)
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const isBelowLgScreen = useMedia('(max-width: 1200px)', false)
+
   const isColorFromPrimaryConfig = primaryColorConfig.find(item => item.main === settings.primaryColor)
 
   // Use native scroll for better performance

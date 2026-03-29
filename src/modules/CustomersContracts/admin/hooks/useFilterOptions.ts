@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+
 import { contractsService } from '../services/contractsService'
 import type { ContractFilterOptions } from '../../types'
 

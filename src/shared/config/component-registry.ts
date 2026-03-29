@@ -5,7 +5,7 @@
  * This is required because Next.js webpack cannot resolve dynamic imports with template literals
  */
 
-import { ComponentType } from 'react'
+import type { ComponentType } from 'react'
 
 // Import all admin components
 import CustomersComponent from '@/modules/Customers/admin/components/Customers'

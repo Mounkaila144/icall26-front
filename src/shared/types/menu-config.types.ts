@@ -23,6 +23,7 @@ export type UserRole = 'admin' | 'superadmin';
  * Use this to define menus in your module's menu.config.ts file
  */
 export interface MenuConfig {
+
   /** Unique identifier for the menu */
   id: string;
 
@@ -68,6 +69,7 @@ export interface MenuConfig {
  * Export this from your module's menu.config.ts
  */
 export interface ModuleMenuConfig {
+
   /** Module name */
   module: string;
 

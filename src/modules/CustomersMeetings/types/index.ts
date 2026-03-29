@@ -126,6 +126,7 @@ export interface MeetingHistory {
 
 export interface DomoprimeRequest {
   id?: number
+
   // Fiscal
   revenue?: number
   number_of_people?: number
@@ -133,6 +134,7 @@ export interface DomoprimeRequest {
   number_of_fiscal?: number
   number_of_parts?: number
   declarants?: string
+
   // Surfaces
   surface_home?: number
   surface_wall?: number
@@ -141,15 +143,18 @@ export interface DomoprimeRequest {
   surface_ite?: number
   parcel_surface?: number
   parcel_reference?: string
+
   // Habitat
   more_2_years?: 'YES' | 'NO'
   build_year?: string
+
   // FK IDs
   energy_id?: number | null
   previous_energy_id?: number | null
   occupation_id?: number | null
   layer_type_id?: number | null
   pricing_id?: number | null
+
   // Related entities
   energy?: NamedRelation | null
   previous_energy?: NamedRelation | null
@@ -323,6 +328,7 @@ export interface MeetingHistoryResponse {
 // ----------------------------------------------------------------------------
 
 export interface MeetingFilters {
+
   // Search
   search_lastname?: string
   search_phone?: string

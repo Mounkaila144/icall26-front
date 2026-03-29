@@ -1,16 +1,13 @@
 import { createApiClient } from '@/shared/lib/api-client';
-import {
+import type {
   Site,
-  SiteListItem,
   CreateSiteData,
   UpdateSiteData,
   SiteFilters,
   SitesListResponse,
   SiteResponse,
   ToggleAvailabilityData,
-  TestConnectionResult,
-} from '../../types/site.types';
-import { ApiResponse } from '@/shared/types/api.types';
+  TestConnectionResult} from '../../types/site.types';
 
 /**
  * Service pour gérer les sites (Superadmin uniquement)
@@ -36,7 +33,9 @@ class SiteService {
     if (filters?.page) params.page = filters.page;
 
     const response = await client.get<SitesListResponse>('/superadmin/sites', { params });
-    return response.data;
+
+    
+return response.data;
   }
 
   /**
@@ -45,7 +44,9 @@ class SiteService {
   async getSite(id: number): Promise<Site> {
     const client = createApiClient();
     const response = await client.get<SiteResponse>(`/superadmin/sites/${id}`);
-    return response.data.data;
+
+    
+return response.data.data;
   }
 
   /**
@@ -55,10 +56,13 @@ class SiteService {
     const client = createApiClient();
 
     // Retirer site_access_restricted de la requête de création (pas supporté par le backend)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { site_access_restricted, ...payload } = data as any;
 
     const response = await client.post<SiteResponse>('/superadmin/sites', payload);
-    return response.data.data;
+
+    
+return response.data.data;
   }
 
   /**
@@ -68,10 +72,13 @@ class SiteService {
     const client = createApiClient();
 
     // Retirer site_access_restricted de la requête de mise à jour (pas supporté par le backend)
-    const { site_access_restricted, ...payload } = data as any;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { site_access_restricted: _unused, ...payload } = data as any;
 
     const response = await client.put<SiteResponse>(`/superadmin/sites/${id}`, payload);
-    return response.data.data;
+
+    
+return response.data.data;
   }
 
   /**
@@ -79,6 +86,7 @@ class SiteService {
    */
   async deleteSite(id: number, deleteDatabase: boolean = false): Promise<void> {
     const client = createApiClient();
+
     await client.delete(`/superadmin/sites/${id}`, {
       params: { delete_database: deleteDatabase },
     });
@@ -90,7 +98,9 @@ class SiteService {
   async testConnection(id: number): Promise<TestConnectionResult> {
     const client = createApiClient();
     const response = await client.post<TestConnectionResult>(`/superadmin/sites/${id}/test-connection`);
-    return response.data;
+
+    
+return response.data;
   }
 
   /**
@@ -99,7 +109,9 @@ class SiteService {
   async updateDatabaseSize(id: number): Promise<Site> {
     const client = createApiClient();
     const response = await client.post<SiteResponse>(`/superadmin/sites/${id}/update-size`);
-    return response.data.data;
+
+    
+return response.data.data;
   }
 
 
@@ -108,6 +120,7 @@ class SiteService {
    */
   async toggleAvailability(data: ToggleAvailabilityData): Promise<void> {
     const client = createApiClient();
+
     await client.post('/superadmin/sites/toggle-availability', data);
   }
 
@@ -116,10 +129,13 @@ class SiteService {
    */
   async activateSite(id: number): Promise<{ success: boolean; message: string; output?: string }> {
     const client = createApiClient();
+
     const response = await client.post<{ success: boolean; message: string; data?: Site; output?: string }>(
       `/superadmin/sites/${id}/activate`
     );
-    return response.data;
+
+    
+return response.data;
   }
 }
 

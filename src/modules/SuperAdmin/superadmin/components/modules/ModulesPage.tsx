@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
+
 import { useRouter, useSearchParams } from 'next/navigation';
+
 import {
   Box,
   Typography,
@@ -12,6 +14,7 @@ import {
   Alert,
   Button,
 } from '@mui/material';
+
 import { useModules } from '../../hooks/useModules';
 import { ModuleCard } from './ModuleCard';
 import { ModulesTable } from './ModulesTable';
@@ -38,6 +41,7 @@ export function ModulesPage() {
 
   // État local pour l'UI
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
+
   const [filters, setFilters] = useState<IModuleFilters>(() => {
     // Restaurer les filtres depuis l'URL au chargement
     return searchParams ? queryParamsToFilters(searchParams) : defaultFilters;
@@ -49,6 +53,7 @@ export function ModulesPage() {
       const params = filtersToQueryParams(filters);
       const queryString = new URLSearchParams(params).toString();
       const newUrl = queryString ? `?${queryString}` : window.location.pathname;
+
       router.replace(newUrl, { scroll: false });
     }
   }, [filters, router]);
@@ -128,6 +133,7 @@ export function ModulesPage() {
 
       {/* Contenu selon le mode de vue */}
       {viewMode === 'grid' ? (
+
         // Vue en grille
         <Grid container spacing={3}>
           {filteredModules.map((module) => (
@@ -142,6 +148,7 @@ export function ModulesPage() {
           )}
         </Grid>
       ) : (
+
         // Vue en tableau
         <ModulesTable modules={filteredModules} loading={loading} onViewDetails={handleViewDetails} />
       )}

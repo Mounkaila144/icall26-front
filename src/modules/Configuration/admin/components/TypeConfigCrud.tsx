@@ -79,6 +79,7 @@ export default function TypeConfigCrud({ baseUrl: baseUrlProp, title: titleProp 
     try {
       setLoading(true)
       setError(null)
+
       const res = await apiClient.get<{ success: boolean; data: TypeItem[] }>(baseUrl, {
         params: { lang: 'fr' },
       })

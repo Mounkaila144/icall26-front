@@ -7,6 +7,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+
 import { contractsService } from '../services/contractsService';
 import type {
   CustomerContract,
@@ -15,6 +16,7 @@ import type {
 } from '../../types';
 
 interface UseContractReturn {
+
   // Data
   contract: CustomerContract | null;
   history: ContractHistory[];
@@ -48,7 +50,8 @@ export const useContract = (contractId: number | null): UseContractReturn => {
   const loadContract = useCallback(async () => {
     if (!contractId) {
       setLoading(false);
-      return;
+      
+return;
     }
 
     try {
@@ -86,6 +89,7 @@ export const useContract = (contractId: number | null): UseContractReturn => {
       }
     } catch (err) {
       console.error(`Error loading contract ${contractId} history:`, err);
+
       // Don't set error state for history, as it's not critical
     } finally {
       setHistoryLoading(false);
@@ -111,16 +115,19 @@ export const useContract = (contractId: number | null): UseContractReturn => {
 
         if (response.success) {
           setContract(response.data);
+
           // Reload history after update
           await loadHistory();
-          return true;
+          
+return true;
         }
 
         return false;
       } catch (err) {
         console.error(`Error updating contract ${contractId}:`, err);
         setError(err instanceof Error ? err.message : 'Failed to update contract');
-        return false;
+        
+return false;
       }
     },
     [contractId, loadHistory]

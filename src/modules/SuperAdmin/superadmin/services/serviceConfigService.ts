@@ -38,7 +38,9 @@ class ServiceConfigService {
       }
 
       const response = await client.get<ConfigResponse<T>>(endpoint);
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error fetching ${service} config:`, error);
       throw error;
@@ -66,7 +68,9 @@ class ServiceConfigService {
       }
 
       const response = await client.put<ConfigResponse<T>>(endpoint, config);
-      return response.data;
+
+      
+return response.data;
     } catch (error) {
       console.error(`Error updating ${service} config:`, error);
       throw error;

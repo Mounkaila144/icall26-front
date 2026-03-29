@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
+
 import {
   useReactTable,
   getCoreRowModel,
@@ -53,7 +54,6 @@ export function DataTable<TData extends Record<string, any>>(props: DataTableCon
     showColumnFilters = false,
     onToggleColumnFilters,
     columnFilters,
-    onColumnFilterChange,
     onClearAllFilters,
     createColumnFilter,
     emptyMessage = 'No data available',
@@ -67,6 +67,7 @@ export function DataTable<TData extends Record<string, any>>(props: DataTableCon
 
   // Local states
   const [rowSelection, setRowSelection] = useState({})
+
   const [localColumnVisibility, setLocalColumnVisibility] = useState<Record<string, boolean>>(
     externalColumnVisibility || {}
   )

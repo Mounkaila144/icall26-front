@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+
 import { useSearchParams } from 'next/navigation'
 
 import Box from '@mui/material/Box'
@@ -31,11 +32,15 @@ export default function MeetingsList() {
   // already includes persisted filters (avoids race condition with hydration effect)
   const initialBackendFilters = useMemo(() => {
     const mapped: Record<string, any> = {}
+
     for (const [key, value] of Object.entries(initialSidebarFilters)) {
       const backendKey = COLUMN_TO_BACKEND_FILTER[key]
+
       if (backendKey && value) mapped[backendKey] = value
     }
-    return mapped
+
+    
+return mapped
   }, [initialSidebarFilters])
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -52,12 +57,10 @@ export default function MeetingsList() {
   const {
     columns, permittedColumns, columnVisibility, columnFilters, showFilters,
     isEditModalOpen, selectedMeetingId, hasCredential, t,
-    smsDialogMeetingId, emailDialogMeetingId, commentDialogMeetingId,
-    notification, showNotification, handleCloseNotification,
+    notification, handleCloseNotification,
     handleColumnVisibilityChange, handleClearAllFilters, handleToggleFilters,
     handleSearch, handleEdit, handleDelete, handleColumnFilterChange,
     handleCloseEditModal, createColumnFilter,
-    handleCloseSmsDialog, handleCloseEmailDialog, handleCloseCommentDialog,
   } = useMeetingListState({ loading, deleteMeeting, updateMeeting, refreshMeetings, updateFilter, clearFilters, permittedFields, filterOptions, initialSidebarFilters })
 
   const tableConfig: DataTableConfig<CustomerMeeting> = {

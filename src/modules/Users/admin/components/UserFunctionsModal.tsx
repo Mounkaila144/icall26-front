@@ -1,8 +1,6 @@
 'use client'
 
 // React Imports
-import { Fragment } from 'react'
-
 // MUI Imports
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'

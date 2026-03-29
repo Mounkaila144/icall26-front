@@ -111,6 +111,7 @@ export default function SuperAdminPage() {
 
   // Build the route key from slug
   const slugArray = params?.slug as string[] | undefined
+
   const routeKey = useMemo(() => {
     return slugArray?.join('/') || ''
   }, [slugArray])

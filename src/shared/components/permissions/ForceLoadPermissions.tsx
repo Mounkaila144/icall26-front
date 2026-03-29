@@ -7,10 +7,11 @@
  * Useful when user was logged in before permissions system was installed
  */
 
+import { useState } from 'react'
+
 import { usePermissionsOptional } from '@/shared/contexts/PermissionsContext'
 import { useAuth } from '@/modules/UsersGuard'
 import { extractPermissionsFromLogin } from '@/shared/lib/permissions/extractPermissions'
-import { useState } from 'react'
 
 export function ForceLoadPermissions() {
   const permissionsContext = usePermissionsOptional()
@@ -34,7 +35,8 @@ export function ForceLoadPermissions() {
           message: 'User data not found in localStorage. Please log out and log in again.',
         })
         setLoading(false)
-        return
+        
+return
       }
 
       const userData = JSON.parse(storedUser)
@@ -47,7 +49,8 @@ export function ForceLoadPermissions() {
             'User data does not contain groups. The backend may not be sending groups in the login response.',
         })
         setLoading(false)
-        return
+        
+return
       }
 
       // Reconstruct login response format

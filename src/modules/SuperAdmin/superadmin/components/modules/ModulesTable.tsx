@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { ColumnDef } from '@tanstack/react-table';
+
+import type { ColumnDef } from '@tanstack/react-table';
 import { Chip, Avatar, IconButton, Tooltip, Box, Stack, Typography } from '@mui/material';
+
 import { DataTable, StandardMobileCard } from '@/components/shared/DataTable';
 import type { DataTableConfig } from '@/components/shared/DataTable';
 import type { Module } from '../../../types/module.types';
@@ -11,10 +13,13 @@ import type { Module } from '../../../types/module.types';
  * Props du composant ModulesTable
  */
 interface ModulesTableProps {
+
   /** Liste des modules à afficher */
   modules: Module[];
+
   /** Indique si les données sont en cours de chargement */
   loading?: boolean;
+
   /** Callback appelé lors du clic sur "Voir détails" */
   onViewDetails?: (module: Module) => void;
 }
@@ -81,14 +86,14 @@ export function ModulesTable({ modules, loading = false, onViewDetails }: Module
         accessorKey: 'displayName',
         header: 'Nom',
         cell: ({ row }) => {
-          const module = row.original;
-          const avatarContent = module.icon || module.displayName.charAt(0).toUpperCase();
+          const moduleData = row.original;
+          const avatarContent = moduleData.icon || moduleData.displayName.charAt(0).toUpperCase();
 
           return (
             <Stack direction="row" spacing={2} alignItems="center">
               <Avatar
                 sx={{
-                  bgcolor: module.enabled ? 'primary.main' : 'grey.400',
+                  bgcolor: moduleData.enabled ? 'primary.main' : 'grey.400',
                   width: 36,
                   height: 36,
                 }}
@@ -97,10 +102,10 @@ export function ModulesTable({ modules, loading = false, onViewDetails }: Module
               </Avatar>
               <Box>
                 <Typography variant="body2" fontWeight={500}>
-                  {module.displayName}
+                  {moduleData.displayName}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {module.name}
+                  {moduleData.name}
                 </Typography>
               </Box>
             </Stack>
@@ -136,7 +141,9 @@ export function ModulesTable({ modules, loading = false, onViewDetails }: Module
         header: 'Statut',
         cell: ({ getValue }) => {
           const enabled = getValue() as boolean;
-          return (
+
+          
+return (
             <Chip
               label={enabled ? 'Activé' : 'Désactivé'}
               color={enabled ? 'success' : 'default'}
@@ -152,7 +159,9 @@ export function ModulesTable({ modules, loading = false, onViewDetails }: Module
         header: 'Dépendances',
         cell: ({ getValue }) => {
           const deps = getValue() as string[];
-          return deps.length > 0 ? (
+
+          
+return deps.length > 0 ? (
             <Chip
               label={`${deps.length} dép.`}
               color="info"

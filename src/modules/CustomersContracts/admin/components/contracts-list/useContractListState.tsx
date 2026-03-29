@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef, type SyntheticEvent } from 'react'
+
 import { createColumnHelper } from '@tanstack/react-table'
 import type { ColumnDef } from '@tanstack/react-table'
 
@@ -28,18 +29,21 @@ export const COLUMN_TO_BACKEND_FILTER: Record<string, string> = {
   customer_phone:    'search_phone',
   customer_city:     'search_city',
   customer_postcode: 'postcode',
+
   // Status columns (select dropdowns)
   contract_status:   'state_id',
   install_status:    'install_state_id',
   admin_status:      'admin_status_id',
   opc_status:        'opc_status_id',
   time_status:       'time_state_id',
+
   // User columns (select dropdowns)
   sale1:             'sale_1_id',
   sale2:             'sale_2_id',
   telepro:           'telepro_id',
   assistant:         'assistant_id',
   creator:           'created_by_id',
+
   // Entity columns (select dropdowns)
   team:              'team_id',
   company:           'company_id',
@@ -47,6 +51,7 @@ export const COLUMN_TO_BACKEND_FILTER: Record<string, string> = {
   partner_layer:     'partner_layer_id',
   polluter:          'polluter_id',
   campaign:          'campaign_id',
+
   // Boolean columns (direct match)
   is_confirmed:      'is_confirmed',
   is_billable:       'is_billable',
@@ -56,16 +61,20 @@ export const COLUMN_TO_BACKEND_FILTER: Record<string, string> = {
   is_photo:          'is_photo',
   is_quality:        'is_quality',
   status:            'status',
+
   // Date column sub-filters (Symfony lines 374-395)
   opc_range_id:      'opc_range_id',
   sav_at_range_id:   'sav_at_range_id',
+
   // Date range filter (Symfony sidebar lines 3-77)
   date_from:         'date_from',
   date_to:           'date_to',
   date_type:         'date_type',
   date_null:         'date_null',
+
   // Customer column sub-filter (Symfony domoprime_status)
   domoprime_status:  'domoprime_status',
+
   // Domoprime sidebar filters (Symfony lines 78-116)
   energy_id:         'energy_id',
   sector_id:         'sector_id',
@@ -75,11 +84,13 @@ export const COLUMN_TO_BACKEND_FILTER: Record<string, string> = {
   quotation_is_signed:  'quotation_is_signed',
   document_is_signed:   'document_is_signed',
   surface_parcel_check: 'surface_parcel_check',
+
   // Sidebar text search filters
   sidebar_search:        'search_lastname',
   sidebar_phone:         'search_phone',
   sidebar_postcode:      'postcode',
   sidebar_city:          'search_city',
+
   // Sidebar text fields
   acces_1:               'acces_1',
   acces_2:               'acces_2',
@@ -88,6 +99,7 @@ export const COLUMN_TO_BACKEND_FILTER: Record<string, string> = {
   rapport_attribution:   'rapport_attribution',
   rapport_temps:         'rapport_temps',
   rapport_admin:         'rapport_admin',
+
   // Sidebar entity selects
   confirmateur_id:       'confirmateur_id',
   regie_callcenter:      'regie_callcenter',
@@ -105,15 +117,18 @@ interface UseContractListStateParams {
   refreshContracts: () => Promise<void>
   updateFilter: (key: string, value: any) => void
   clearFilters: () => void
+
   /** API-driven permitted field keys from backend meta.permitted_fields */
   permittedFields: Set<string>
+
   /** Server-populated filter dropdown options */
   filterOptions: ContractFilterOptions
+
   /** Sidebar filters read from URL search params (for persistence) */
   initialSidebarFilters?: Record<string, string>
 }
 
-export function useContractListState({ loading, deleteContract, updateContract, refreshContracts, updateFilter, clearFilters, permittedFields, filterOptions, initialSidebarFilters }: UseContractListStateParams) {
+export function useContractListState({ loading, deleteContract, refreshContracts, updateFilter, clearFilters, permittedFields, filterOptions, initialSidebarFilters }: UseContractListStateParams) {
   const { hasCredential } = usePermissions()
   const t = useContractTranslations()
 
@@ -129,6 +144,7 @@ export function useContractListState({ loading, deleteContract, updateContract, 
     if (action === 'email_installer' || action === 'email_partner') {
       setEmailDialogContractId(contractId)
     }
+
     // TODO: WhatsApp action — requires dedicated endpoint/dialog
   }, [])
 
@@ -141,7 +157,8 @@ export function useContractListState({ loading, deleteContract, updateContract, 
   const permittedColumns = useMemo<ContractColumnDef[]>(
     () => columnDefs.filter(col => {
       if (permittedFields.size === 0) return true
-      return permittedFields.has(col.id)
+      
+return permittedFields.has(col.id)
     }),
     [columnDefs, permittedFields]
   )
@@ -150,10 +167,12 @@ export function useContractListState({ loading, deleteContract, updateContract, 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedContractId, setSelectedContractId] = useState<number | null>(null)
+
   const [showFilters, setShowFilters] = useState(() => {
     // Auto-open sidebar if URL has persisted filters
     return !!initialSidebarFilters && Object.keys(initialSidebarFilters).length > 0
   })
+
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>(
     () => initialSidebarFilters ?? {}
   )
@@ -183,12 +202,14 @@ export function useContractListState({ loading, deleteContract, updateContract, 
 
   // On mount: sync URL-persisted sidebar filters to the backend
   const hasHydratedRef = useRef(false)
+
   useEffect(() => {
     if (hasHydratedRef.current || !initialSidebarFilters || Object.keys(initialSidebarFilters).length === 0) return
     hasHydratedRef.current = true
 
     for (const [columnId, value] of Object.entries(initialSidebarFilters)) {
       const backendParam = COLUMN_TO_BACKEND_FILTER[columnId]
+
       if (backendParam && value) {
         updateFilter(backendParam, value)
       }
@@ -266,9 +287,15 @@ export function useContractListState({ loading, deleteContract, updateContract, 
         case 'create_default_products': result = await contractsService.createDefaultProducts(contractId); break
 
         // Communication (open dialogs instead of calling API directly)
-        case 'send_sms':     setSmsDialogContractId(contractId); return
-        case 'send_email':   setEmailDialogContractId(contractId); return
-        case 'new_comment':  setCommentDialogContractId(contractId); return
+        case 'send_sms':     setSmsDialogContractId(contractId); 
+
+return
+        case 'send_email':   setEmailDialogContractId(contractId); 
+
+return
+        case 'new_comment':  setCommentDialogContractId(contractId); 
+
+return
 
         // Documents & Export (placeholders until backend is ready)
         case 'documents_form':
@@ -300,7 +327,8 @@ export function useContractListState({ loading, deleteContract, updateContract, 
   const handleColumnFilterChange = useCallback((columnId: string, value: string) => {
     setColumnFilters(prev => {
       if (value === '' || value === null || value === undefined) {
-        const { [columnId]: _, ...rest } = prev
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [columnId]: _removed, ...rest } = prev
 
         return rest
       }
@@ -357,6 +385,7 @@ export function useContractListState({ loading, deleteContract, updateContract, 
   const columns = useMemo<ColumnDef<CustomerContract, any>[]>(() => {
     // ID column gated by credential (Symfony: superadmin, admin, contract_view_list_id)
     const showId = hasCredential([['superadmin', 'admin', 'contract_view_list_id']])
+
     const idCols = showId ? [columnHelper.accessor('id', {
       id: 'id',
       header: '# ID',

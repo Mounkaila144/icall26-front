@@ -49,7 +49,9 @@ function statusCol(id: string, label: string, getStatus: (r: CustomerContract) =
     defaultVisible,
     getValue: r => {
       const s = getStatus(r)
-      return s?.value ?? s?.name
+
+      
+return s?.value ?? s?.name
     },
     renderCell: r => statusChip(getStatus(r))
   }
@@ -127,8 +129,10 @@ export function getColumnDefs(t: ContractTranslations, hasCredential: HasCredent
 
     textCol('prime_renov', t.colPrimeRenov, r => {
       const pr = r.prime_renov
+
       if (!pr?.reference) return null
-      return pr.amount ? `${pr.reference} — ${pr.amount} €` : pr.reference
+      
+return pr.amount ? `${pr.reference} — ${pr.amount} €` : pr.reference
     }, false),
     textCol('prime_renov_state1', t.colPrimeRenovState1, r => r.prime_renov?.state1, false),
     textCol('prime_renov_state2', t.colPrimeRenovState2, r => r.prime_renov?.state2, false),

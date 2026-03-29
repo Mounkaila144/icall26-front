@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+
 import { useTenant } from '@/shared/lib/tenant-context';
 import { userService } from '../services/userService';
 import type {
@@ -19,6 +20,7 @@ export const useUsers = (initialParams?: UserQueryParams) => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
+
   const [pagination, setPagination] = useState<PaginationMeta>({
     current_page: 1,
     total: 0,
@@ -27,12 +29,14 @@ export const useUsers = (initialParams?: UserQueryParams) => {
     from: null,
     to: null
   });
+
   const [statistics, setStatistics] = useState<UserStatistics>({
     total_users: 0,
     active_users: 0,
     inactive_users: 0,
     locked_users: 0
   });
+
   const [params, setParams] = useState<UserQueryParams>(
     initialParams || { page: 1, nbitemsbypage: 10 }
   );
@@ -108,6 +112,7 @@ export const useUsers = (initialParams?: UserQueryParams) => {
         setLoading(true);
         setError(null);
         await userService.deleteUser(userId, tenantId);
+
         // Refresh the list after deletion
         await fetchUsers();
       } catch (err) {

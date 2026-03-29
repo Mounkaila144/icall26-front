@@ -2,6 +2,7 @@
 import type { VerticalMenuDataType } from '@/types/menuTypes'
 import type { getDictionary } from '@/utils/getDictionary'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const verticalMenuData = (dictionary: Awaited<ReturnType<typeof getDictionary>>): VerticalMenuDataType[] => [
   // SuperAdmin Section
   {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useCallback, useState } from 'react'
+
 import { createColumnHelper } from '@tanstack/react-table'
 
 // MUI Imports
@@ -16,19 +17,22 @@ import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
 
 // Components
+import type { ColumnDef } from '@tanstack/react-table'
+
+import { formatDistanceToNow } from 'date-fns'
+
+import { fr } from 'date-fns/locale'
+
 import { DependencyGraph } from '@/modules/SuperAdmin/superadmin/components/modules/DependencyGraph'
 
 // Services & Types
 import type { SiteListItem } from '../../types/site.types'
-import type { ColumnDef } from '@tanstack/react-table'
 
 // Shared Components
 import { DataTable, StandardMobileCard } from '@/components/shared/DataTable'
 import type { DataTableConfig } from '@/components/shared/DataTable'
 
 // Date formatting
-import { formatDistanceToNow } from 'date-fns'
-import { fr } from 'date-fns/locale'
 
 // Column helper
 const columnHelper = createColumnHelper<SiteListItem>()
@@ -94,6 +98,7 @@ export default function SitesTable({
 
   const formatLastConnection = useCallback((date: string | null) => {
     if (!date) return 'Jamais'
+
     try {
       return formatDistanceToNow(new Date(date), { addSuffix: true, locale: fr })
     } catch {
@@ -156,7 +161,9 @@ export default function SitesTable({
         header: 'Type',
         cell: ({ row }) => {
           const typeInfo = getTypeLabel(row.original.type)
-          return <Chip label={typeInfo.label} size='small' color={typeInfo.color} />
+
+          
+return <Chip label={typeInfo.label} size='small' color={typeInfo.color} />
         }
       }),
       columnHelper.accessor('company', {

@@ -113,12 +113,12 @@ export default function TabBilling({ contractId, t }: TabBillingProps) {
             <TableCell align='right'>Crédit impôts</TableCell>
             <TableCell align='right'>Qmac</TableCell>
             <TableCell>Nombre de personne</TableCell>
-            <TableCell>Nombre d'enfants</TableCell>
-            <TableCell align='right'>Crédit d'impôt utilisé</TableCell>
+            <TableCell>Nombre d&apos;enfants</TableCell>
+            <TableCell align='right'>Crédit d&apos;impôt utilisé</TableCell>
             <TableCell align='right'>Reste à charge</TableCell>
             <TableCell align='right'>Credit limit</TableCell>
-            <TableCell align='right'>Reste à charge après crédit d'impôts</TableCell>
-            <TableCell align='right'>Crédit d'impots disponible</TableCell>
+            <TableCell align='right'>Reste à charge après crédit d&apos;impôts</TableCell>
+            <TableCell align='right'>Crédit d&apos;impots disponible</TableCell>
             <TableCell>Créé par</TableCell>
             <TableCell>Créé le</TableCell>
           </TableRow>

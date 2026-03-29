@@ -21,6 +21,7 @@ export { useDomoprimeIsoRequest } from './admin/hooks/useDomoprimeIsoRequest';
 
 // Type Exports
 export type {
+
   // Reference entities
   DomoprimeEnergy,
   DomoprimeClass,
@@ -73,6 +74,7 @@ export type {
   DomoprimeAssetResponse,
 
   // Filter options
+  FilterOption,
   DomoprimeFilterOptions,
   DomoprimeFilterOptionsResponse,
 } from './types';

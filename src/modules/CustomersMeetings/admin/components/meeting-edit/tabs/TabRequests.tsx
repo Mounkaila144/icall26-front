@@ -101,7 +101,8 @@ export default function TabRequests({ meetingId }: TabRequestsProps) {
 
   const formatNumber = (val: number | null | undefined) => {
     if (val === null || val === undefined) return '---'
-    return val.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 2 })
+    
+return val.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 2 })
   }
 
   return (

@@ -1,7 +1,6 @@
 'use client'
 
 import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -23,7 +22,7 @@ interface TabSmsProps {
  * Shows sent SMS list with date, message, sender.
  * API integration pending CustomersCommunicationSms module migration.
  */
-export default function TabSms({ meetingId, t }: TabSmsProps) {
+export default function TabSms({ t }: TabSmsProps) {
   const tR = t as Record<string, string>
 
   return (

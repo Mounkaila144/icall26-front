@@ -16,6 +16,8 @@ import LinearProgress from '@mui/material/LinearProgress'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
 
+import type { AxiosError } from 'axios'
+
 import StepperWrapper from '@core/styles/stepper'
 
 import { useContractWizardState } from './useContractWizardState'
@@ -29,7 +31,6 @@ import StepTeamFinance from './steps/StepTeamFinance'
 import StepIso from './steps/StepIso'
 import StepSummary from './steps/StepSummary'
 
-import type { AxiosError } from 'axios'
 
 import type { CreateContractData } from '../../../types'
 

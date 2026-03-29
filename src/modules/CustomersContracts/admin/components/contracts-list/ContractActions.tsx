@@ -47,6 +47,7 @@ export default function ContractActionsCell({ contract, onAction, onEdit, onDele
 
     // 3. Ownership: current user ID matches one of the contract's user fields
     const userId = permissions?.user_id
+
     if (userId != null) {
       if (userId === contract.assistant_id) return true
       if (userId === contract.telepro_id) return true
@@ -66,10 +67,6 @@ export default function ContractActionsCell({ contract, onAction, onEdit, onDele
   // Row-level gate: Symfony line 2266 — $item->isAuthorized() || hasCredential([['contract_list_view_actions']])
   const canViewActions = isAuthorized || hasCredential([['contract_list_view_actions']])
 
-  if (!canViewActions) {
-    return <Typography variant='body2' color='text.disabled'>---</Typography>
-  }
-
   const handleOpen = useCallback((e: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(e.currentTarget)
   }, [])
@@ -85,6 +82,10 @@ export default function ContractActionsCell({ contract, onAction, onEdit, onDele
     else if (action === 'copy_ref') navigator.clipboard.writeText(contract.reference)
     else onAction(contract.id, action)
   }, [handleClose, contract.id, contract.reference, onAction, onEdit, onDelete])
+
+  if (!canViewActions) {
+    return <Typography variant='body2' color='text.disabled'>---</Typography>
+  }
 
   const isHold = contract.is_hold === 'YES'
   const isConfirmed = contract.is_confirmed === 'YES'
@@ -103,11 +104,13 @@ export default function ContractActionsCell({ contract, onAction, onEdit, onDele
 
   // Toggle actions
   const canConfirm = hasCredential([['superadmin', 'admin', 'contracts_confirmation']])
+
   const canConfirmAction = canConfirm && (
     isConfirmed
       ? hasCredential([['superadmin', 'admin', 'contract_list_unconfirmed']])
       : hasCredential([['superadmin', 'admin', 'contract_list_confirmed']])
   )
+
   const canCancel = hasCredential([['superadmin', 'admin', 'contract_list_cancel']])
   const canBlowing = hasCredential([['superadmin', 'admin', 'contract_list_blowing']])
   const canPlacement = hasCredential([['superadmin', 'admin', 'contract_list_placement']])
@@ -134,16 +137,19 @@ export default function ContractActionsCell({ contract, onAction, onEdit, onDele
       ? hasCredential([['superadmin', 'admin', 'contract_list_unhold']])
       : hasCredential([['superadmin', 'admin', 'contract_list_hold']])
   )
+
   const canHoldQuote = hasCredential([['superadmin', 'contract_hold_quote']]) && (
     isHoldQuote
       ? hasCredential([['superadmin', 'contract_list_unhold_quote']])
       : hasCredential([['superadmin', 'contract_list_hold_quote']])
   )
+
   const canHoldAdmin = hasCredential([['superadmin', 'contract_hold_admin']]) && (
     isHoldAdmin
       ? hasCredential([['superadmin', 'admin', 'contract_list_unhold_admin']])
       : hasCredential([['superadmin', 'admin', 'contract_list_hold_admin']])
   )
+
   const canCopyContract = hasCredential([['superadmin', 'contract_copy']])
 
   // Check if any group has visible items (for divider rendering)
@@ -159,6 +165,7 @@ export default function ContractActionsCell({ contract, onAction, onEdit, onDele
     '& .MuiListItemIcon-root': { color: 'inherit', minWidth: 32 },
     '& .MuiListItemText-root': { color: 'inherit' },
   }
+
   const iconSx = { fontSize: '1.125rem' }
 
   return (

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+
 import { useForm } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 
@@ -21,6 +22,7 @@ import type { CustomerMeeting, UpdateMeetingData } from '../../../types'
 function formatDateForInput(value: string | null | undefined): string {
   if (!value) return ''
   const d = new Date(value)
+
   if (isNaN(d.getTime())) return ''
 
   const pad = (n: number) => String(n).padStart(2, '0')
@@ -31,6 +33,7 @@ function formatDateForInput(value: string | null | undefined): string {
 function normalizeOptionalId(value: number | string | null | undefined): number | undefined {
   if (value == null) return undefined
   const numeric = Number(value)
+
   if (!Number.isFinite(numeric) || numeric <= 0) return undefined
 
   return numeric
@@ -84,7 +87,8 @@ export function useEditMeetingState() {
 
         if (!data) {
           setError('Meeting not found')
-          return
+          
+return
         }
 
         setMeeting(data)
@@ -263,6 +267,7 @@ export function useEditMeetingState() {
 
     // Domoprime data
     const domoprime = domoprimeForm.getValues()
+
     const dpCleaned = Object.fromEntries(
       Object.entries(domoprime).filter(([, v]) => {
         if (v === undefined) return false

@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react'
 
 import Box from '@mui/material/Box'
-import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
@@ -56,14 +55,6 @@ interface TabDocCheckProps {
   t: ContractTranslations
 }
 
-function formatDate(dateStr: string | null) {
-  if (!dateStr || dateStr === '0000-00-00 00:00:00') return '—'
-  try {
-    return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-  } catch {
-    return '—'
-  }
-}
 
 const EXT_ICONS: Record<string, string> = {
   pdf: 'ri-file-pdf-line',
@@ -94,9 +85,11 @@ export default function TabDocCheck({ contractId, t }: TabDocCheckProps) {
 
   const fetchDocCheck = useCallback(async () => {
     if (!contractId) return
+
     try {
       setLoading(true)
       const response = await contractsService.getContractDocCheck(contractId)
+
       if (response.success) {
         setData(response.data as unknown as DocCheckData)
       }
@@ -114,6 +107,7 @@ export default function TabDocCheck({ contractId, t }: TabDocCheckProps) {
   // File actions
   const handleDisable = async (fileId: number, fileName: string) => {
     if (!contractId || !confirm(`Le fichier "${fileName}" sera désactivé. Confirmer ?`)) return
+
     try {
       await apiClient.patch(`/admin/customerscontracts/contracts/${contractId}/doc-check/files/${fileId}/disable`)
       setSuccessMsg('Fichier désactivé')
@@ -123,19 +117,11 @@ export default function TabDocCheck({ contractId, t }: TabDocCheckProps) {
     }
   }
 
-  const handleEnable = async (fileId: number) => {
-    if (!contractId) return
-    try {
-      await apiClient.patch(`/admin/customerscontracts/contracts/${contractId}/doc-check/files/${fileId}/enable`)
-      setSuccessMsg('Fichier réactivé')
-      fetchDocCheck()
-    } catch {
-      setError('Erreur lors de la réactivation')
-    }
-  }
+
 
   const handleDelete = async (fileId: number, fileName: string) => {
     if (!contractId || !confirm(`Le fichier "${fileName}" sera supprimé. Confirmer ?`)) return
+
     try {
       await apiClient.delete(`/admin/customerscontracts/contracts/${contractId}/doc-check/files/${fileId}`)
       setSuccessMsg('Fichier supprimé')
@@ -149,11 +135,14 @@ export default function TabDocCheck({ contractId, t }: TabDocCheckProps) {
   const handleUpload = async (checkerId: number, checkId: number | null, files: FileList) => {
     if (!contractId) return
     const formData = new FormData()
+
     formData.append('checker_id', String(checkerId))
     if (checkId) formData.append('check_id', String(checkId))
+
     for (let i = 0; i < files.length; i++) {
       formData.append('files[]', files[i])
     }
+
     try {
       await apiClient.post(`/admin/customerscontracts/contracts/${contractId}/doc-check/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -168,7 +157,9 @@ export default function TabDocCheck({ contractId, t }: TabDocCheckProps) {
   if (loading) {
     return <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}><CircularProgress size={28} /></Box>
   }
+
   if (error) return <Alert severity='error' onClose={() => setError(null)}>{error}</Alert>
+
   if (!data || data.checkers.length === 0) {
     return <Typography color='text.secondary' sx={{ py: 4, textAlign: 'center' }}>Aucun document checker actif</Typography>
   }
@@ -207,12 +198,16 @@ export default function TabDocCheck({ contractId, t }: TabDocCheckProps) {
               sx={{ mb: 2, p: 2, border: '2px dashed', borderColor: 'divider', borderRadius: 1, textAlign: 'center', cursor: 'pointer', '&:hover': { borderColor: 'primary.main', bgcolor: 'action.hover' } }}
               onClick={() => {
                 const input = document.createElement('input')
+
                 input.type = 'file'
                 input.multiple = true
+
                 input.onchange = (e) => {
                   const files = (e.target as HTMLInputElement).files
+
                   if (files) handleUpload(checker.checker_id, checker.check_id, files)
                 }
+
                 input.click()
               }}
             >
@@ -253,6 +248,8 @@ export default function TabDocCheck({ contractId, t }: TabDocCheckProps) {
                                     `/admin/customerscontracts/contracts/${contractId}/doc-check/files/${file.id}/download`,
                                     { responseType: 'blob' },
                                   )
+
+
                                   // Use the Content-Type from response, or guess from extension
                                   const mimeMap: Record<string, string> = {
                                     pdf: 'application/pdf',
@@ -265,9 +262,11 @@ export default function TabDocCheck({ contractId, t }: TabDocCheckProps) {
                                     xls: 'application/vnd.ms-excel',
                                     xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                                   }
+
                                   const contentType = response.headers['content-type'] || mimeMap[file.extension?.toLowerCase()] || 'application/octet-stream'
                                   const blob = new Blob([response.data], { type: contentType })
                                   const url = window.URL.createObjectURL(blob)
+
                                   window.open(url, '_blank')
                                 } catch {
                                   setError('Impossible de télécharger le fichier')

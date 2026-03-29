@@ -1,13 +1,15 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+
+import type { AxiosError } from 'axios';
+
 import { siteService } from '../services/siteService';
-import {
+import type {
   SiteListItem,
   SiteFilters,
   SitePaginationMeta,
 } from '../../types/site.types';
-import { AxiosError } from 'axios';
 
 interface UseSitesReturn {
   sites: SiteListItem[];
@@ -31,11 +33,13 @@ export const useSites = (initialFilters?: SiteFilters): UseSitesReturn => {
 
     try {
       const response = await siteService.getSites(customFilters || filters);
+
       setSites(response.data);
       setMeta(response.meta);
     } catch (err) {
       const axiosError = err as AxiosError<{ message: string }>;
       const errorMessage = axiosError.response?.data?.message || 'Failed to load sites';
+
       setError(errorMessage);
       console.error('Failed to load sites:', err);
     } finally {
@@ -46,6 +50,7 @@ export const useSites = (initialFilters?: SiteFilters): UseSitesReturn => {
   const loadStatistics = useCallback(async () => {
     try {
       const stats = await siteService.getStatistics();
+
       setStatistics(stats);
     } catch (err) {
       console.error('Failed to load statistics:', err);

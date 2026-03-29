@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import {
   Card,
   CardContent,
@@ -15,16 +16,20 @@ import {
   Divider,
   Avatar,
 } from '@mui/material';
+
 import type { RecentActivity } from '../../../types/health.types';
 
 /**
  * Props du composant ActivityTimeline
  */
 interface ActivityTimelineProps {
+
   /** Liste des activités récentes */
   activities: RecentActivity[];
+
   /** Afficher en mode compact */
   compact?: boolean;
+
   /** Nombre maximum d'activités à afficher */
   maxItems?: number;
 }
@@ -51,7 +56,8 @@ function formatActivityTime(isoDate: string): string {
     if (diff < 60000) return 'À l\'instant';
     if (diff < 3600000) return `Il y a ${Math.floor(diff / 60000)} min`;
     if (diff < 86400000) return `Il y a ${Math.floor(diff / 3600000)} h`;
-    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+    
+return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
   } catch {
     return '-';
   }
@@ -69,7 +75,6 @@ function formatActivityTime(isoDate: string): string {
  */
 export function ActivityTimeline({
   activities,
-  compact = false,
   maxItems = 10,
 }: ActivityTimelineProps) {
   // Limiter le nombre d'activités

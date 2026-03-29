@@ -1,9 +1,6 @@
 // MUI Imports
 import Grid from '@mui/material/Grid2'
 
-// Type Imports
-import type { Locale } from '@configs/i18n'
-
 // Components Imports
 import Award from '@views/dashboards/admin/Award'
 import ContractsOverview from '@views/dashboards/admin/ContractsOverview'
@@ -15,12 +12,8 @@ import MonthlyPerformance from '@views/dashboards/admin/MonthlyPerformance'
 import RecentContracts from '@views/dashboards/admin/RecentContracts'
 import CardStatVertical from '@components/card-statistics/Vertical'
 
-// Util Imports
-import { getDictionary } from '@/utils/getDictionary'
-
-const AdminDashboard = async ({ params }: { params: Promise<{ lang: Locale }> }) => {
-  const { lang } = await params
-  const dictionary = await getDictionary(lang)
+const AdminDashboard = async ({ params }: { params: Promise<{ lang: string }> }) => {
+  await params
 
   return (
     <Grid container spacing={6}>

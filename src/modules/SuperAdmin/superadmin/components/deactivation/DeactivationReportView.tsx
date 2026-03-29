@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import {
   Box,
   Typography,
@@ -17,6 +18,7 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from '@mui/material';
+
 import type { DeactivationResult } from '../../../types/deactivation.types';
 import type { SagaStep } from '../../../types/activation.types';
 import { SagaStepsList, getSagaStepsStats } from '../activation/SagaStepsList';
@@ -26,14 +28,19 @@ import { deactivationService } from '../../services/deactivationService';
  * Props du composant DeactivationReportView
  */
 interface DeactivationReportViewProps {
+
   /** Résultat de la désactivation */
   result: DeactivationResult;
+
   /** Nom du module */
   moduleName: string;
+
   /** Version du module */
   moduleVersion: string;
+
   /** Nom du tenant */
   tenantName: string;
+
   /** Afficher en mode compact */
   compact?: boolean;
 }
@@ -43,6 +50,7 @@ interface DeactivationReportViewProps {
  */
 function formatDate(isoDate: string | undefined): string {
   if (!isoDate) return '-';
+
   try {
     return new Intl.DateTimeFormat('fr-FR', {
       dateStyle: 'medium',
@@ -325,7 +333,7 @@ export function DeactivationReportView({
           <AccordionSummary expandIcon={<i className="tabler-chevron-down" />}>
             <Typography variant="subtitle2" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <i className="tabler-list-check" />
-              Étapes d'exécution ({result.steps.length})
+              Étapes d&apos;exécution ({result.steps.length})
             </Typography>
           </AccordionSummary>
           <AccordionDetails>

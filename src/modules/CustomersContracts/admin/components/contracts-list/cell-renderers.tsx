@@ -31,7 +31,8 @@ export const booleanChip = (
 
 export const statusChip = (status: { name?: string; value?: string; color?: string } | null | undefined): ReactNode => {
   if (!status) return <Typography variant='body2'>-</Typography>
-  return (
+  
+return (
     <Chip
       label={status.value ?? status.name}
       size='small'
@@ -58,6 +59,7 @@ interface SubDateDef {
   field: keyof CustomerContract
   label: string
   showAlways: boolean
+
   /** Credential to show datetime instead of date-only */
   datetimeCredential?: string[][]
 }
@@ -144,6 +146,7 @@ export const dateCellMultiLine = (
     if (!value && !def.showAlways) continue
 
     const useDateTime = def.datetimeCredential ? hasCredential(def.datetimeCredential) : true
+
     const formatted = value
       ? (useDateTime ? formatDateTime(value) : formatDate(value))
       : '---'
@@ -176,6 +179,7 @@ export const dateCellMultiLine = (
  */
 export const customerCell = (r: CustomerContract): ReactNode => {
   const c = r.customer
+
   if (!c) return <Typography variant='body2'>-</Typography>
 
   const fullName = (c.lastname || c.firstname)
@@ -211,6 +215,7 @@ export const customerCell = (r: CustomerContract): ReactNode => {
  */
 export const phoneCell = (r: CustomerContract): ReactNode => {
   const c = r.customer
+
   if (!c) return <Typography variant='body2'>-</Typography>
 
   return (
@@ -247,6 +252,7 @@ export const saleCell = (
   onSaleAction?: OnSaleActionFn
 ): ReactNode => {
   const user = r[saleField] as { id?: number; name?: string } | null | undefined
+
   if (!user?.name) return <Typography variant='body2'>-</Typography>
 
   const canSms = hasCredential([['superadmin', 'admin', 'contract_sale_sms_send']])
@@ -296,6 +302,7 @@ export const financialPartnerCell = (
   onPartnerAction?: OnPartnerActionFn
 ): ReactNode => {
   const partner = r.financial_partner as { id?: number; name?: string } | null | undefined
+
   if (!partner?.name) return <Typography variant='body2'>-</Typography>
 
   const hasInstaller = !!r.installer_user_id

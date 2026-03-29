@@ -58,7 +58,9 @@ class SuperadminAuthService {
     getStoredUser(): User | null {
         if (typeof window === 'undefined') return null;
         const userStr = localStorage.getItem('superadmin_user');
+
         if (!userStr) return null;
+
         try {
             return JSON.parse(userStr);
         } catch {
@@ -68,7 +70,8 @@ class SuperadminAuthService {
 
     getStoredToken(): string | null {
         if (typeof window === 'undefined') return null;
-        return localStorage.getItem('superadmin_auth_token');
+        
+return localStorage.getItem('superadmin_auth_token');
     }
 
     isAuthenticated(): boolean {

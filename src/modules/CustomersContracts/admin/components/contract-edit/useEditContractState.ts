@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+
 import { useForm } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 
@@ -68,6 +69,7 @@ export function useEditContractState() {
       const normalizeOptionalId = (value: number | string | null | undefined): number | undefined => {
         if (value == null) return undefined
         const numeric = Number(value)
+
         if (!Number.isFinite(numeric) || numeric <= 0) return undefined
 
         return numeric
@@ -79,9 +81,11 @@ export function useEditContractState() {
         relation: { id: number | string } | null | undefined
       ): number | undefined => {
         const normalizedDirect = normalizeOptionalId(directId)
+
         if (normalizedDirect != null) return normalizedDirect
 
         const normalizedRelation = normalizeOptionalId(relation?.id)
+
         if (normalizedRelation != null) return normalizedRelation
 
         return undefined
@@ -91,6 +95,7 @@ export function useEditContractState() {
         for (const value of values) {
           if (value == null) continue
           const normalized = String(value).trim()
+
           if (normalized !== '') return normalized
         }
 
@@ -101,6 +106,7 @@ export function useEditContractState() {
         for (const value of values) {
           if (value == null || value === '') continue
           const numeric = Number(value)
+
           if (Number.isFinite(numeric)) return numeric
         }
 
@@ -110,35 +116,46 @@ export function useEditContractState() {
       const normalizeYesNo = (value: unknown): 'YES' | 'NO' | '' => {
         if (value == null || value === '') return ''
         const normalized = String(value).toUpperCase()
+
         if (normalized === 'YES' || normalized === 'Y') return 'YES'
         if (normalized === 'NO' || normalized === 'N') return 'NO'
-        return ''
+        
+return ''
       }
 
       const parseVerifEntries = (value: unknown): Array<{ reference: string; number: string }> => {
         const toArray = (input: unknown): unknown[] => {
           if (Array.isArray(input)) return input
+
           if (typeof input === 'string') {
             try {
               const parsed = JSON.parse(input)
-              return Array.isArray(parsed) ? parsed : []
+
+              
+return Array.isArray(parsed) ? parsed : []
             } catch {
               return []
             }
           }
-          return []
+
+          
+return []
         }
 
         return toArray(value)
           .map(item => {
             if (item && typeof item === 'object') {
               const rec = item as Record<string, unknown>
-              return {
+
+              
+return {
                 reference: pickString(rec.reference, rec.ref),
                 number: pickString(rec.number, rec.num),
               }
             }
-            return { reference: '', number: '' }
+
+            
+return { reference: '', number: '' }
           })
           .filter(entry => entry.reference !== '' || entry.number !== '')
       }
@@ -152,7 +169,8 @@ export function useEditContractState() {
 
         if (!data) {
           setError('Contract not found')
-          return
+          
+return
         }
 
         setContract(data)
@@ -188,10 +206,12 @@ export function useEditContractState() {
         if (data.customer) {
           const customerAddress = (data.customer.address ?? {}) as Record<string, unknown>
           const customerAddresses = (data.customer as unknown as { addresses?: unknown[] }).addresses
+
           const firstAddress =
             Array.isArray(customerAddresses) && customerAddresses.length > 0
               ? (customerAddresses[0] as Record<string, unknown>)
               : {}
+
           const customer = data.customer as unknown as Record<string, unknown>
 
           customerForm.reset({
@@ -270,6 +290,7 @@ export function useEditContractState() {
 
         // Verif form - extract from variables and domoprime payload variants
         const verifData = parseVerifEntries(iso.verif || vars.verif || vars.verifs || data.verif)
+
         verifForm.reset({
           verif: verifData.length > 0 ? verifData : [{ reference: '', number: '' }],
         })
@@ -321,11 +342,16 @@ export function useEditContractState() {
         Object.entries(obj).filter(([, v]) => {
           if (v === undefined || v === null) return false
           if (typeof v === 'string' && v.trim() === '') return false
+
           if (typeof v === 'object' && v !== null && !Array.isArray(v)) {
             const cleaned = cleanObject(v as Record<string, unknown>)
-            return Object.keys(cleaned).length > 0
+
+            
+return Object.keys(cleaned).length > 0
           }
-          return true
+
+          
+return true
         })
       ) as Partial<T>
     }
@@ -335,6 +361,7 @@ export function useEditContractState() {
     // Add customer data (cleaned)
     if (customer.customer) {
       const cleanedCustomer = cleanObject(customer.customer)
+
       if (Object.keys(cleanedCustomer).length > 0) {
         merged.customer = cleanedCustomer as typeof customer.customer
       }
@@ -343,6 +370,7 @@ export function useEditContractState() {
     // Add ISO data (cleaned)
     if (iso) {
       const cleanedIso = cleanObject(iso)
+
       if (Object.keys(cleanedIso).length > 0) {
         merged.iso = cleanedIso as typeof iso
       }
@@ -353,6 +381,7 @@ export function useEditContractState() {
       const cleanedVerif = verif.verif.filter(
         entry => entry.reference?.trim() || entry.number?.trim()
       )
+
       if (cleanedVerif.length > 0) {
         merged.verif = cleanedVerif
       }
@@ -369,8 +398,10 @@ export function useEditContractState() {
       Object.entries(merged).filter(([, v]) => {
         // Remove undefined values
         if (v === undefined) return false
+
         // Remove empty strings
         if (typeof v === 'string' && v === '') return false
+
         // Keep everything else, including null (to explicitly clear fields)
         return true
       })
@@ -380,12 +411,15 @@ export function useEditContractState() {
     if (merged.variables) {
       cleaned.variables = merged.variables
     }
+
     if (merged.customer && Object.keys(merged.customer).length > 0) {
       cleaned.customer = merged.customer
     }
+
     if (merged.iso && Object.keys(merged.iso).length > 0) {
       cleaned.iso = merged.iso
     }
+
     if (merged.verif && merged.verif.length > 0) {
       cleaned.verif = merged.verif
     }

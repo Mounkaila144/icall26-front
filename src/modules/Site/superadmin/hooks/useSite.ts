@@ -1,14 +1,16 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+
+import type { AxiosError } from 'axios';
+
 import { siteService } from '../services/siteService';
-import {
+import type {
   Site,
   CreateSiteData,
   UpdateSiteData,
   ToggleAvailabilityData,
 } from '../../types/site.types';
-import { AxiosError } from 'axios';
 
 interface UseSiteReturn {
   site: Site | null;
@@ -34,10 +36,12 @@ export const useSite = (): UseSiteReturn => {
 
     try {
       const data = await siteService.getSite(id);
+
       setSite(data);
     } catch (err) {
       const axiosError = err as AxiosError<{ message: string }>;
       const errorMessage = axiosError.response?.data?.message || 'Failed to load site';
+
       setError(errorMessage);
       console.error('Failed to load site:', err);
     } finally {
@@ -51,11 +55,14 @@ export const useSite = (): UseSiteReturn => {
 
     try {
       const newSite = await siteService.createSite(data);
+
       setSite(newSite);
-      return newSite;
+      
+return newSite;
     } catch (err) {
       const axiosError = err as AxiosError<{ message: string; errors?: any }>;
       const errorMessage = axiosError.response?.data?.message || 'Failed to create site';
+
       setError(errorMessage);
       throw err;
     } finally {
@@ -69,11 +76,14 @@ export const useSite = (): UseSiteReturn => {
 
     try {
       const updatedSite = await siteService.updateSite(id, data);
+
       setSite(updatedSite);
-      return updatedSite;
+      
+return updatedSite;
     } catch (err) {
       const axiosError = err as AxiosError<{ message: string; errors?: any }>;
       const errorMessage = axiosError.response?.data?.message || 'Failed to update site';
+
       setError(errorMessage);
       throw err;
     } finally {
@@ -91,6 +101,7 @@ export const useSite = (): UseSiteReturn => {
     } catch (err) {
       const axiosError = err as AxiosError<{ message: string }>;
       const errorMessage = axiosError.response?.data?.message || 'Failed to delete site';
+
       setError(errorMessage);
       throw err;
     } finally {
@@ -103,12 +114,16 @@ export const useSite = (): UseSiteReturn => {
 
     try {
       const result = await siteService.testConnection(id);
-      return result.success;
+
+      
+return result.success;
     } catch (err) {
       const axiosError = err as AxiosError<{ message: string }>;
       const errorMessage = axiosError.response?.data?.message || 'Failed to test connection';
+
       setError(errorMessage);
-      return false;
+      
+return false;
     }
   }, []);
 
@@ -117,10 +132,12 @@ export const useSite = (): UseSiteReturn => {
 
     try {
       const updatedSite = await siteService.updateDatabaseSize(id);
+
       setSite(updatedSite);
     } catch (err) {
       const axiosError = err as AxiosError<{ message: string }>;
       const errorMessage = axiosError.response?.data?.message || 'Failed to update database size';
+
       setError(errorMessage);
       throw err;
     }
@@ -134,6 +151,7 @@ export const useSite = (): UseSiteReturn => {
     } catch (err) {
       const axiosError = err as AxiosError<{ message: string }>;
       const errorMessage = axiosError.response?.data?.message || 'Failed to toggle availability';
+
       setError(errorMessage);
       throw err;
     }

@@ -1,4 +1,11 @@
 {
+  "Users": "المستخدمون",
+  "Customers": "العملاء",
+  "Contract": "العقود",
+  "Meeting": "الاجتماعات",
+  "Configuration": "التكوين",
+  "Sites": "المواقع",
+  "Services": "الخدمات",
   "Save": "حفظ",
   "Cancel": "إلغاء",
   "Delete": "حذف",

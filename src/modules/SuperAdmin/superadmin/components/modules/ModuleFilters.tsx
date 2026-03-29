@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+
 import {
   Box,
   TextField,
@@ -14,6 +15,7 @@ import {
   Badge,
   type SelectChangeEvent,
 } from '@mui/material';
+
 import { useDebounce } from '@/hooks/useDebounce';
 import type { ModuleCategory } from '../../../types/module.types';
 import type { ModuleFilters as IModuleFilters } from '../../utils/moduleFilters';
@@ -23,10 +25,13 @@ import { defaultFilters, countActiveFilters } from '../../utils/moduleFilters';
  * Props du composant ModuleFilters
  */
 interface ModuleFiltersProps {
+
   /** Callback appelé quand les filtres changent */
   onFilterChange: (filters: IModuleFilters) => void;
+
   /** Afficher le filtre de statut tenant (pour la page tenant) */
   showTenantFilter?: boolean;
+
   /** Valeurs initiales des filtres */
   initialFilters?: Partial<IModuleFilters>;
 }

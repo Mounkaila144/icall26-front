@@ -1,149 +1,90 @@
+'use client'
+
 // Next Imports
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 
-// Third-party Imports
-import classnames from 'classnames'
-
 // Type Imports
 import type { Locale } from '@configs/i18n'
+import type { MenuConfig } from '@/shared/types/menu-config.types'
+
+// Hook Imports
+import { useConfigMenus } from '@/shared/hooks/useConfigMenus'
 
 // Util Imports
 import { getLocalizedUrl } from '@/utils/i18n'
 
-type DefaultSuggestionsType = {
-  sectionLabel: string
-  items: {
-    label: string
-    href: string
-    icon?: string
-  }[]
+/** Flatten hierarchical menus to items that have routes */
+const flattenMenuItems = (items: MenuConfig[]): MenuConfig[] => {
+  const result: MenuConfig[] = []
+
+  for (const item of items) {
+    if (item.route) {
+      result.push(item)
+    }
+
+    if (item.children) {
+      result.push(...flattenMenuItems(item.children))
+    }
+  }
+
+  return result
 }
 
-const defaultSuggestions: DefaultSuggestionsType[] = [
-  {
-    sectionLabel: 'Popular Searches',
-    items: [
-      {
-        label: 'Analytics',
-        href: '/dashboards/analytics',
-        icon: 'ri-bar-chart-line'
-      },
-      {
-        label: 'CRM',
-        href: '/',
-        icon: 'ri-pie-chart-2-line'
-      },
-      {
-        label: 'eCommerce',
-        href: '/dashboards/ecommerce',
-        icon: 'ri-shopping-bag-3-line'
-      },
-      {
-        label: 'User List',
-        href: '/apps/user/list',
-        icon: 'ri-file-user-line'
-      }
-    ]
-  },
-  {
-    sectionLabel: 'Apps',
-    items: [
-      {
-        label: 'Calendar',
-        href: '/apps/calendar',
-        icon: 'ri-calendar-line'
-      },
-      {
-        label: 'Invoice List',
-        href: '/apps/invoice/list',
-        icon: 'ri-file-list-3-line'
-      },
-      {
-        label: 'User List',
-        href: '/apps/user/list',
-        icon: 'ri-file-user-line'
-      },
-      {
-        label: 'Roles & Permissions',
-        href: '/apps/roles',
-        icon: 'ri-lock-unlock-line'
-      }
-    ]
-  },
-  {
-    sectionLabel: 'Pages',
-    items: [
-      {
-        label: 'User Profile',
-        href: '/pages/user-profile',
-        icon: 'ri-user-3-line'
-      },
-      {
-        label: 'Account Settings',
-        href: '/pages/account-settings',
-        icon: 'ri-settings-4-line'
-      },
-      {
-        label: 'Pricing',
-        href: '/pages/pricing',
-        icon: 'ri-money-dollar-circle-line'
-      },
-      {
-        label: 'FAQ',
-        href: '/pages/faq',
-        icon: 'ri-question-line'
-      }
-    ]
-  },
-  {
-    sectionLabel: 'Forms & Charts',
-    items: [
-      {
-        label: 'Form Layouts',
-        href: '/forms/form-layouts',
-        icon: 'ri-file-text-line'
-      },
-      {
-        label: 'Form Validation',
-        href: '/forms/form-validation',
-        icon: 'ri-checkbox-multiple-line'
-      },
-      {
-        label: 'Form Wizard',
-        href: '/forms/form-wizard',
-        icon: 'ri-equalizer-line'
-      },
-      {
-        label: 'Apex Charts',
-        href: '/charts/apex-charts',
-        icon: 'ri-line-chart-line'
-      }
-    ]
+/** Render menu icon based on its type (emoji, icon-class, etc.) */
+const MenuItemIcon = ({ menu }: { menu: MenuConfig }) => {
+  if (!menu.icon) return null
+
+  if (menu.icon.type === 'emoji') {
+    return <span className='text-xl'>{menu.icon.value}</span>
   }
-]
+
+  if (menu.icon.type === 'icon-class') {
+    return <i className={`${menu.icon.value} flex text-xl`} />
+  }
+
+  return null
+}
 
 const DefaultSuggestions = ({ setOpen }: { setOpen: (value: boolean) => void }) => {
   // Hooks
   const { lang: locale } = useParams()
+  const { menus, isLoading } = useConfigMenus({ visibleOnly: true })
+
+  if (isLoading) return null
+
+  const allItems = flattenMenuItems(menus)
+
+  // Group items by role
+  const adminItems = allItems.filter(item => item.roles?.includes('admin'))
+  const superAdminItems = allItems.filter(item => item.roles?.includes('superadmin'))
+  const generalItems = allItems.filter(item => !item.roles || item.roles.length === 0)
+
+  const sections: { label: string; items: MenuConfig[] }[] = []
+
+  if (adminItems.length > 0) sections.push({ label: 'Admin', items: adminItems })
+  if (superAdminItems.length > 0) sections.push({ label: 'Super Admin', items: superAdminItems })
+  if (generalItems.length > 0) sections.push({ label: 'General', items: generalItems })
+
+  if (sections.length === 0) return null
 
   return (
     <div className='flex grow flex-wrap gap-x-[48px] gap-y-8 plb-14 pli-16 overflow-y-auto overflow-x-hidden bs-full'>
-      {defaultSuggestions.map((section, index) => (
+      {sections.map(section => (
         <div
-          key={index}
+          key={section.label}
           className='flex flex-col justify-center overflow-x-hidden gap-4 basis-full sm:basis-[calc((100%-3rem)/2)]'
         >
-          <p className='text-xs uppercase text-textDisabled tracking-[0.8px]'>{section.sectionLabel}</p>
+          <p className='text-xs uppercase text-textDisabled tracking-[0.8px]'>{section.label}</p>
           <ul className='flex flex-col gap-4'>
-            {section.items.map((item, i) => (
-              <li key={i} className='flex'>
+            {section.items.map(item => (
+              <li key={item.id} className='flex'>
                 <Link
-                  href={getLocalizedUrl(item.href, locale as Locale)}
+                  href={getLocalizedUrl(item.route!, locale as Locale)}
                   className='flex items-center overflow-x-hidden cursor-pointer gap-2 hover:text-primary focus-visible:text-primary focus-visible:outline-0'
                   onClick={() => setOpen(false)}
                 >
-                  {item.icon && <i className={classnames(item.icon, 'flex text-xl')} />}
+                  <MenuItemIcon menu={item} />
                   <p className='text-[15px] overflow-hidden whitespace-nowrap overflow-ellipsis'>{item.label}</p>
                 </Link>
               </li>

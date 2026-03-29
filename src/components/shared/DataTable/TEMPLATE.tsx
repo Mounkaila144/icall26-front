@@ -16,12 +16,12 @@
 'use client'
 
 import { useEffect, useState, useMemo, useCallback } from 'react'
+
 import { createColumnHelper } from '@tanstack/react-table'
 
 // MUI Imports
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
-import Chip from '@mui/material/Chip'
 
 // Services
 // import { yourService } from '../services/yourService'
@@ -41,6 +41,7 @@ interface YourDataType {
   id: number
   name: string
   email: string
+
   // ... ajoutez vos champs
 }
 
@@ -54,6 +55,7 @@ const AVAILABLE_COLUMNS: ColumnConfig[] = [
   { id: 'id', label: 'ID', defaultVisible: true },
   { id: 'name', label: 'Name', defaultVisible: true },
   { id: 'email', label: 'Email', defaultVisible: true },
+
   // ... ajoutez vos colonnes
 ]
 
@@ -143,8 +145,8 @@ export default function YourTableComponent() {
         { id: 2, name: 'Jane Smith', email: 'jane@example.com' }
       ])
       setPagination({ current_page: 1, last_page: 1, per_page: 15, total: 2 })
-    } catch (err: any) {
-      console.error('Error loading data:', err)
+    } catch {
+      // Data loading failed
     } finally {
       setLoading(false)
     }
@@ -159,6 +161,7 @@ export default function YourTableComponent() {
   // HANDLERS
   // ========================================
   const handleDelete = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (id: number) => {
       if (!confirm('Are you sure you want to delete this item?')) {
         return
@@ -168,26 +171,25 @@ export default function YourTableComponent() {
         // ⚠️ REMPLACEZ PAR VOTRE APPEL API
         // await yourService.delete(id)
         loadData()
-      } catch (err: any) {
-        alert('Error deleting item: ' + err.message)
+      } catch (err) {
+        alert('Error deleting item: ' + (err instanceof Error ? err.message : 'An error occurred'))
       }
     },
     [loadData]
   )
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleEdit = useCallback((item: YourDataType) => {
-    // ⚠️ IMPLÉMENTEZ VOTRE LOGIQUE
-    console.log('Edit:', item)
+    // TODO: implement edit logic
   }, [])
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleView = useCallback((item: YourDataType) => {
-    // ⚠️ IMPLÉMENTEZ VOTRE LOGIQUE
-    console.log('View:', item)
+    // TODO: implement view logic
   }, [])
 
   const handleAdd = useCallback(() => {
-    // ⚠️ IMPLÉMENTEZ VOTRE LOGIQUE
-    console.log('Add new item')
+    // TODO: implement add logic
   }, [])
 
   // ========================================
@@ -273,6 +275,7 @@ export default function YourTableComponent() {
         color: 'primary',
         onClick: handleAdd
       }
+
       // Ajoutez d'autres actions (Export, Import, etc.)
     ],
 
@@ -282,6 +285,7 @@ export default function YourTableComponent() {
     mobileCard: {
       renderCard: item => (
         <StandardMobileCard
+
           // Header
           title={item.name}
           subtitle={item.email}
@@ -299,6 +303,7 @@ export default function YourTableComponent() {
               label: 'Email',
               value: item.email
             }
+
             // ⚠️ AJOUTEZ VOS CHAMPS ICI
             // {
             //   icon: 'ri-phone-line',

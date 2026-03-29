@@ -1,8 +1,9 @@
 'use client';
 
 import React, { createContext, useContext } from 'react';
+
 import { useLanguage } from '@/shared/lib/language-context';
-import { Locale, TranslationContextValue } from './types';
+import type { Locale, TranslationContextValue } from './types';
 
 const TranslationContext = createContext<TranslationContextValue | undefined>(undefined);
 
@@ -44,8 +45,11 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
  */
 export function useTranslationContext() {
   const context = useContext(TranslationContext);
+
   if (context === undefined) {
     throw new Error('useTranslationContext must be used within a TranslationProvider');
   }
-  return context;
+
+  
+return context;
 }

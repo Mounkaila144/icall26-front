@@ -1,5 +1,6 @@
-import type { ColumnDef } from '@tanstack/react-table'
 import type { ReactNode } from 'react'
+
+import type { ColumnDef } from '@tanstack/react-table'
 
 /**
  * Generic DataTable Types
@@ -8,6 +9,7 @@ import type { ReactNode } from 'react'
 
 // Base configuration for any data table
 export interface DataTableConfig<TData> {
+
   // Column definitions using TanStack Table
   columns: ColumnDef<TData, any>[]
 
@@ -70,6 +72,7 @@ export interface ColumnConfig {
 
 // Mobile card configuration
 export interface MobileCardConfig<TData> {
+
   // Function to render the card for each item
   renderCard: (item: TData, actions?: CardAction<TData>[]) => ReactNode
 }

@@ -68,6 +68,7 @@ export default function TabInformations({ meetingId, t }: TabInformationsProps) 
 
       if (res.data.success) {
         setFormData(res.data.data)
+
         // Initialize values from API response
         const initialValues: Record<string, string> = {}
 

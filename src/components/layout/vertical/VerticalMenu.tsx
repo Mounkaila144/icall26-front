@@ -5,7 +5,6 @@ import { memo, useCallback } from 'react'
 import { useTheme } from '@mui/material/styles'
 
 // Type Imports
-import type { getDictionary } from '@/utils/getDictionary'
 import type { VerticalMenuContextProps } from '@menu/components/vertical-menu/Menu'
 
 // Component Imports
@@ -31,7 +30,6 @@ type RenderExpandIconProps = {
 }
 
 type Props = {
-  dictionary: Awaited<ReturnType<typeof getDictionary>>
   scrollMenu: (container: any, isPerfectScrollbar: boolean) => void
 }
 
@@ -60,7 +58,7 @@ const NativeScrollWrapper = memo(({ children, onScroll }: { children: React.Reac
 
 NativeScrollWrapper.displayName = 'NativeScrollWrapper'
 
-const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
+const VerticalMenu = ({ scrollMenu }: Props) => {
   // Hooks
   const theme = useTheme()
   const verticalNavOptions = useVerticalNav()
@@ -74,6 +72,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
   }, [scrollMenu])
 
   return (
+
     // Use native scroll for better performance - eliminates PerfectScrollbar forced reflows
     <NativeScrollWrapper onScroll={handleScroll}>
       {/* Vertical Menu from Module Configurations */}

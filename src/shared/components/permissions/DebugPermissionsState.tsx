@@ -6,10 +6,11 @@
  * Comprehensive debug tool to diagnose permission loading issues
  */
 
+import { useState, useEffect } from 'react'
+
 import { usePermissionsOptional } from '@/shared/contexts/PermissionsContext'
 import { useAuth } from '@/modules/UsersGuard'
 import { loadPermissionsFromStorage } from '@/shared/lib/permissions/extractPermissions'
-import { useState, useEffect } from 'react'
 
 export function DebugPermissionsState() {
   const permissionsContext = usePermissionsOptional()
@@ -20,12 +21,15 @@ export function DebugPermissionsState() {
   useEffect(() => {
     // Load from localStorage
     const stored = loadPermissionsFromStorage()
+
     setLocalStorageData(stored)
 
     // Get all localStorage keys
     const allKeys: Record<string, any> = {}
+
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i)
+
       if (key) {
         try {
           allKeys[key] = JSON.parse(localStorage.getItem(key) || 'null')
@@ -34,6 +38,7 @@ export function DebugPermissionsState() {
         }
       }
     }
+
     setAllLocalStorage(allKeys)
   }, [])
 

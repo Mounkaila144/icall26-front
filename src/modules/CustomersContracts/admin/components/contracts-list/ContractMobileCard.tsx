@@ -9,8 +9,10 @@ import { isYes, getCustomerFullName, formatDate, formatPrice } from './helpers'
 
 interface ContractMobileCardProps {
   contract: CustomerContract
+
   /** Action-level permission checks (view, edit, delete buttons) */
   hasCredential: (credential: string | string[][]) => boolean
+
   /** API-driven permitted field keys from backend meta.permitted_fields */
   permittedFields: Set<string>
   onEdit: (id: number) => void

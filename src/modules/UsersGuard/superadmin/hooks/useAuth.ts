@@ -2,10 +2,13 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+
 import { useRouter } from 'next/navigation';
+
+import type { AxiosError } from 'axios';
+
 import { superadminAuthService } from '../services/authService';
 import type { AuthState, LoginCredentials } from '../../types/auth.types';
-import type { AxiosError } from 'axios';
 import { isTokenExpiringSoon } from '@/shared/lib/api-client';
 
 /** Check token freshness every 5 minutes */
@@ -55,8 +58,10 @@ export const useAuth = (): UseAuthReturn => {
         if (!isTokenExpiringSoon(true)) return;
 
         refreshingRef.current = true;
+
         try {
             const newToken = await superadminAuthService.refreshToken();
+
             if (newToken) {
                 setState(prev => ({ ...prev, token: newToken }));
             }
@@ -77,6 +82,7 @@ export const useAuth = (): UseAuthReturn => {
                 proactiveRefresh();
             }
         };
+
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
         return () => {
@@ -149,9 +155,11 @@ export const useAuth = (): UseAuthReturn => {
 
         try {
             const user = await superadminAuthService.getCurrentUser();
+
             setState(prev => ({ ...prev, user }));
         } catch (err) {
             console.error('Failed to refresh user:', err);
+
             if ((err as AxiosError).response?.status === 401) {
                 await logout();
             }

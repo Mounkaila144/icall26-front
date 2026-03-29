@@ -5,13 +5,12 @@ import Typography from '@mui/material/Typography'
 import Alert from '@mui/material/Alert'
 import CircularProgress from '@mui/material/CircularProgress'
 import Snackbar from '@mui/material/Snackbar'
-import MuiAlert from '@mui/material/Alert'
 import Tooltip from '@mui/material/Tooltip'
 import IconButton from '@mui/material/IconButton'
 import Collapse from '@mui/material/Collapse'
 
 import type { CustomerContract } from '../../../../../types'
-import type { ContractTranslations } from '../../../../../hooks/useContractTranslations'
+import type { ContractTranslations } from '../../../../hooks/useContractTranslations'
 import { usePermissions } from '@/shared/contexts/PermissionsContext'
 
 import { POLLUTER_TYPE_SUFFIXES, resolvePolluterType, formatDate } from './documents/helpers'
@@ -69,7 +68,6 @@ export default function EditSubTabDocuments({
     error,
     downloading,
     quotations,
-    activeQuotations,
     lastQuotation,
     activeBillings,
     lastBilling,
@@ -158,14 +156,14 @@ export default function EditSubTabDocuments({
           onClose={handleCloseNotification}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         >
-          <MuiAlert
+          <Alert
             onClose={handleCloseNotification}
             severity={notification.severity}
             variant='filled'
             elevation={6}
           >
             {notification.message}
-          </MuiAlert>
+          </Alert>
         </Snackbar>
       </Box>
     )
@@ -460,14 +458,14 @@ export default function EditSubTabDocuments({
         onClose={handleCloseNotification}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <MuiAlert
+        <Alert
           onClose={handleCloseNotification}
           severity={notification.severity}
           variant='filled'
           elevation={6}
         >
           {notification.message}
-        </MuiAlert>
+        </Alert>
       </Snackbar>
     </Box>
   )

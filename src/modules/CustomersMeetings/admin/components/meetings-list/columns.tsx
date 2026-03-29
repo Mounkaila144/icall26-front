@@ -33,7 +33,11 @@ function boolCol(
 function statusCol(id: string, label: string, getStatus: (r: CustomerMeeting) => any, defaultVisible = true): MeetingColumnDef {
   return {
     id, label, defaultVisible,
-    getValue: r => { const s = getStatus(r); return s?.value ?? s?.name },
+    getValue: r => { const s = getStatus(r);
+
+ 
+
+return s?.value ?? s?.name },
     renderCell: r => statusChip(getStatus(r))
   }
 }
@@ -168,8 +172,10 @@ export function getColumnDefs(t: MeetingTranslations, hasCredential: HasCredenti
       getValue: r => r.opc_range?.name,
       renderCell: r => {
         const range = r.opc_range
+
         if (!range) return textCell(null)
-        return statusChip({ name: range.name, color: range.color ?? undefined })
+        
+return statusChip({ name: range.name, color: range.color ?? undefined })
       }
     },
 

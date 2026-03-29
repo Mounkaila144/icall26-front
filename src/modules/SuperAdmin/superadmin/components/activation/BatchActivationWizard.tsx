@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+
 import {
   Dialog,
   DialogTitle,
@@ -15,7 +16,6 @@ import {
   Alert,
   LinearProgress,
   Checkbox,
-  FormControlLabel,
   IconButton,
   Divider,
   Chip,
@@ -27,10 +27,9 @@ import {
   ListItemSecondaryAction,
   Paper,
 } from '@mui/material';
+
 import { useModuleActivation } from '../../hooks/useModuleActivation';
 import { dependencyService } from '../../services/dependencyService';
-import { SagaStepsList } from './SagaStepsList';
-import { ActivationReportView } from './ActivationReportView';
 import type { TenantModule } from '../../../types/module.types';
 import type { DependencyResolution } from '../../../types/dependency.types';
 import type { ActivationResult } from '../../../types/activation.types';
@@ -40,16 +39,22 @@ import { activationService } from '../../services/activationService';
  * Props du composant BatchActivationWizard
  */
 interface BatchActivationWizardProps {
+
   /** Contrôle l'ouverture du modal */
   open: boolean;
+
   /** Callback de fermeture */
   onClose: () => void;
+
   /** Modules à activer */
   modules: TenantModule[];
+
   /** ID du tenant */
   tenantId: number;
+
   /** Nom du tenant */
   tenantName: string;
+
   /** Callback appelé après activation réussie */
   onSuccess?: () => void;
 }
@@ -130,10 +135,13 @@ export function BatchActivationWizard({
   // Vérifier les dépendances
   const checkDependencies = useCallback(async () => {
     setCheckingDeps(true);
+
     try {
       const moduleNames = selectedModules.map((m) => m.name);
+
       // Passer tous les modules disponibles pour le fallback local
       const resolution = await dependencyService.resolveDependencies(moduleNames, modules);
+
       setDependencies(resolution);
       setInstallOrder(resolution.installOrder);
     } catch (err) {
@@ -147,12 +155,14 @@ export function BatchActivationWizard({
   const toggleModuleSelection = useCallback((module: TenantModule) => {
     setSelectedModules((prev) => {
       const isSelected = prev.some((m) => m.name === module.name);
+
       if (isSelected) {
         return prev.filter((m) => m.name !== module.name);
       } else {
         return [...prev, module];
       }
     });
+
     // Reset dependencies quand la sélection change
     setDependencies(null);
   }, []);
@@ -176,6 +186,7 @@ export function BatchActivationWizard({
       module: selectedModules.find((m) => m.name === name) || modules.find((m) => m.name === name)!,
       status: 'pending',
     }));
+
     setModuleStates(initialStates);
 
     // Activer chaque module dans l'ordre
@@ -245,6 +256,7 @@ export function BatchActivationWizard({
       if (batchComplete && moduleStates.some((s) => s.status === 'success') && onSuccess) {
         onSuccess();
       }
+
       onClose();
     }
   }, [isActivating, batchComplete, moduleStates, onSuccess, onClose]);
@@ -255,7 +267,9 @@ export function BatchActivationWizard({
     const failed = moduleStates.filter((s) => s.status === 'failed').length;
     const skipped = moduleStates.filter((s) => s.status === 'skipped').length;
     const pending = moduleStates.filter((s) => s.status === 'pending' || s.status === 'activating').length;
-    return { success, failed, skipped, pending, total: moduleStates.length };
+
+    
+return { success, failed, skipped, pending, total: moduleStates.length };
   }, [moduleStates]);
 
   // Vérifier si on peut passer au step suivant
@@ -263,10 +277,13 @@ export function BatchActivationWizard({
     if (activeStep === 0) {
       return selectedModules.length > 0;
     }
+
     if (activeStep === 1) {
       return !checkingDeps && dependencies && dependencies.canInstall;
     }
-    return true;
+
+    
+return true;
   }, [activeStep, selectedModules, checkingDeps, dependencies]);
 
   // Rendu des steps
@@ -280,14 +297,16 @@ export function BatchActivationWizard({
               Sélectionnez les modules à activer
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Les modules seront activés dans l'ordre de leurs dépendances.
+              Les modules seront activés dans l&apos;ordre de leurs dépendances.
             </Typography>
 
             <Paper variant="outlined" sx={{ maxHeight: 300, overflow: 'auto' }}>
               <List dense>
                 {modules.map((module) => {
                   const isSelected = selectedModules.some((m) => m.name === module.name);
-                  return (
+
+                  
+return (
                     <ListItem
                       key={module.name}
                       button
@@ -365,7 +384,7 @@ export function BatchActivationWizard({
                 {installOrder.length > 0 && (
                   <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
                     <Typography variant="subtitle2" gutterBottom>
-                      Ordre d'installation
+                      Ordre d&apos;installation
                     </Typography>
                     <Stack spacing={1}>
                       {installOrder.map((name, index) => (
@@ -392,11 +411,11 @@ export function BatchActivationWizard({
         return (
           <Box>
             <Typography variant="subtitle1" gutterBottom>
-              Confirmer l'activation batch
+              Confirmer l&apos;activation batch
             </Typography>
 
             <Alert severity="warning" sx={{ mb: 3 }}>
-              Vous êtes sur le point d'activer {installOrder.length} module(s) pour <strong>{tenantName}</strong>.
+              Vous êtes sur le point d&apos;activer {installOrder.length} module(s) pour <strong>{tenantName}</strong>.
               Cette action lancera les migrations de base de données pour chaque module.
             </Alert>
 
@@ -408,7 +427,9 @@ export function BatchActivationWizard({
               <List dense disablePadding>
                 {installOrder.map((name, index) => {
                   const mod = selectedModules.find((m) => m.name === name) || modules.find((m) => m.name === name);
-                  return (
+
+                  
+return (
                     <ListItem key={name} disablePadding sx={{ py: 0.5 }}>
                       <ListItemIcon sx={{ minWidth: 32 }}>
                         <Typography variant="caption" color="text.secondary">
@@ -459,7 +480,7 @@ export function BatchActivationWizard({
             {/* Liste des modules avec leur statut */}
             <Paper variant="outlined" sx={{ maxHeight: 400, overflow: 'auto' }}>
               <List dense>
-                {moduleStates.map((state, index) => (
+                {moduleStates.map((state) => (
                   <ListItem
                     key={state.module.name}
                     sx={{
@@ -575,7 +596,7 @@ export function BatchActivationWizard({
           <>
             <Button onClick={handleBack}>Retour</Button>
             <Button onClick={handleActivateBatch} variant="contained" color="primary">
-              Lancer l'activation
+              Lancer l&apos;activation
             </Button>
           </>
         )}

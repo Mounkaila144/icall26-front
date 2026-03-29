@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+
 import { useMenus } from '../hooks/useMenus';
 import type { MenuItem } from '../../types';
 
@@ -23,18 +24,22 @@ export const MenuList: React.FC = () => {
   const toggleExpand = (menuId: string) => {
     setExpandedMenus((prev) => {
       const next = new Set(prev);
+
       if (next.has(menuId)) {
         next.delete(menuId);
       } else {
         next.add(menuId);
       }
-      return next;
+
+      
+return next;
     });
   };
 
   const handleDelete = async (id: string, label: string) => {
     if (window.confirm(`Are you sure you want to delete "${label}"?`)) {
       const success = await deleteMenu(id);
+
       if (success) {
         alert('Menu deleted successfully');
       }

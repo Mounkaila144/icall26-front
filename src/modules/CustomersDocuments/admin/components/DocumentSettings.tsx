@@ -31,9 +31,11 @@ export default function DocumentSettings() {
   const fetchSettings = useCallback(async () => {
     try {
       setLoading(true)
+
       const response = await apiClient.get<{ success: boolean; data: DocumentSettingsData }>(
         '/admin/customersdocuments/settings',
       )
+
       if (response.data.success) {
         setSettings(response.data.data)
       }
@@ -51,6 +53,7 @@ export default function DocumentSettings() {
   const handleSave = async () => {
     setSaving(true)
     setError(null)
+
     try {
       await apiClient.put('/admin/customersdocuments/settings', { settings })
       setSuccessMsg(t.settingsSaved)

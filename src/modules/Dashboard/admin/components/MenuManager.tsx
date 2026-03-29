@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+
 import { MenuList } from './MenuList';
 import { MenuForm } from './MenuForm';
 import type { MenuItem } from '../../types';
@@ -18,6 +19,7 @@ export const MenuManager: React.FC = () => {
     setShowForm(true);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleEdit = (menu: MenuItem) => {
     setEditingMenu(menu);
     setShowForm(true);

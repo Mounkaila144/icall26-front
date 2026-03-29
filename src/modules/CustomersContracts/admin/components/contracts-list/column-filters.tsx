@@ -139,23 +139,6 @@ const COMPACT_AUTOCOMPLETE_SX: SxProps<Theme> = {
   },
 }
 
-const COMPACT_DATE_SX: SxProps<Theme> = {
-  '& .MuiOutlinedInput-root': {
-    fontSize: '0.75rem',
-    borderRadius: '6px',
-    backgroundColor: 'var(--mui-palette-background-paper)',
-    '& fieldset': {
-      borderColor: 'var(--mui-palette-divider)',
-    },
-    '&:hover fieldset': {
-      borderColor: 'var(--mui-palette-primary-light)',
-    },
-  },
-  '& .MuiOutlinedInput-input': {
-    padding: '3px 6px',
-    height: '1.4em',
-  },
-}
 
 const COMPACT_CHECKBOX_SX = {
   '& .MuiCheckbox-root': { padding: '2px' },

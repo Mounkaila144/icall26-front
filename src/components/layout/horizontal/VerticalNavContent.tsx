@@ -45,7 +45,7 @@ const StyledBoxForShadow = styled('div')(({ theme }) => ({
 
 const VerticalNavContent = ({ children }: ChildrenType) => {
   // Hooks
-  const { isBreakpointReached } = useHorizontalNav()
+  useHorizontalNav()
   const { lang: locale } = useParams()
 
   // Refs

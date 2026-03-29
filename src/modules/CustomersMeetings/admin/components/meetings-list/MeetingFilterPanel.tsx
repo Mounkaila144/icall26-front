@@ -266,10 +266,13 @@ export default function MeetingFilterPanel({
 
   const [localFilters, setLocalFilters] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {}
+
     for (const key of SIDEBAR_KEYS) {
       if (columnFilters[key]) init[key] = columnFilters[key]
     }
-    return init
+
+    
+return init
   })
 
   const f = (key: string) => localFilters[key] || ''
@@ -277,10 +280,15 @@ export default function MeetingFilterPanel({
   const setLocal = useCallback((key: string, value: string) => {
     setLocalFilters(prev => {
       if (!value) {
-        const { [key]: _, ...rest } = prev
-        return rest
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [key]: _removed, ...rest } = prev
+
+
+return rest
       }
-      return { ...prev, [key]: value }
+
+      
+return { ...prev, [key]: value }
     })
   }, [])
 
@@ -290,6 +298,7 @@ export default function MeetingFilterPanel({
 
   const toggleDateType = (value: string) => {
     const next = new Set(activeDateTypes)
+
     if (next.has(value)) { next.delete(value) } else { next.add(value) }
     setLocal('date_type', Array.from(next).join(','))
   }
@@ -305,6 +314,7 @@ export default function MeetingFilterPanel({
     for (const key of SIDEBAR_KEYS) {
       const localVal = localFilters[key] || ''
       const parentVal = columnFilters[key] || ''
+
       if (localVal !== parentVal) {
         onFilterChange(key, localVal)
       }
@@ -673,6 +683,7 @@ export default function MeetingFilterPanel({
           color={f('sidebar_is_confirmed') === 'YES' ? 'success' : f('sidebar_is_confirmed') === 'NO' ? 'warning' : 'default'}
           onClick={() => {
             const cur = f('sidebar_is_confirmed')
+
             setLocal('sidebar_is_confirmed', cur === '' ? 'YES' : cur === 'YES' ? 'NO' : '')
           }}
           sx={{ fontSize: '0.72rem', height: 24, cursor: 'pointer' }}
@@ -684,6 +695,7 @@ export default function MeetingFilterPanel({
           color={f('sidebar_is_hold') === 'YES' ? 'error' : f('sidebar_is_hold') === 'NO' ? 'success' : 'default'}
           onClick={() => {
             const cur = f('sidebar_is_hold')
+
             setLocal('sidebar_is_hold', cur === '' ? 'YES' : cur === 'YES' ? 'NO' : '')
           }}
           sx={{ fontSize: '0.72rem', height: 24, cursor: 'pointer' }}
@@ -695,6 +707,7 @@ export default function MeetingFilterPanel({
           color={f('sidebar_is_hold_quote') === 'YES' ? 'error' : f('sidebar_is_hold_quote') === 'NO' ? 'success' : 'default'}
           onClick={() => {
             const cur = f('sidebar_is_hold_quote')
+
             setLocal('sidebar_is_hold_quote', cur === '' ? 'YES' : cur === 'YES' ? 'NO' : '')
           }}
           sx={{ fontSize: '0.72rem', height: 24, cursor: 'pointer' }}
@@ -706,6 +719,7 @@ export default function MeetingFilterPanel({
           color={f('sidebar_is_qualified') === 'YES' ? 'success' : f('sidebar_is_qualified') === 'NO' ? 'default' : 'default'}
           onClick={() => {
             const cur = f('sidebar_is_qualified')
+
             setLocal('sidebar_is_qualified', cur === '' ? 'YES' : cur === 'YES' ? 'NO' : '')
           }}
           sx={{ fontSize: '0.72rem', height: 24, cursor: 'pointer' }}

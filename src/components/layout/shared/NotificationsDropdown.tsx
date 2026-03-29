@@ -68,7 +68,7 @@ export type NotificationsType = {
     }
 )
 
-const ScrollWrapper = ({ children, hidden }: { children: ReactNode; hidden: boolean }) => {
+const ScrollWrapper = ({ children }: { children: ReactNode }) => {
   // Use native scroll for better performance - eliminates PerfectScrollbar forced reflows
   return (
     <div
@@ -119,7 +119,6 @@ const NotificationDropdown = ({ notifications }: { notifications: NotificationsT
   const ref = useRef<HTMLDivElement | null>(null)
 
   // Hooks
-  const hidden = useMediaQuery((theme: Theme) => theme.breakpoints.down('lg'))
   const isSmallScreen = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'))
   const { settings } = useSettings()
 
@@ -243,7 +242,7 @@ const NotificationDropdown = ({ notifications }: { notifications: NotificationsT
                     </Tooltip>
                   </div>
                   <Divider />
-                  <ScrollWrapper hidden={hidden}>
+                  <ScrollWrapper>
                     {notificationsState.map((notification, index) => {
                       const {
                         title,

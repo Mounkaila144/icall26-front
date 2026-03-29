@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Site, CreateSiteData, UpdateSiteData, SiteType, YesNo, SslMode } from '../../types/site.types';
+
+import type { Site, CreateSiteData, UpdateSiteData, SiteType, YesNo, SslMode } from '../../types/site.types';
 
 interface SiteFormModalProps {
   isOpen: boolean;
@@ -279,7 +280,7 @@ export default function SiteFormModal({ isOpen, onClose, onSubmit, site, mode }:
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Mot de passe de la base de données
-                      {mode === 'edit' && <span className="text-xs text-gray-500 ml-2">(laisser vide pour garder l'existant)</span>}
+                      {mode === 'edit' && <span className="text-xs text-gray-500 ml-2">(laisser vide pour garder l&apos;existant)</span>}
                     </label>
                     <input
                       type="password"

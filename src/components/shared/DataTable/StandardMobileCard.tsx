@@ -1,6 +1,8 @@
 'use client'
 
 // MUI Imports
+import type { ReactNode } from 'react'
+
 import Card from '@mui/material/Card'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
@@ -10,9 +12,9 @@ import Chip from '@mui/material/Chip'
 
 // Types
 import type { CardAction, CardField } from './types'
-import type { ReactNode } from 'react'
 
 interface StandardMobileCardProps<TData> {
+
   // Header
   title: string | ReactNode
   subtitle?: string | ReactNode

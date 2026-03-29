@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+
 import {
   Dialog,
   DialogTitle,
@@ -18,10 +19,8 @@ import {
   FormControlLabel,
   TextField,
   IconButton,
-  Divider,
-  Chip,
-  Stack,
 } from '@mui/material';
+
 import { useModuleDeactivation } from '../../hooks/useModuleDeactivation';
 import { ImpactAnalysisView } from './ImpactAnalysisView';
 import { SagaStepsList } from '../activation/SagaStepsList';
@@ -33,16 +32,22 @@ import type { DeactivationOptions } from '../../../types/deactivation.types';
  * Props du composant DeactivationWizard
  */
 interface DeactivationWizardProps {
+
   /** Contrôle l'ouverture du modal */
   open: boolean;
+
   /** Callback de fermeture */
   onClose: () => void;
+
   /** Module à désactiver */
   module: TenantModule;
+
   /** ID du tenant */
   tenantId: number;
+
   /** Nom du tenant */
   tenantName: string;
+
   /** Callback appelé après désactivation réussie */
   onSuccess?: () => void;
 }
@@ -75,10 +80,12 @@ export function DeactivationWizard({
 }: DeactivationWizardProps) {
   // State du wizard
   const [activeStep, setActiveStep] = useState(0);
+
   const [options, setOptions] = useState<DeactivationOptions>({
     backup: true,
     force: false,
   });
+
   const [confirmationText, setConfirmationText] = useState('');
 
   // Hook de désactivation
@@ -146,14 +153,18 @@ export function DeactivationWizard({
     if (activeStep === 0) {
       // Step analyse d'impact
       if (!impact || isAnalyzing) return false;
+
       // Bloquer si non désactivable et force pas coché
       if (!impact.canDeactivate && !options.force) return false;
     }
+
     if (activeStep === 1) {
       // Step options - toujours pouvoir continuer
       return true;
     }
-    return true;
+
+    
+return true;
   }, [activeStep, impact, isAnalyzing, options.force]);
 
   // Vérifier si la confirmation est valide
@@ -170,7 +181,7 @@ export function DeactivationWizard({
               {module.displayName}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Analyse de l'impact de la désactivation de ce module pour <strong>{tenantName}</strong>.
+              Analyse de l&apos;impact de la désactivation de ce module pour <strong>{tenantName}</strong>.
             </Typography>
 
             {isAnalyzing && (

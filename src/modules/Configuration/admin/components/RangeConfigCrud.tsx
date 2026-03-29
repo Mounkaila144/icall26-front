@@ -76,6 +76,7 @@ export default function RangeConfigCrud({ baseUrl: baseUrlProp, title: titleProp
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
+
       const res = await apiClient.get<{ success: boolean; data: RangeItem[] }>(
         `${apiUrl}`,
       )

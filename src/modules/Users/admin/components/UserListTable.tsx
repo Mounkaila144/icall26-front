@@ -12,7 +12,6 @@ import TextField from '@mui/material/TextField'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
-import Box from '@mui/material/Box'
 
 // Third-party Imports
 import { createColumnHelper } from '@tanstack/react-table'
@@ -23,7 +22,7 @@ import { useTranslation } from '@/shared/i18n'
 
 // Type Imports
 import type { ThemeColor } from '@core/types'
-import type { User } from '../../types/user.types'
+import type { User , UserCreationOptions } from '../../types/user.types'
 
 // Component Imports
 import CustomAvatar from '@core/components/mui/Avatar'
@@ -41,7 +40,7 @@ import { useUsersContext } from './UsersList'
 
 // Service Imports
 import { userService } from '../services/userService'
-import type { UserCreationOptions } from '../../types/user.types'
+
 
 type UserWithAction = User & {
   action?: string
@@ -96,7 +95,7 @@ const columnHelper = createColumnHelper<UserWithAction>()
 
 const UserListTable = () => {
   // Translation
-  const { t, locale } = useTranslation('Users')
+  const { t } = useTranslation('Users')
 
   // Context
   const {
@@ -206,8 +205,10 @@ const UserListTable = () => {
   useEffect(() => {
     const loadFilterOptions = async () => {
       setLoadingOptions(true)
+
       try {
         const options = await userService.getCreationOptions()
+
         setFilterOptions(options)
       } catch (error) {
         console.error('Failed to load filter options:', error)
@@ -270,10 +271,15 @@ const UserListTable = () => {
     setColumnFilters(prev => {
       if (value === '' || value === null || value === undefined) {
         // Remove filter if empty
-        const { [columnId]: _, ...rest } = prev
-        return rest
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [columnId]: _removed, ...rest } = prev
+
+
+return rest
       }
-      return {
+
+      
+return {
         ...prev,
         [columnId]: value
       }
@@ -844,7 +850,7 @@ const UserListTable = () => {
               {
                 icon: 'ri-eye-line',
                 color: 'default',
-                onClick: () => console.log('View user:', user)
+                onClick: () => { /* TODO: implement view user */ }
               },
               {
                 icon: 'ri-edit-box-line',

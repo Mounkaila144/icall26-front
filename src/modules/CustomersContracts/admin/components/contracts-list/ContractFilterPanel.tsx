@@ -280,7 +280,8 @@ export default function ContractFilterPanel({
   const setLocal = useCallback((key: string, value: string) => {
     setLocalFilters(prev => {
       if (!value) {
-        const { [key]: _, ...rest } = prev
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [key]: _removed, ...rest } = prev
 
         return rest
       }

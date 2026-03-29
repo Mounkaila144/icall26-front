@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import {
   Card,
   CardContent,
@@ -13,21 +14,24 @@ import {
   ListItemText,
   IconButton,
   Chip,
-  Collapse,
-  Alert,
 } from '@mui/material';
+
 import type { SystemAlert } from '../../../types/health.types';
 
 /**
  * Props du composant AlertsList
  */
 interface AlertsListProps {
+
   /** Liste des alertes */
   alerts: SystemAlert[];
+
   /** Callback pour marquer une alerte comme lue */
   onDismiss?: (alertId: string) => void;
+
   /** Afficher en mode compact */
   compact?: boolean;
+
   /** Nombre maximum d'alertes à afficher */
   maxAlerts?: number;
 }
@@ -54,7 +58,8 @@ function formatAlertTime(isoDate: string): string {
     if (diff < 60000) return 'À l\'instant';
     if (diff < 3600000) return `Il y a ${Math.floor(diff / 60000)} min`;
     if (diff < 86400000) return `Il y a ${Math.floor(diff / 3600000)} h`;
-    return date.toLocaleDateString('fr-FR');
+    
+return date.toLocaleDateString('fr-FR');
   } catch {
     return 'Inconnu';
   }
@@ -84,7 +89,9 @@ export function AlertsList({
     .filter((a) => !a.read)
     .sort((a, b) => {
       const order = { error: 0, warning: 1, info: 2, success: 3 };
-      return order[a.type] - order[b.type];
+
+      
+return order[a.type] - order[b.type];
     });
 
   // Limiter si nécessaire
@@ -123,7 +130,9 @@ export function AlertsList({
           <List disablePadding>
             {displayAlerts.map((alert, index) => {
               const config = alertConfig[alert.type];
-              return (
+
+              
+return (
                 <ListItem
                   key={alert.id}
                   divider={index < displayAlerts.length - 1}

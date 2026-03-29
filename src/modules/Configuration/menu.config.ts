@@ -1,4 +1,4 @@
-import { ModuleMenuConfig } from '@/shared/types/menu-config.types'
+import type { ModuleMenuConfig } from '@/shared/types/menu-config.types'
 
 export const ConfigurationMenuConfig: ModuleMenuConfig = {
   module: 'Configuration',

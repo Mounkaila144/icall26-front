@@ -5,7 +5,7 @@
  * and provides a centralized access point for the application.
  */
 
-import { MenuConfig, ModuleMenuConfig, UserRole } from '@/shared/types/menu-config.types';
+import type { MenuConfig, ModuleMenuConfig, UserRole } from '@/shared/types/menu-config.types';
 
 // Import menu configurations from modules
 import { dashboardMenuConfig } from '@/modules/Dashboard/menu.config';
@@ -34,6 +34,7 @@ const moduleMenuConfigs: ModuleMenuConfig[] = [
   AppDomoprimeMenuConfig,
   CustomersMeetingsMenuConfig,
   ConfigurationMenuConfig,
+
   // Add more module menu configs here
 ];
 
@@ -59,7 +60,8 @@ function flattenMenus(menus: MenuConfig[]): MenuConfig[] {
   };
 
   flatten(menus);
-  return flattened;
+  
+return flattened;
 }
 
 /**
@@ -80,10 +82,12 @@ function buildMenuHierarchy(flatMenus: MenuConfig[]): MenuConfig[] {
 
     if (menu.parentId) {
       const parent = menuMap.get(menu.parentId);
+
       if (parent) {
         if (!parent.children) {
           parent.children = [];
         }
+
         parent.children.push(menuItem);
       } else {
         // Parent not found, treat as root
@@ -115,6 +119,7 @@ export function getAllFlatMenus(): MenuConfig[] {
 
   moduleMenuConfigs.forEach((moduleConfig) => {
     const flatMenus = flattenMenus(moduleConfig.menus);
+
     allMenus.push(...flatMenus);
   });
 
@@ -126,7 +131,9 @@ export function getAllFlatMenus(): MenuConfig[] {
  */
 export function getAllMenus(): MenuConfig[] {
   const flatMenus = getAllFlatMenus();
-  return buildMenuHierarchy(flatMenus);
+
+  
+return buildMenuHierarchy(flatMenus);
 }
 
 /**
@@ -142,7 +149,9 @@ export function getModuleMenus(moduleName: string): MenuConfig[] {
   }
 
   const flatMenus = flattenMenus(moduleConfig.menus);
-  return buildMenuHierarchy(flatMenus);
+
+  
+return buildMenuHierarchy(flatMenus);
 }
 
 /**
@@ -150,7 +159,9 @@ export function getModuleMenus(moduleName: string): MenuConfig[] {
  */
 export function getMenuById(menuId: string): MenuConfig | undefined {
   const allFlatMenus = getAllFlatMenus();
-  return allFlatMenus.find((menu) => menu.id === menuId);
+
+  
+return allFlatMenus.find((menu) => menu.id === menuId);
 }
 
 /**
@@ -158,10 +169,13 @@ export function getMenuById(menuId: string): MenuConfig | undefined {
  */
 export function getMenusByPermission(permission: string): MenuConfig[] {
   const allFlatMenus = getAllFlatMenus();
+
   const filteredMenus = allFlatMenus.filter(
     (menu) => menu.permission === permission
   );
-  return buildMenuHierarchy(filteredMenus);
+
+  
+return buildMenuHierarchy(filteredMenus);
 }
 
 /**
@@ -202,6 +216,8 @@ export function getMenusByRole(role: UserRole): MenuConfig[] {
         if (!menu.roles || menu.roles.length === 0) {
           return true;
         }
+
+
         // Check if the menu is accessible by the current role
         return menu.roles.includes(role);
       })

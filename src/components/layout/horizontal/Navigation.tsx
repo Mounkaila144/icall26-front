@@ -39,6 +39,7 @@ const StyledDiv = styled.div<StyledDivProps>`
   `}
 `
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Navigation = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof getDictionary>> }) => {
   // Hooks
   const { settings } = useSettings()
@@ -60,7 +61,7 @@ const Navigation = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof getD
           className: classnames(horizontalLayoutClasses.navigationContentWrapper, 'flex items-center is-full plb-2')
         })}
       >
-        <HorizontalMenu dictionary={dictionary} />
+        <HorizontalMenu />
       </StyledDiv>
     </div>
   )

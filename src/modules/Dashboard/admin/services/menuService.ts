@@ -1,6 +1,6 @@
 import { createApiClient } from '@/shared/lib/api-client';
 import { generateAdminRoute } from '@/shared/utils/routeGenerator';
-import type { MenuItem, MenuFormData, MenuReorderItem, BackendMenuItem } from '../../types';
+import type { MenuItem, MenuFormData, BackendMenuItem } from '../../types';
 import type { ApiResponse } from '@/shared/types/api.types';
 
 /**
@@ -34,6 +34,7 @@ class MenuService {
       is_visible: backendItem.status !== 'DELETED',
       created_at: backendItem.created_at,
       updated_at: backendItem.updated_at,
+
       // Icon can be added later if needed
       icon: undefined,
       permission: undefined,
@@ -62,13 +63,12 @@ class MenuService {
 
     const root: MenuItem[] = [];
     const stack: Array<MenuItem & { level: number }> = [];
-    let skippedRootNodes = 0;
 
     itemsWithLevel.forEach((item) => {
       // Skip root node (level 0)
       if (item.level === 0) {
-        skippedRootNodes++;
-        return;
+
+return;
       }
 
       // Remove items from stack that are not ancestors
@@ -98,9 +98,11 @@ class MenuService {
       } else {
         // Child item
         const parent = stack[stack.length - 1];
+
         if (!parent.children) {
           parent.children = [];
         }
+
         parent.children.push(menuItem);
       }
 
@@ -109,6 +111,7 @@ class MenuService {
 
     return root;
   }
+
   /**
    * Get current language from localStorage, browser, or default to 'fr'
    */
@@ -116,13 +119,18 @@ class MenuService {
     if (typeof window !== 'undefined') {
       // Try localStorage first
       const savedLang = localStorage.getItem('app_language');
+
       if (savedLang) return savedLang;
 
       // Fallback to browser language
       const browserLang = navigator.language.split('-')[0];
-      return browserLang || 'fr';
+
+      
+return browserLang || 'fr';
     }
-    return 'fr';
+
+    
+return 'fr';
   }
 
   /**
@@ -139,9 +147,13 @@ class MenuService {
         lang: lang, // Request translated labels
       },
     });
+
+
     // Backend returns { data: { data: [...], meta: {...} } }
     const backendItems = response.data.data.data || [];
-    return backendItems.map(item => this.transformMenuItem(item));
+
+    
+return backendItems.map(item => this.transformMenuItem(item));
   }
 
   /**
@@ -158,7 +170,9 @@ class MenuService {
 
     const backendItems = response.data.data || [];
     const hierarchy = this.buildNestedSetHierarchy(backendItems);
-    return hierarchy;
+
+    
+return hierarchy;
   }
 
   /**
@@ -167,7 +181,9 @@ class MenuService {
    */
   async getMenusFlat(tenantId?: string): Promise<MenuItem[]> {
     const tree = await this.getMenuTree(tenantId);
-    return this.flattenHierarchy(tree);
+
+    
+return this.flattenHierarchy(tree);
   }
 
   /**
@@ -176,7 +192,9 @@ class MenuService {
   async getMenuById(id: string, tenantId?: string): Promise<MenuItem> {
     const client = createApiClient(tenantId);
     const response = await client.get<ApiResponse<MenuItem>>(`/admin/menus/${id}`);
-    return response.data.data;
+
+    
+return response.data.data;
   }
 
   /**
@@ -185,7 +203,9 @@ class MenuService {
   async createMenu(data: MenuFormData, tenantId?: string): Promise<MenuItem> {
     const client = createApiClient(tenantId);
     const response = await client.post<ApiResponse<MenuItem>>('/admin/menus', data);
-    return response.data.data;
+
+    
+return response.data.data;
   }
 
   /**
@@ -194,7 +214,9 @@ class MenuService {
   async updateMenu(id: string, data: Partial<MenuFormData>, tenantId?: string): Promise<MenuItem> {
     const client = createApiClient(tenantId);
     const response = await client.put<ApiResponse<MenuItem>>(`/admin/menus/${id}`, data);
-    return response.data.data;
+
+    
+return response.data.data;
   }
 
   /**
@@ -202,6 +224,7 @@ class MenuService {
    */
   async deleteMenu(id: string, tenantId?: string): Promise<void> {
     const client = createApiClient(tenantId);
+
     await client.delete(`/admin/menus/${id}`);
   }
 
@@ -224,10 +247,13 @@ class MenuService {
    */
   async moveMenu(id: string, parentId: string | null, tenantId?: string): Promise<MenuItem> {
     const client = createApiClient(tenantId);
+
     const response = await client.post<ApiResponse<MenuItem>>(`/admin/menus/${id}/move`, {
       parent_id: parentId,
     });
-    return response.data.data;
+
+    
+return response.data.data;
   }
 
   /**
@@ -236,7 +262,9 @@ class MenuService {
   async getMenuChildren(id: string, tenantId?: string): Promise<MenuItem[]> {
     const client = createApiClient(tenantId);
     const response = await client.get<ApiResponse<MenuItem[]>>(`/admin/menus/${id}/children`);
-    return response.data.data;
+
+    
+return response.data.data;
   }
 
   /**
@@ -244,6 +272,7 @@ class MenuService {
    */
   async rebuildTree(tenantId?: string): Promise<void> {
     const client = createApiClient(tenantId);
+
     await client.post('/admin/menus/rebuild');
   }
 
@@ -253,7 +282,9 @@ class MenuService {
   async getMenuByName(name: string, tenantId?: string): Promise<MenuItem> {
     const client = createApiClient(tenantId);
     const response = await client.get<ApiResponse<MenuItem>>(`/admin/menus/by-name/${name}`);
-    return response.data.data;
+
+    
+return response.data.data;
   }
 
   /**
@@ -261,6 +292,7 @@ class MenuService {
    */
   async hardDeleteMenu(id: string, tenantId?: string): Promise<void> {
     const client = createApiClient(tenantId);
+
     await client.delete(`/admin/menus/${id}/hard`);
   }
 
@@ -282,6 +314,7 @@ class MenuService {
 
       if (menu.parent_id) {
         const parent = menuMap.get(menu.parent_id);
+
         if (parent) {
           parent.children = parent.children || [];
           parent.children.push(menuItem);
@@ -317,6 +350,7 @@ class MenuService {
     const flatten = (items: MenuItem[], parentId?: string) => {
       items.forEach((item) => {
         const { children, ...itemWithoutChildren } = item;
+
         result.push({
           ...itemWithoutChildren,
           parent_id: parentId || null,
@@ -329,7 +363,8 @@ class MenuService {
     };
 
     flatten(menus);
-    return result;
+    
+return result;
   }
 }
 

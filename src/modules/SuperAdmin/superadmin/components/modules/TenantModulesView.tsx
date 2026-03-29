@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+
 import {
   Box,
   Typography,
@@ -13,6 +14,7 @@ import {
   Chip,
   Tooltip,
 } from '@mui/material';
+
 import { useTenantModules } from '../../hooks/useTenantModules';
 import { TenantModulesTable } from './TenantModulesTable';
 import { ModuleFilters } from './ModuleFilters';
@@ -28,8 +30,10 @@ import { filterModules, defaultFilters } from '../../utils/moduleFilters';
  * Props du composant TenantModulesView
  */
 interface TenantModulesViewProps {
+
   /** ID du tenant */
   tenantId: number;
+
   /** Nom du tenant (pour l'affichage) */
   tenantName: string;
 }
@@ -112,12 +116,14 @@ export function TenantModulesView({ tenantId, tenantName }: TenantModulesViewPro
 
   const handleConfigure = (module: TenantModule) => {
     console.log('Configuration à venir:', module.name);
+
     // TODO: Implémenter configuration
     alert(`Configuration du module "${module.displayName}" à venir`);
   };
 
   const handleViewDetails = (module: TenantModule) => {
     console.log('Détails du module:', module);
+
     // TODO: Ouvrir modal ou drawer avec détails
   };
 
@@ -130,17 +136,21 @@ export function TenantModulesView({ tenantId, tenantName }: TenantModulesViewPro
   const toggleModuleSelection = (moduleName: string) => {
     setSelectedForBatch((prev) => {
       const newSet = new Set(prev);
+
       if (newSet.has(moduleName)) {
         newSet.delete(moduleName);
       } else {
         newSet.add(moduleName);
       }
-      return newSet;
+
+      
+return newSet;
     });
   };
 
   const selectAllAvailable = () => {
     const allNames = availableModules.map((m) => m.name);
+
     setSelectedForBatch(new Set(allNames));
   };
 
@@ -167,17 +177,21 @@ export function TenantModulesView({ tenantId, tenantName }: TenantModulesViewPro
   const toggleDeactivationSelection = (moduleName: string) => {
     setSelectedForDeactivation((prev) => {
       const newSet = new Set(prev);
+
       if (newSet.has(moduleName)) {
         newSet.delete(moduleName);
       } else {
         newSet.add(moduleName);
       }
-      return newSet;
+
+      
+return newSet;
     });
   };
 
   const selectAllActive = () => {
     const allNames = activeModules.map((m) => m.name);
+
     setSelectedForDeactivation(new Set(allNames));
   };
 

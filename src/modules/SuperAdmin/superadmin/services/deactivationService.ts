@@ -34,6 +34,7 @@ class DeactivationService {
       console.log(`Analyzing impact for deactivating "${moduleName}" from tenant ${tenantId}...`);
 
       const client = createApiClient();
+
       const response = await client.get<ImpactAnalysisResponse>(
         `/superadmin/sites/${tenantId}/modules/${moduleName}/impact`
       );
@@ -103,6 +104,7 @@ class DeactivationService {
       console.log(`Deactivating module "${moduleName}" for tenant ${tenantId}...`, options);
 
       const client = createApiClient();
+
       const response = await client.delete<DeactivationResponse>(
         `/superadmin/sites/${tenantId}/modules/${moduleName}`,
         {
@@ -125,7 +127,9 @@ class DeactivationService {
         // Format standard avec success explicite
         if (responseData.success && responseData.data) {
           const result = responseData.data;
-          return {
+
+          
+return {
             ...result,
             success: true,
             duration,
@@ -233,7 +237,9 @@ class DeactivationService {
     }
 
     const seconds = ms / 1000;
-    return `${seconds.toFixed(1)}s`;
+
+    
+return `${seconds.toFixed(1)}s`;
   }
 }
 

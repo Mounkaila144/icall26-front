@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useCallback } from 'react'
+
 import { usePermissions } from '@/shared/contexts/PermissionsContext'
 
 /**

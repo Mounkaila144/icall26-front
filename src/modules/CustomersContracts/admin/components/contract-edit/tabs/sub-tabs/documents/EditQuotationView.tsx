@@ -84,6 +84,7 @@ export default function EditQuotationView({
   const [datedAt, setDatedAt] = useState('')
   const [subventionTypeId, setSubventionTypeId] = useState<number | string>('')
   const [items, setItems] = useState<ItemFormState[]>([])
+
   const [manual, setManual] = useState<ManualSubventionState>({
     anaPrimeCheck: false,
     ceePrimeCheck: false,

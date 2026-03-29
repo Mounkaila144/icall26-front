@@ -43,7 +43,8 @@ interface SettingsOptions {
 const isYes = (val: unknown): boolean => {
   if (typeof val === 'boolean') return val
   if (typeof val === 'string') return val.toUpperCase() === 'YES'
-  return false
+  
+return false
 }
 
 // ─── Component ───────────────────────────────────────────
@@ -51,11 +52,13 @@ const isYes = (val: unknown): boolean => {
 export default function ContractSettings() {
   const t = useConfigTranslations()
   const [settings, setSettings] = useState<ContractSettingsRaw | null>(null)
+
   const [options, setOptions] = useState<SettingsOptions>({
     contract_statuses: [],
     attributions: [],
     companies: [],
   })
+
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [dirty, setDirty] = useState(false)
@@ -65,6 +68,7 @@ export default function ContractSettings() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
+
       const [settingsRes, optionsRes] = await Promise.all([
         apiClient.get<{ success: boolean; data: ContractSettingsRaw }>('/admin/customerscontracts/settings'),
         apiClient.get<{ success: boolean; data: SettingsOptions }>('/admin/customerscontracts/settings/options'),

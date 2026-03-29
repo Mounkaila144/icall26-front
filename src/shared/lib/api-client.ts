@@ -1,4 +1,6 @@
-import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import type { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import axios from 'axios';
+
 import type { ApiError } from '../types/api.types';
 import type { RefreshTokenResponse } from '@/modules/UsersGuard/types/auth.types';
 
@@ -23,17 +25,20 @@ const TOKEN_REFRESH_THRESHOLD_MS = 50 * 60 * 1000;
 
 const isSuperadminContext = (): boolean => {
     if (typeof window === 'undefined') return false;
-    return window.location.pathname.includes('/superadmin');
+    
+return window.location.pathname.includes('/superadmin');
 };
 
 const getAuthToken = (): string | null => {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem(isSuperadminContext() ? SUPERADMIN_TOKEN_KEY : TOKEN_KEY);
+    
+return localStorage.getItem(isSuperadminContext() ? SUPERADMIN_TOKEN_KEY : TOKEN_KEY);
 };
 
 const getTenantId = (): string | null => {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem('tenant_id');
+    
+return localStorage.getItem('tenant_id');
 };
 
 const getCurrentLocale = (): string => {
@@ -47,12 +52,16 @@ const getCurrentLocale = (): string => {
     }
 
     const locale = localStorage.getItem('app_language') || 'en';
-    return locale.split('_')[0].split('-')[0].toLowerCase();
+
+    
+return locale.split('_')[0].split('-')[0].toLowerCase();
 };
 
 const getLoginUrl = (): string => {
     const locale = getCurrentLocale();
-    return `/${locale}/login`;
+
+    
+return `/${locale}/login`;
 };
 
 // ---------------------------------------------------------------------------
@@ -61,13 +70,8 @@ const getLoginUrl = (): string => {
 
 export const storeTokenTimestamp = (superadmin = false): void => {
     const key = superadmin ? SUPERADMIN_TOKEN_ISSUED_KEY : TOKEN_ISSUED_KEY;
-    localStorage.setItem(key, Date.now().toString());
-};
 
-const getTokenIssuedAt = (): number => {
-    const key = isSuperadminContext() ? SUPERADMIN_TOKEN_ISSUED_KEY : TOKEN_ISSUED_KEY;
-    const val = localStorage.getItem(key);
-    return val ? parseInt(val, 10) : 0;
+    localStorage.setItem(key, Date.now().toString());
 };
 
 /** True when the token has exceeded the Sanctum lifetime (60 min) */
@@ -76,9 +80,12 @@ export const isTokenExpired = (superadmin?: boolean): boolean => {
     const contextIsSuperadmin = superadmin ?? isSuperadminContext();
     const key = contextIsSuperadmin ? SUPERADMIN_TOKEN_ISSUED_KEY : TOKEN_ISSUED_KEY;
     const val = localStorage.getItem(key);
+
     if (!val) return true; // No timestamp → treat as expired
     const issuedAt = parseInt(val, 10);
-    return Date.now() - issuedAt > TOKEN_LIFETIME_MS;
+
+    
+return Date.now() - issuedAt > TOKEN_LIFETIME_MS;
 };
 
 /** True when the token will expire in the next ~10 minutes */
@@ -86,9 +93,12 @@ export const isTokenExpiringSoon = (superadmin?: boolean): boolean => {
     const contextIsSuperadmin = superadmin ?? isSuperadminContext();
     const key = contextIsSuperadmin ? SUPERADMIN_TOKEN_ISSUED_KEY : TOKEN_ISSUED_KEY;
     const val = localStorage.getItem(key);
+
     if (!val) return false;
     const issuedAt = parseInt(val, 10);
-    return Date.now() - issuedAt > TOKEN_REFRESH_THRESHOLD_MS;
+
+    
+return Date.now() - issuedAt > TOKEN_REFRESH_THRESHOLD_MS;
 };
 
 // ---------------------------------------------------------------------------
@@ -153,6 +163,7 @@ const callRefreshEndpoint = async (): Promise<string> => {
     // Admin context needs tenant header
     if (!superadmin) {
         const tenantId = getTenantId();
+
         if (tenantId) {
             headers['X-Tenant-ID'] = tenantId;
         }
@@ -172,10 +183,10 @@ const callRefreshEndpoint = async (): Promise<string> => {
 
     // Persist new token + timestamp
     const tokenKey = superadmin ? SUPERADMIN_TOKEN_KEY : TOKEN_KEY;
+
     localStorage.setItem(tokenKey, newToken);
     storeTokenTimestamp(superadmin);
 
-    console.log('[api-client] Token refreshed successfully');
     return newToken;
 };
 
@@ -204,12 +215,14 @@ export const refreshTokenSilently = async (superadmin?: boolean): Promise<string
 
     try {
         const newToken = await callRefreshEndpoint();
+
         processQueue(null, newToken);
-        return newToken;
+        
+return newToken;
     } catch (err) {
         processQueue(err, null);
-        console.warn('[api-client] Silent token refresh failed', err);
-        return null;
+        
+return null;
     } finally {
         isRefreshing = false;
     }
@@ -234,12 +247,14 @@ export const createApiClient = (): AxiosInstance => {
         (config: InternalAxiosRequestConfig) => {
             if (config.headers) {
                 const token = getAuthToken();
+
                 if (token) {
                     config.headers.Authorization = `Bearer ${token}`;
                 }
 
                 if (!isSuperadminContext()) {
                     const tenantId = getTenantId();
+
                     if (tenantId) {
                         config.headers['X-Tenant-ID'] = tenantId;
                     }
@@ -247,7 +262,9 @@ export const createApiClient = (): AxiosInstance => {
 
                 config.headers['Accept-Language'] = getCurrentLocale();
             }
-            return config;
+
+            
+return config;
         },
         (error) => Promise.reject(error)
     );
@@ -271,14 +288,18 @@ export const createApiClient = (): AxiosInstance => {
                     failedQueue.push({ resolve, reject });
                 }).then((newToken) => {
                     originalRequest.headers.Authorization = `Bearer ${newToken}`;
-                    return client(originalRequest);
+                    
+return client(originalRequest);
                 }).catch(() => {
                     // Refresh failed — logout
                     clearAuthData();
+
                     if (typeof window !== 'undefined') {
                         window.location.href = getLoginUrl();
                     }
-                    return Promise.reject(error);
+
+                    
+return Promise.reject(error);
                 });
             }
 
@@ -287,20 +308,25 @@ export const createApiClient = (): AxiosInstance => {
 
             try {
                 const newToken = await callRefreshEndpoint();
+
                 processQueue(null, newToken);
 
                 // Retry the original request with the fresh token
                 originalRequest.headers.Authorization = `Bearer ${newToken}`;
-                return client(originalRequest);
+                
+return client(originalRequest);
             } catch (refreshError) {
                 processQueue(refreshError, null);
 
                 // Refresh truly failed — clear auth and redirect to login
                 clearAuthData();
+
                 if (typeof window !== 'undefined') {
                     window.location.href = getLoginUrl();
                 }
-                return Promise.reject(error);
+
+                
+return Promise.reject(error);
             } finally {
                 isRefreshing = false;
             }

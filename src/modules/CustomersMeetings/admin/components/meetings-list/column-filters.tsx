@@ -87,15 +87,16 @@ const COMPACT_AUTOCOMPLETE_SX: SxProps<Theme> = {
 const DEBOUNCE_MS = 400
 
 function DebouncedTextFilter({
-  columnId, externalValue, onFilterChange, placeholder, disabled, sx,
+  columnId, externalValue, onFilterChange, placeholder, sx,
 }: {
   columnId: string; externalValue: string
   onFilterChange: (columnId: string, value: string) => void
-  placeholder: string; disabled: boolean; sx: SxProps<Theme>
+  placeholder: string; sx: SxProps<Theme>
 }) {
   const [localValue, setLocalValue] = useState(externalValue)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const onFilterChangeRef = useRef(onFilterChange)
+
   onFilterChangeRef.current = onFilterChange
 
   // Sync from external only when the user isn't actively typing (e.g. clear-all)
@@ -108,6 +109,7 @@ function DebouncedTextFilter({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value
+
     setLocalValue(val)
 
     if (timerRef.current) clearTimeout(timerRef.current)
@@ -186,7 +188,9 @@ export function createColumnFilterFactory(
     // 2. Boolean filters
     if (columnId in BOOLEAN_FILTER_COLUMNS) {
       const { yes, no } = BOOLEAN_FILTER_COLUMNS[columnId]
-      return (
+
+      
+return (
         <FormControl size='small' fullWidth sx={{ ...COMPACT_SELECT_SX, minWidth: 90 }}>
           <Select value={value} onChange={e => onFilterChange(columnId, e.target.value)} displayEmpty disabled={loading} variant='outlined'>
             <MenuItem value='' sx={{ fontSize: '0.8125rem' }}>{t.filterAll}</MenuItem>
@@ -214,7 +218,9 @@ export function createColumnFilterFactory(
     if (columnId in STATUS_FILTER_MAP) {
       const optionsKey = STATUS_FILTER_MAP[columnId]
       const items: FilterOption[] = filterOptions[optionsKey] as FilterOption[] || []
-      return (
+
+      
+return (
         <SearchableSelectFilter value={value} items={items} onFilterChange={onFilterChange}
           columnId={columnId} loading={loading} labelAll={t.filterAll} labelSearch={t.filterSearch} />
       )
@@ -224,7 +230,9 @@ export function createColumnFilterFactory(
     if (columnId in ENTITY_FILTER_MAP) {
       const optionsKey = ENTITY_FILTER_MAP[columnId]
       const items: FilterOption[] = filterOptions[optionsKey] as FilterOption[] || []
-      return (
+
+      
+return (
         <SearchableSelectFilter value={value} items={items} onFilterChange={onFilterChange}
           columnId={columnId} loading={loading} labelAll={t.filterAll} labelSearch={t.filterSearch} />
       )

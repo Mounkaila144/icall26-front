@@ -55,6 +55,7 @@ export const contractDetailsSchema = object({
   has_tva: optional(string()),
   reference: optional(string()),
   remarks: optional(string()),
+
   // Additional fields from wizard
   total_price_with_taxe: optional(number()),
   tax_id: optional(number()),
@@ -84,13 +85,22 @@ export const teamFinanceSchema = object({
   team_id: optional(number()),
 
   // Finance
+  financial_partner_id: optional(number()),
+  tax_id: optional(number()),
+  total_price_without_taxe: optional(number()),
+  total_price_with_taxe: optional(number()),
   mensuality: optional(number()),
   advance_payment: optional(number()),
+  state_id: optional(number()),
 
   // References
+  company_id: optional(number()),
   polluter_id: optional(number()),
+  partner_layer_id: optional(number()),
   campaign_id: optional(number()),
   sous_traitant_id: optional(number()),
+  opc_range_id: optional(number()),
+  sav_at_range_id: optional(number()),
 
   // Reports
   rapport_installation: optional(string()),

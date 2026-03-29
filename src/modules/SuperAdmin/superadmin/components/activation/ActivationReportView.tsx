@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import {
   Box,
   Typography,
@@ -17,6 +18,7 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from '@mui/material';
+
 import type { ActivationResult, SagaStep } from '../../../types/activation.types';
 import { SagaStepsList, getSagaStepsStats } from './SagaStepsList';
 import { activationService } from '../../services/activationService';
@@ -25,14 +27,19 @@ import { activationService } from '../../services/activationService';
  * Props du composant ActivationReportView
  */
 interface ActivationReportViewProps {
+
   /** Résultat de l'activation */
   result: ActivationResult;
+
   /** Nom du module */
   moduleName: string;
+
   /** Version du module */
   moduleVersion: string;
+
   /** Nom du tenant */
   tenantName: string;
+
   /** Afficher en mode compact */
   compact?: boolean;
 }
@@ -42,6 +49,7 @@ interface ActivationReportViewProps {
  */
 function formatDate(isoDate: string | undefined): string {
   if (!isoDate) return '-';
+
   try {
     return new Intl.DateTimeFormat('fr-FR', {
       dateStyle: 'medium',
@@ -313,7 +321,7 @@ export function ActivationReportView({
           <AccordionSummary expandIcon={<i className="tabler-chevron-down" />}>
             <Typography variant="subtitle2" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <i className="tabler-list-check" />
-              Étapes d'exécution ({result.steps.length})
+              Étapes d&apos;exécution ({result.steps.length})
             </Typography>
           </AccordionSummary>
           <AccordionDetails>

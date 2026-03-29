@@ -34,7 +34,9 @@ const HorizontalModuleMenu = () => {
     } else if (pathname?.includes('/admin')) {
       return 'admin'
     }
-    return undefined
+
+    
+return undefined
   }, [pathname])
 
   const { menus, isLoading } = useConfigMenus({ visibleOnly: true, role: currentRole })
@@ -59,7 +61,7 @@ const HorizontalModuleMenu = () => {
         return <span style={{ fontSize: '1.25rem' }}>{menu.icon.value}</span>
       }
 
-      if (menu.icon.type === 'iconify') {
+      if (menu.icon.type === 'icon-class') {
         return <i className={menu.icon.value} />
       }
 
