@@ -148,4 +148,32 @@ export const meetingsService = {
     const response = await apiClient.post<MeetingActionResponse>(`${MEETINGS_BASE_URL}/${meetingId}/comments`, { comment })
     return response.data
   },
+
+  async getComments(meetingId: number): Promise<{ success: boolean; data: MeetingComment[] }> {
+    const response = await apiClient.get<{ success: boolean; data: MeetingComment[] }>(`${MEETINGS_BASE_URL}/${meetingId}/comments`)
+    return response.data
+  },
+
+  async getLogs(meetingId: number): Promise<{ success: boolean; data: MeetingLog[] }> {
+    const response = await apiClient.get<{ success: boolean; data: MeetingLog[] }>(`${MEETINGS_BASE_URL}/${meetingId}/logs`)
+    return response.data
+  },
+}
+
+// ─── Tab data types ───────────────────────────────────────
+
+export interface MeetingComment {
+  id: number
+  comment: string
+  type: string
+  created_at: string | null
+}
+
+export interface MeetingLog {
+  id: number
+  comment: string | null
+  user: string | null
+  old_status: string | null
+  new_status: string | null
+  created_at: string | null
 }

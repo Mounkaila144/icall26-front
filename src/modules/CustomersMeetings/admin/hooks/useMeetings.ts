@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { meetingsService } from '../services/meetingsService'
 import type {
   CustomerMeeting,
@@ -54,6 +54,8 @@ export const useMeetings = (initialFilters?: Partial<MeetingFilters> | Record<st
     ...initialFilters,
   })
 
+  const mountedRef = useRef(true)
+
   const loadMeetings = useCallback(async () => {
     try {
       setLoading(true)
@@ -64,6 +66,9 @@ export const useMeetings = (initialFilters?: Partial<MeetingFilters> | Record<st
         page: currentPage,
         per_page: perPage,
       })
+
+      // Ignore response if component was unmounted (StrictMode cleanup)
+      if (!mountedRef.current) return
 
       if (response.success) {
         let meetingsData: CustomerMeeting[] = []
@@ -90,11 +95,14 @@ export const useMeetings = (initialFilters?: Partial<MeetingFilters> | Record<st
         setMeetings([])
       }
     } catch (err) {
+      if (!mountedRef.current) return
       console.error('Error loading meetings:', err)
       setError(err instanceof Error ? err.message : 'An error occurred while loading meetings')
       setMeetings([])
     } finally {
-      setLoading(false)
+      if (mountedRef.current) {
+        setLoading(false)
+      }
     }
   }, [filters, currentPage, perPage])
 
@@ -164,7 +172,11 @@ export const useMeetings = (initialFilters?: Partial<MeetingFilters> | Record<st
   }, [])
 
   useEffect(() => {
+    mountedRef.current = true
     loadMeetings()
+    return () => {
+      mountedRef.current = false
+    }
   }, [loadMeetings])
 
   return {

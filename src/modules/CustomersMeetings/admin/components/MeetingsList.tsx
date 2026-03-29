@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 import Box from '@mui/material/Box'
@@ -16,6 +16,8 @@ import type { CustomerMeeting } from '../../types'
 
 import MeetingMobileCard from './meetings-list/MeetingMobileCard'
 import MeetingFilterPanel from './meetings-list/MeetingFilterPanel'
+import CreateMeetingWizard from './meeting-wizard/CreateMeetingWizard'
+import EditMeetingDialog from './meeting-edit/EditMeetingDialog'
 import { useMeetingListState, COLUMN_TO_BACKEND_FILTER } from './meetings-list/useMeetingListState'
 
 export default function MeetingsList() {
@@ -36,11 +38,13 @@ export default function MeetingsList() {
     return mapped
   }, [initialSidebarFilters])
 
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+
   const {
     meetings, loading, error, currentPage, totalPages, total, perPage,
     permittedFields,
     setCurrentPage, setPerPage, updateFilter, clearFilters,
-    deleteMeeting, updateMeeting, refreshMeetings
+    deleteMeeting, updateMeeting, refreshMeetings, createMeeting, getMeeting
   } = useMeetings(initialBackendFilters)
 
   const { filterOptions } = useMeetingFilterOptions()
@@ -80,7 +84,7 @@ export default function MeetingsList() {
     stickyLeft: ['select', 'id'],
     stickyRight: ['actions'],
     actions: hasCredential([['superadmin', 'admin', 'meeting_new']]) ? [
-      { label: t.newMeeting, icon: 'ri-add-line', color: 'primary', onClick: () => {} }
+      { label: t.newMeeting, icon: 'ri-add-line', color: 'primary', onClick: () => setIsCreateModalOpen(true) }
     ] : [],
     mobileCard: {
       renderCard: meeting => (
@@ -119,6 +123,25 @@ export default function MeetingsList() {
           <DataTable {...tableConfig} />
         </Box>
       </Box>
+
+      {isCreateModalOpen && (
+        <CreateMeetingWizard
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onCreate={createMeeting}
+        />
+      )}
+
+      {isEditModalOpen && selectedMeetingId !== null && (
+        <EditMeetingDialog
+          isOpen={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          onUpdate={updateMeeting}
+          meetingId={selectedMeetingId}
+          onFetchMeeting={getMeeting}
+          filterOptions={filterOptions}
+        />
+      )}
 
       <Snackbar
         open={notification.open}

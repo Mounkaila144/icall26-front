@@ -79,6 +79,7 @@ export interface MeetingCustomer {
   mobile2?: string
   status?: string
   address?: CustomerAddress
+  addresses?: CustomerAddress[]
 }
 
 // ----------------------------------------------------------------------------
@@ -117,6 +118,44 @@ export interface MeetingHistory {
   }
   created_at: string
   updated_at: string
+}
+
+// ----------------------------------------------------------------------------
+// Domoprime Request (fiscal, habitat, surfaces)
+// ----------------------------------------------------------------------------
+
+export interface DomoprimeRequest {
+  id?: number
+  // Fiscal
+  revenue?: number
+  number_of_people?: number
+  number_of_children?: number
+  number_of_fiscal?: number
+  number_of_parts?: number
+  declarants?: string
+  // Surfaces
+  surface_home?: number
+  surface_wall?: number
+  surface_top?: number
+  surface_floor?: number
+  surface_ite?: number
+  parcel_surface?: number
+  parcel_reference?: string
+  // Habitat
+  more_2_years?: 'YES' | 'NO'
+  build_year?: string
+  // FK IDs
+  energy_id?: number | null
+  previous_energy_id?: number | null
+  occupation_id?: number | null
+  layer_type_id?: number | null
+  pricing_id?: number | null
+  // Related entities
+  energy?: NamedRelation | null
+  previous_energy?: NamedRelation | null
+  occupation?: NamedRelation | null
+  layer_type?: NamedRelation | null
+  pricing?: NamedRelation | null
 }
 
 // ----------------------------------------------------------------------------
@@ -218,6 +257,9 @@ export interface CustomerMeeting {
   remarks?: string
   sale_comments?: string
   variables?: any
+
+  // Domoprime
+  domoprime_request?: DomoprimeRequest | null
 
   // Relations (loaded on demand)
   products?: MeetingProduct[]
@@ -393,6 +435,9 @@ export interface CreateMeetingData {
   turnover?: number
   remarks?: string
   sale_comments?: string
+  see_with_mr?: 'YES' | 'NO'
+  see_with_mrs?: 'YES' | 'NO'
+  treated_at?: string
   variables?: any
   is_confirmed?: 'YES' | 'NO'
   is_hold?: 'YES' | 'NO'
@@ -426,6 +471,11 @@ export interface MeetingFilterOptions {
   partner_layers: FilterOption[]
   polluters: FilterOption[]
   products: FilterOption[]
+  energies?: FilterOption[]
+  previous_energies?: FilterOption[]
+  occupations?: FilterOption[]
+  layer_types?: FilterOption[]
+  pricings?: FilterOption[]
 }
 
 export interface FilterOptionsResponse {
