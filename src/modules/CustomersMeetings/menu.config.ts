@@ -17,5 +17,19 @@ export const CustomersMeetingsMenuConfig: ModuleMenuConfig = {
             isVisible: true,
             isActive: true,
         },
+        {
+            id: 'MeetingSchedule',
+            label: 'Planning',
+            route: '/admin/CustomersMeetings/MeetingSchedule',
+            icon: {
+                type: 'emoji',
+                value: '📆',
+            },
+            order: 22,
+            module: 'CustomersMeetings',
+            roles: ['admin'],
+            isVisible: true,
+            isActive: true,
+        },
     ],
 };

@@ -488,3 +488,160 @@ export interface FilterOptionsResponse {
   success: boolean
   data: MeetingFilterOptions
 }
+
+// ----------------------------------------------------------------------------
+// Schedule / Calendar Types
+// ----------------------------------------------------------------------------
+
+export interface ScheduleEventCustomer {
+  id: number
+  name: string
+  phone?: string
+  mobile?: string
+  postcode?: string
+  city?: string
+  address?: string
+}
+
+export interface ScheduleEventStatus {
+  id: number
+  name: string
+  color?: string
+  icon?: string
+}
+
+export interface ScheduleEventUser {
+  id: number
+  name: string
+}
+
+export interface ScheduleEventExtendedProps {
+  meeting_id: number
+  registration: string
+  customer: ScheduleEventCustomer | null
+  status: ScheduleEventStatus | null
+  status_call: ScheduleEventStatus | null
+  telepro: ScheduleEventUser | null
+  sales: ScheduleEventUser | null
+  sale2: ScheduleEventUser | null
+  assistant: ScheduleEventUser | null
+  callcenter: ScheduleEventUser | null
+  campaign: ScheduleEventUser | null
+  is_confirmed: 'YES' | 'NO'
+  in_at: string | null
+  out_at: string | null
+  remarks: string | null
+}
+
+export interface ScheduleEvent {
+  id: number
+  title: string
+  start: string | null
+  end: string | null
+  backgroundColor: string
+  borderColor: string
+  extendedProps: ScheduleEventExtendedProps
+}
+
+export interface ScheduleResponse {
+  success: boolean
+  data: ScheduleEvent[]
+  meta: {
+    total: number
+    start: string
+    end: string
+  }
+}
+
+export interface ScheduleFilters {
+  start: string
+  end: string
+  status?: string
+  telepro_id?: number | string
+  sales_id?: number | string
+  campaign_id?: number | string
+  callcenter_id?: number | string
+  state_id?: number | string
+  status_call_id?: number | string
+  status_lead_id?: number | string
+  is_confirmed?: string
+  postcode?: string
+  in_telepro_id?: string
+  in_sales_id?: string
+  in_state_id?: string
+  in_status_call_id?: string
+  in_campaign_id?: string
+  in_callcenter_id?: string
+  lang?: string
+  [key: string]: any
+}
+
+// ----------------------------------------------------------------------------
+// Tour Generator Types
+// ----------------------------------------------------------------------------
+
+export interface TourMeetingInGroup {
+  id: number
+  order_in_group: number
+  customer_name: string
+  address: string
+  postcode: string
+  city: string
+  in_at: string | null
+  lat: number | null
+  lng: number | null
+}
+
+export interface TourGroup {
+  id: number
+  sale_id: number | null
+  salesperson?: { id: number; name: string } | null
+  total_distance: number
+  total_duration: number
+  meetings: TourMeetingInGroup[]
+}
+
+export interface TourGeneratorMessage {
+  type: 'info' | 'warning' | 'error' | 'success'
+  text: string
+}
+
+export interface Tour {
+  id: number
+  date: string
+  status: 'DRAFT' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED'
+  created_at: string
+}
+
+export interface TourGenerateResponse {
+  success: boolean
+  data: {
+    tour: Tour
+    groups: TourGroup[]
+    messages: TourGeneratorMessage[]
+  }
+  message?: string
+}
+
+export interface TourDetailResponse {
+  success: boolean
+  data: {
+    tour: Tour
+    groups: TourGroup[]
+    available_salespeople: Array<{ id: number; name: string }>
+  }
+}
+
+export interface TourIndicator {
+  id: number
+  date: string
+  status: string
+  groups_count: number
+  meetings_count: number
+}
+
+export interface GenerateTourParams {
+  date: string
+  number_of_salespeople: number
+  states?: number[]
+}

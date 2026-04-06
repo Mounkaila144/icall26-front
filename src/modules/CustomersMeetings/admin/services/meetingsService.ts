@@ -8,6 +8,8 @@ import type {
   CreateMeetingData,
   UpdateMeetingData,
   FilterOptionsResponse,
+  ScheduleResponse,
+  ScheduleFilters,
 } from '../../types'
 
 const MEETINGS_BASE_URL = '/admin/customersmeetings/meetings'
@@ -70,6 +72,28 @@ return response.data
 
     
 return response.data
+  },
+
+  // ─── Schedule / Calendar ─────────────────────────────────
+
+  async getSchedule(filters: ScheduleFilters): Promise<ScheduleResponse> {
+    const params = new URLSearchParams()
+
+    for (const [key, value] of Object.entries(filters)) {
+      if (value === undefined || value === null || value === '') continue
+      params.append(key, String(value))
+    }
+
+    const url = `${MEETINGS_BASE_URL}/schedule${params.toString() ? `?${params.toString()}` : ''}`
+    const response = await apiClient.get<ScheduleResponse>(url)
+
+    return response.data
+  },
+
+  async rescheduleMeeting(id: number, data: { in_at: string; out_at?: string }): Promise<MeetingActionResponse> {
+    const response = await apiClient.patch<MeetingActionResponse>(`${MEETINGS_BASE_URL}/${id}/reschedule`, data)
+
+    return response.data
   },
 
   // ─── Meeting Action Endpoints ────────────────────────────

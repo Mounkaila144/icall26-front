@@ -4,12 +4,14 @@
 
 // Admin Layer Components
 export { default as MeetingsList } from './admin/components/MeetingsList';
+export { default as MeetingSchedule } from './admin/components/MeetingSchedule';
 
 // Admin Layer Services
 export { meetingsService } from './admin/services/meetingsService';
 
 // Admin Layer Hooks
 export { useMeetings } from './admin/hooks/useMeetings';
+export { useSchedule } from './admin/hooks/useSchedule';
 export { useMeetingTranslations } from './admin/hooks/useMeetingTranslations';
 
 // Type Exports
@@ -37,4 +39,9 @@ export type {
   MeetingFilterOptions,
   FilterOption,
   FilterOptionsResponse,
+
+  // Schedule Types
+  ScheduleEvent,
+  ScheduleResponse,
+  ScheduleFilters,
 } from './types';

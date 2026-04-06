@@ -11,6 +11,7 @@ import type { ComponentType } from 'react'
 import CustomersComponent from '@/modules/Customers/admin/components/Customers'
 import CustomersContractsList1 from '@/modules/CustomersContracts/admin/components/ContractsList1'
 import MeetingsList from '@/modules/CustomersMeetings/admin/components/MeetingsList'
+import MeetingSchedule from '@/modules/CustomersMeetings/admin/components/MeetingSchedule'
 import { UsersList } from '@/modules/Users/admin/components/UsersList'
 import ConfigurationPage from '@/modules/Configuration/admin/components/ConfigurationPage'
 
@@ -26,6 +27,7 @@ export const adminComponentRegistry: Record<string, ComponentType<any>> = {
 
   // CustomersMeetings module
   'CustomersMeetings:MeetingsList': MeetingsList,
+  'CustomersMeetings:MeetingSchedule': MeetingSchedule,
 
   // Users module
   'Users:UsersList': UsersList,

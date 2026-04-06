@@ -13,6 +13,7 @@ import Divider from '@mui/material/Divider'
 import DocumentSettings from '@/modules/CustomersDocuments/admin/components/DocumentSettings'
 import ContractSettings from '@/modules/CustomersContracts/admin/components/ContractSettings'
 import MeetingSettings from '@/modules/CustomersMeetings/admin/components/MeetingSettings'
+import TourGeneratorSettings from '@/modules/CustomersMeetings/admin/components/tour-generator/TourGeneratorSettings'
 import StatusConfigCrud from './StatusConfigCrud'
 import RangeConfigCrud from './RangeConfigCrud'
 import ZoneConfigCrud from './ZoneConfigCrud'
@@ -192,6 +193,13 @@ const configBlocks: ConfigBlock[] = [
         icon: 'ri-file-edit-line',
         color: '#F59E0B',
       },
+      {
+        key: 'tour-generator-settings',
+        labelKey: 'itemTourGeneratorSettings',
+        descriptionKey: 'itemTourGeneratorSettingsDesc',
+        icon: 'ri-route-line',
+        color: '#0D9488',
+      },
     ],
   },
 ]
@@ -326,6 +334,7 @@ export default function ConfigurationPage() {
         {activeSection === 'meeting-campaigns' ? <CampaignConfigCrud /> : null}
         {activeSection === 'meeting-ranges' ? <RangeConfigCrud baseUrl='/admin/customersmeetings/config/ranges' title={t.meetingRangeTitle} /> : null}
         {activeSection === 'contract-forms' || activeSection === 'meeting-forms' ? <FormConfigCrud /> : null}
+        {activeSection === 'tour-generator-settings' ? <TourGeneratorSettings /> : null}
       </Box>
     )
   }
