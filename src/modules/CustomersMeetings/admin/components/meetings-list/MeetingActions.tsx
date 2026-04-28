@@ -47,7 +47,7 @@ export default function MeetingActionsCell({ meeting, onAction, onEdit, onDelete
       if (userId === meeting.sale2_id) return true
     }
 
-    
+
 return false
   }, [hasCredential, permissions?.user_id, meeting.assistant_id, meeting.telepro_id, meeting.sales_id, meeting.sale2_id])
 
@@ -121,13 +121,6 @@ return false
             <ListItemText>{isConfirmed ? t.actionUnconfirm : t.actionConfirm}</ListItemText>
           </MenuItem>
         )}
-        {canCancel && (
-          <MenuItem onClick={() => fire(isCancelled ? 'uncancel' : 'cancel')} sx={{ ...menuItemSx, ...dimmedSx, color: isCancelled ? 'success.main' : 'error.main' }}>
-            <ListItemIcon><i className={isCancelled ? 'ri-arrow-go-back-line' : 'ri-forbid-line'} style={{ ...iconSx, color: 'inherit' }} /></ListItemIcon>
-            <ListItemText>{isCancelled ? t.actionUncancel : t.actionCancel}</ListItemText>
-          </MenuItem>
-        )}
-
         {/* ── Edit ── */}
         {hasToggleGroup && canEdit && <Divider />}
         {canEdit && (
@@ -136,6 +129,22 @@ return false
             <ListItemText>{t.actionEdit}</ListItemText>
           </MenuItem>
         )}
+        {canCopyMeeting && (
+          <MenuItem onClick={() => fire('copy_meeting')} sx={{ ...menuItemSx, color: 'secondary.main' }}>
+            <ListItemIcon><i className='ri-file-copy-line' style={{ ...iconSx, color: 'inherit' }} /></ListItemIcon>
+            <ListItemText>{t.actionCopyMeeting}</ListItemText>
+          </MenuItem>
+        )}
+
+
+        {canCancel && (
+          <MenuItem onClick={() => fire(isCancelled ? 'uncancel' : 'cancel')} sx={{ ...menuItemSx, ...dimmedSx, color: isCancelled ? 'success.main' : 'error.main' }}>
+            <ListItemIcon><i className={isCancelled ? 'ri-arrow-go-back-line' : 'ri-forbid-line'} style={{ ...iconSx, color: 'inherit' }} /></ListItemIcon>
+            <ListItemText>{isCancelled ? t.actionUncancel : t.actionCancel}</ListItemText>
+          </MenuItem>
+        )}
+
+
 
         {/* ── Communication ── */}
         {hasCommunicationGroup && <Divider />}
@@ -184,12 +193,7 @@ return false
             <ListItemText>{t.actionCancelCallback}</ListItemText>
           </MenuItem>
         )}
-        {canCopyMeeting && (
-          <MenuItem onClick={() => fire('copy_meeting')} sx={{ ...menuItemSx, color: 'secondary.main' }}>
-            <ListItemIcon><i className='ri-file-copy-line' style={{ ...iconSx, color: 'inherit' }} /></ListItemIcon>
-            <ListItemText>{t.actionCopyMeeting}</ListItemText>
-          </MenuItem>
-        )}
+
         {canCreateContract && (
           <MenuItem onClick={() => fire('create_contract')} sx={{ ...menuItemSx, color: 'primary.main' }}>
             <ListItemIcon><i className='ri-file-add-line' style={{ ...iconSx, color: 'inherit' }} /></ListItemIcon>
