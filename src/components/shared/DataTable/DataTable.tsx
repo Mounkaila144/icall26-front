@@ -378,7 +378,7 @@ export function DataTable<TData extends Record<string, any>>(props: DataTableCon
                           key={`${header.id}-filter`}
                           style={{ padding: '4px 6px', ...getStickyStyle(header.id, 'filter') }}
                         >
-                          {header.id === 'select' || header.id === 'row_number' || header.id === 'action' || header.id === 'actions' || header.id === 'id' ? null : (
+                          {header.id === 'select' || header.id === 'row_number' || header.id === 'action' || header.id === 'actions' ? null : (
                             createColumnFilter(header.id)
                           )}
                         </th>

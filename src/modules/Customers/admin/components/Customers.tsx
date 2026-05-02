@@ -96,12 +96,12 @@ export default function Customers() {
     return defaultVisibility
   })
 
-  // Save column visibility
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(columnVisibility))
-    }
-  }, [columnVisibility])
+  // Persist column visibility in event handler — avoids an extra effect run on mount.
+  const handleColumnVisibilityChange = useCallback((visibility: Record<string, boolean>) => {
+    setColumnVisibility(visibility)
+
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(visibility)) } catch { /* ignore */ }
+  }, [])
 
   // Load customers
   const loadCustomers = useCallback(async () => {
@@ -328,7 +328,7 @@ return {
     pagination,
     availableColumns: AVAILABLE_COLUMNS,
     columnVisibility,
-    onColumnVisibilityChange: setColumnVisibility,
+    onColumnVisibilityChange: handleColumnVisibilityChange,
     onPageChange: page => setPagination(prev => ({ ...prev, current_page: page })),
     onPageSizeChange: size => {
       setFilters(prev => ({ ...prev, per_page: size }))

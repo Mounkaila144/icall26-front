@@ -346,6 +346,60 @@ export default function BasePolluterDocumentsSection({
               {t.docNoQuotations}
             </Typography>
 
+            {/* Symfony quotationsITEForViewContract.tpl (theme32a actual): when no quotation,
+                renders 2 "+" buttons + Docusign/Yousign/Yousign Evidence iframe + Email. */}
+            {hasCredential([['superadmin', 'app_domoprime_iso3_contract_list_quotation_new']]) ? (
+              <Tooltip title={t.docActionNewQuotation}>
+                <span>
+                  <IconButton size='small' color='primary' disabled={isHold}>
+                    <i className='ri-add-line' style={{ fontSize: 16 }} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            ) : null}
+
+            {hasCredential([['superadmin', 'app_domoprime_iso3_contract_list_quotation_new3']]) ? (
+              <Tooltip title={t.docActionNewQuotation3}>
+                <span>
+                  <IconButton size='small' sx={{ color: 'info.main' }} disabled={isHold}>
+                    <i className='ri-add-line' style={{ fontSize: 16 }} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            ) : null}
+
+            <Tooltip title={t.docActionDocusign}>
+              <span>
+                <IconButton size='small' disabled>
+                  <i className='ri-file-text-line' style={{ fontSize: 16, color: '#888' }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+
+            <Tooltip title={t.docActionYousign}>
+              <span>
+                <IconButton size='small' disabled>
+                  <i className='ri-file-text-line' style={{ fontSize: 16, color: '#e53935' }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+
+            <Tooltip title={t.docActionYousignEvidence}>
+              <span>
+                <IconButton size='small' disabled>
+                  <i className='ri-file-text-line' style={{ fontSize: 16, color: '#1976d2' }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+
+            <Tooltip title={t.docActionEmail}>
+              <span>
+                <IconButton size='small' sx={{ color: 'info.main' }} disabled>
+                  <i className='ri-mail-line' style={{ fontSize: 16 }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+
             <Tooltip title={t.docRefresh}>
               <IconButton size='small' onClick={() => fetchDocuments()}>
                 <i className='ri-refresh-line' style={{ fontSize: 16 }} />

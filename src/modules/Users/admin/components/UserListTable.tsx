@@ -25,11 +25,15 @@ import type { ThemeColor } from '@core/types'
 import type { User , UserCreationOptions } from '../../types/user.types'
 
 // Component Imports
+import dynamic from 'next/dynamic'
+
 import CustomAvatar from '@core/components/mui/Avatar'
-import UserFunctionsModal from './UserFunctionsModal'
-import UserGroupsModal from './UserGroupsModal'
-import UserAddModal from './UserAddModal'
-import UserEditModal from './UserEditModal'
+
+// Heavy modals are lazy-loaded — only mount when actually opened.
+const UserFunctionsModal = dynamic(() => import('./UserFunctionsModal'), { ssr: false })
+const UserGroupsModal = dynamic(() => import('./UserGroupsModal'), { ssr: false })
+const UserAddModal = dynamic(() => import('./UserAddModal'), { ssr: false })
+const UserEditModal = dynamic(() => import('./UserEditModal'), { ssr: false })
 
 // Shared DataTable Components
 import { DataTable, StandardMobileCard } from '@/components/shared/DataTable'
@@ -869,17 +873,21 @@ return {
     <>
       <DataTable {...tableConfig} />
 
-      {/* Functions Modal */}
-      <UserFunctionsModal open={functionsModalOpen} onClose={handleCloseFunctionsModal} user={selectedUser} />
+      {functionsModalOpen && (
+        <UserFunctionsModal open onClose={handleCloseFunctionsModal} user={selectedUser} />
+      )}
 
-      {/* Groups Modal */}
-      <UserGroupsModal open={groupsModalOpen} onClose={handleCloseGroupsModal} user={selectedUser} />
+      {groupsModalOpen && (
+        <UserGroupsModal open onClose={handleCloseGroupsModal} user={selectedUser} />
+      )}
 
-      {/* Add User Modal */}
-      <UserAddModal open={addModalOpen} onClose={handleCloseAddModal} onSuccess={handleAddSuccess} />
+      {addModalOpen && (
+        <UserAddModal open onClose={handleCloseAddModal} onSuccess={handleAddSuccess} />
+      )}
 
-      {/* Edit User Modal */}
-      <UserEditModal open={editModalOpen} onClose={handleCloseEditModal} onSuccess={handleEditSuccess} user={selectedUser} />
+      {editModalOpen && (
+        <UserEditModal open onClose={handleCloseEditModal} onSuccess={handleEditSuccess} user={selectedUser} />
+      )}
     </>
   )
 }

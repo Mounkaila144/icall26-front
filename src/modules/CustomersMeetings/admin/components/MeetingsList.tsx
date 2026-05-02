@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 
+import dynamic from 'next/dynamic'
 import { useSearchParams } from 'next/navigation'
 
 import Box from '@mui/material/Box'
@@ -17,9 +18,11 @@ import type { CustomerMeeting } from '../../types'
 
 import MeetingMobileCard from './meetings-list/MeetingMobileCard'
 import MeetingFilterPanel from './meetings-list/MeetingFilterPanel'
-import CreateMeetingWizard from './meeting-wizard/CreateMeetingWizard'
-import EditMeetingDialog from './meeting-edit/EditMeetingDialog'
 import { useMeetingListState, COLUMN_TO_BACKEND_FILTER } from './meetings-list/useMeetingListState'
+
+// Heavy dialogs are lazy-loaded — they only mount when actually opened.
+const CreateMeetingWizard = dynamic(() => import('./meeting-wizard/CreateMeetingWizard'), { ssr: false })
+const EditMeetingDialog = dynamic(() => import('./meeting-edit/EditMeetingDialog'), { ssr: false })
 
 export default function MeetingsList() {
   const searchParams = useSearchParams()

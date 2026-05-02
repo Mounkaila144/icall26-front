@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 
+import dynamic from 'next/dynamic'
 import { useSearchParams } from 'next/navigation'
 
 import Box from '@mui/material/Box'
@@ -15,14 +16,17 @@ import { DataTable } from '@/components/shared/DataTable'
 import type { DataTableConfig } from '@/components/shared/DataTable'
 import type { CustomerContract } from '../../types'
 
-import CreateContractWizard from './contract-wizard/CreateContractWizard'
-import EditContractDialog from './contract-edit/EditContractDialog'
 import ContractMobileCard from './contracts-list/ContractMobileCard'
 import ContractFilterPanel from './contracts-list/ContractFilterPanel'
-import SendSmsDialog from './dialogs/SendSmsDialog'
-import SendEmailDialog from './dialogs/SendEmailDialog'
-import ContractCommentDialog from './dialogs/ContractCommentDialog'
 import { useContractListState, COLUMN_TO_BACKEND_FILTER } from './contracts-list/useContractListState'
+
+// Heavy dialogs are lazy-loaded — they only mount when actually opened.
+// Avoids bundling rich form fields, date pickers, and wizard steps in the initial chunk.
+const CreateContractWizard = dynamic(() => import('./contract-wizard/CreateContractWizard'), { ssr: false })
+const EditContractDialog = dynamic(() => import('./contract-edit/EditContractDialog'), { ssr: false })
+const SendSmsDialog = dynamic(() => import('./dialogs/SendSmsDialog'), { ssr: false })
+const SendEmailDialog = dynamic(() => import('./dialogs/SendEmailDialog'), { ssr: false })
+const ContractCommentDialog = dynamic(() => import('./dialogs/ContractCommentDialog'), { ssr: false })
 
 export default function ContractsList1() {
   const searchParams = useSearchParams()
@@ -148,32 +152,38 @@ return mapped
         />
       )}
 
-      <SendSmsDialog
-        open={smsDialogContractId !== null}
-        contractId={smsDialogContractId}
-        onClose={handleCloseSmsDialog}
-        onSuccess={refreshContracts}
-        showNotification={showNotification}
-        t={t}
-      />
+      {smsDialogContractId !== null && (
+        <SendSmsDialog
+          open
+          contractId={smsDialogContractId}
+          onClose={handleCloseSmsDialog}
+          onSuccess={refreshContracts}
+          showNotification={showNotification}
+          t={t}
+        />
+      )}
 
-      <SendEmailDialog
-        open={emailDialogContractId !== null}
-        contractId={emailDialogContractId}
-        onClose={handleCloseEmailDialog}
-        onSuccess={refreshContracts}
-        showNotification={showNotification}
-        t={t}
-      />
+      {emailDialogContractId !== null && (
+        <SendEmailDialog
+          open
+          contractId={emailDialogContractId}
+          onClose={handleCloseEmailDialog}
+          onSuccess={refreshContracts}
+          showNotification={showNotification}
+          t={t}
+        />
+      )}
 
-      <ContractCommentDialog
-        open={commentDialogContractId !== null}
-        contractId={commentDialogContractId}
-        onClose={handleCloseCommentDialog}
-        onSuccess={refreshContracts}
-        showNotification={showNotification}
-        t={t}
-      />
+      {commentDialogContractId !== null && (
+        <ContractCommentDialog
+          open
+          contractId={commentDialogContractId}
+          onClose={handleCloseCommentDialog}
+          onSuccess={refreshContracts}
+          showNotification={showNotification}
+          t={t}
+        />
+      )}
 
       <Snackbar
         open={notification.open}

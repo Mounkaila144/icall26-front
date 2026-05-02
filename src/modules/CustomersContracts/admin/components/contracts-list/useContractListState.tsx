@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect, useRef, type SyntheticEvent } from 'react'
+import { useState, useMemo, useCallback, type SyntheticEvent } from 'react'
 
 import { createColumnHelper } from '@tanstack/react-table'
 import type { ColumnDef } from '@tanstack/react-table'
@@ -24,6 +24,8 @@ const columnHelper = createColumnHelper<CustomerContract>()
  * Matches Symfony's CustomerContractsFormFilter field names.
  */
 export const COLUMN_TO_BACKEND_FILTER: Record<string, string> = {
+  id:                'search_id',
+
   // Text search columns
   customer:          'search_lastname',
   customer_phone:    'search_phone',
@@ -200,21 +202,9 @@ return permittedFields.has(col.id)
     setNotification(prev => ({ ...prev, open: false }))
   }, [])
 
-  // On mount: sync URL-persisted sidebar filters to the backend
-  const hasHydratedRef = useRef(false)
-
-  useEffect(() => {
-    if (hasHydratedRef.current || !initialSidebarFilters || Object.keys(initialSidebarFilters).length === 0) return
-    hasHydratedRef.current = true
-
-    for (const [columnId, value] of Object.entries(initialSidebarFilters)) {
-      const backendParam = COLUMN_TO_BACKEND_FILTER[columnId]
-
-      if (backendParam && value) {
-        updateFilter(backendParam, value)
-      }
-    }
-  }, [initialSidebarFilters, updateFilter])
+  // URL-persisted sidebar filters are already injected into the first API call
+  // via `initialBackendFilters` in ContractsList1.tsx, so no hydration effect
+  // is needed here — adding one would cause a redundant /contracts call after mount.
 
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(() => {
     if (typeof window === 'undefined') return {}

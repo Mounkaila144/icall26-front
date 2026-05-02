@@ -440,6 +440,100 @@ This keeps the credential check **explicit per type** (matches Symfony) while DR
 
 ---
 
+## List page performance patterns (CRITICAL — apply to EVERY list)
+
+These rules come from a real measured optimization: ContractsList1 went from **LCP 6.7 s → 493 ms** (×13.7) by fixing 3 specific bugs. Reproduce these patterns for every new list (and audit the existing ones: `ContractsList1`, `MeetingsList`, `UsersList`, `Customers`).
+
+### 1. Never read tenant Storage in `Resource::toArray()` without caching
+
+**Symptom:** the first row of a list takes 2 000–3 000 ms while the rest take 1 ms — backend `json_encode` blows up.
+
+**Cause:** `app(<X>SettingsService::class)->getXxx()` calls `loadConfig()` which reads `XxxSettings.dat` from S3 (`tenant_s3` disk) on every HTTP request. One S3 read = 2 s on local Laragon. Confirmed via per-row timings: `[2537, 1.6, 1.1, 1.0, …]`.
+
+**Fix (apply this template to every `*SettingsService`):**
+- Add a class-level static cache `protected static array $configByTenant = []` keyed by `tenant->site_id`.
+- Wrap the Storage read in `Cache::store('file')->get(...)` / `put(...)` (TTL 600 s). Force the `file` driver because the project's default is Redis and Redis is not always running — `Cache::remember` with the default driver throws `RedisException` and burns 2 s per call.
+- Invalidate both caches in `save()` and `refresh()`.
+- Reference implementation: `Modules/CustomersContracts/Services/ContractSettingsService.php` (mirror to `Modules/CustomersMeetings/Services/MeetingSettingsService.php`).
+
+In the Resource's `toArray()`, also keep an in-method `static $statusCache = null` so the *first* row pays the (now-cached) lookup and the rest hit the static.
+
+### 2. Never render heavy modals at mount
+
+**Symptom:** the list page bundle is huge and the table is interactive 1–2 s late even after the API returns.
+
+**Cause:** dialogs like `CreateContractWizard`, `EditContractDialog`, `Send{Sms,Email}Dialog`, `UserAddModal`, etc. ship rich form fields, date pickers, and wizard steps — bundling them in the initial chunk delays hydration.
+
+**Fix:**
+- Replace `import X from './X'` with `const X = dynamic(() => import('./X'), { ssr: false })`.
+- Wrap each dialog usage in `{open && <X open ... />}` so the chunk doesn't even download until the dialog opens.
+- Reference: `src/modules/CustomersContracts/admin/components/ContractsList1.tsx`. Same pattern is now applied to `MeetingsList.tsx` and `UserListTable.tsx`.
+
+### 3. Never duplicate filter hydration in a `useEffect`
+
+**Symptom:** `/<resource>` is called 2–3 times at mount instead of once.
+
+**Cause:** the parent component (`ContractsList1.tsx`) maps URL sidebar filters to backend params via `initialBackendFilters` (a `useMemo`) and passes them to `useContracts(initialBackendFilters)` — so filters are already in the **first** request. A second `useEffect` inside `useContractListState` then loops over the same filters and calls `updateFilter(...)` per-key, which mutates state and triggers a second `loadContracts`. React StrictMode double-mount in dev makes it look like 3 calls.
+
+**Fix:**
+- Inject persisted filters at the source (`initialBackendFilters` → hook initial state). Done.
+- Delete any "On mount: sync URL-persisted sidebar filters" `useEffect` inside the list-state hook.
+- Reference: removed in `useContractListState.tsx` and `useMeetingListState.tsx`.
+
+### 4. Persist UI state in event handlers, not in `useEffect`
+
+**Symptom:** an extra effect run on mount, and on every visibility toggle.
+
+**Cause:** writing `localStorage` from `useEffect(..., [columnVisibility])` runs once on mount with the initial value (no-op write) and again every change.
+
+**Fix:** wrap `setColumnVisibility` in a handler that also writes `localStorage`. Reference: `useContractListState.tsx` (`handleColumnVisibilityChange`), now applied to `Customers.tsx`.
+
+### 5. Backend `index()` controllers must stay thin
+
+For a list endpoint, the controller should do at most: resolve permissions → call `repository->getFilteredXxx()` → wrap in `XxxListCollection` → return JSON. **No `Storage::` reads, no extra DB roundtrips outside the repository.**
+
+Per-list-row settings (cancel/blowing/placement flags, etc.) belong in the `*SettingsService` with the cache from rule #1. The Resource consumes them through a method-level `static` cache so the cost is paid once per request.
+
+### 6. Permission gates must use indexed lookups, not loops
+
+`HasPermissions` trait already exposes O(1) `getPermissionIndex()` and `getGroupIndex()`. Never write `$user->permissions->contains('name', 'X')` in a hot path — that's O(n) per row × 15 rows × N permission checks = thousands of array scans.
+
+### 7. Always measure with Chrome DevTools MCP before declaring "fixed"
+
+The optimizer's loop:
+1. `mcp__chrome-devtools__performance_start_trace` → navigate → `performance_stop_trace`. Read LCP and TTFB.
+2. `evaluate_script` with `performance.getEntriesByType('resource')` to count duplicate API calls and per-call durations.
+3. Add a `?__profile=1` query param to the slow endpoint that returns `permissions_ms`, `repository_ms`, `resource_toArray_ms`, `json_encode_ms`, per-row timings, query count + cumulative time. **Per-row timings reveal whether the cost is per-row (eager-load problem) or one-time (settings/cache miss).**
+4. Compare before/after for: `client_ms`, controller breakdown, and number of API calls at mount.
+
+### Checklist for a NEW list page
+
+When you build a new admin list (e.g. `MyEntitiesList.tsx`), apply these in order:
+
+**Frontend**
+- [ ] Component < 200 lines. If larger, extract `useMyEntityListState`, mobile card, filter panel.
+- [ ] All modals (create/edit/send/etc.) imported via `next/dynamic({ ssr: false })`.
+- [ ] All modals wrapped in `{open && <Dialog />}`. No "always mounted, hidden" pattern.
+- [ ] `initialBackendFilters` computed from URL `searchParams` and passed to `useMyEntities(initialBackendFilters)`. **No hydration `useEffect`.**
+- [ ] Column visibility persisted in an event handler (`handleColumnVisibilityChange`), not in `useEffect`.
+- [ ] Statistics/secondary calls (`/statistics`, `/filter-options`) fired in parallel, never blocking the table.
+- [ ] No effect with a missing dep that re-runs `loadXxx` on filter-object identity changes — use stable refs or include the actual filter values as deps.
+
+**Backend**
+- [ ] `index()` controller: ≤ 30 lines, no `Storage::`, no `Cache::` outside the service.
+- [ ] If the Resource needs per-tenant settings, the service uses the **2-level cache pattern** (static class + `Cache::store('file')`).
+- [ ] Resource `toArray()` uses a method-level `static` cache for any value that is the same for every row in the request.
+- [ ] Repository: eager-load only relations the visible columns need. Use `select('id,name')` on every `belongsTo`/`hasOne`.
+- [ ] Permissions resolved via `HasPermissions` indexed lookups (`hasCredential` is already O(1)).
+- [ ] No N+1: confirm with `?__profile=1` that the query count stays roughly constant when going from 1 to 50 rows.
+
+**Verification**
+- [ ] Open the page in Chrome DevTools MCP. LCP must be < 1 s for ≤ 50 rows on local dev.
+- [ ] Network tab: only **one** `/<resource>` call at mount in production build (StrictMode dev shows 2 — that's expected).
+- [ ] Re-load: TTFB on `/<resource>` < 300 ms with the cache warm.
+
+---
+
 ## Quick-find recipes
 
 - **"Where is the Symfony render of this UI?"** →

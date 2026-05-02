@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import Box from '@mui/material/Box'
@@ -19,7 +19,7 @@ import type { ContractTranslations } from '../../hooks/useContractTranslations'
 // ── Text search columns (free-text input) ──
 // Note: customer handled separately (section 7) because it has domoprime_status sub-filter
 export const TEXT_SEARCH_COLUMNS = new Set([
-  'customer_phone', 'customer_city', 'customer_postcode'
+  'id', 'customer_phone', 'customer_city', 'customer_postcode'
 ])
 
 // ── Boolean filter columns (YES/NO or Y/N selects) ──
@@ -145,6 +145,71 @@ const COMPACT_CHECKBOX_SX = {
   '& .MuiFormControlLabel-label': { fontSize: '0.7rem' },
 }
 
+function TextSearchFilter({
+  value,
+  onFilterChange,
+  columnId,
+  loading,
+  placeholder,
+  commitOnEnter,
+}: {
+  value: string
+  onFilterChange: (columnId: string, value: string) => void
+  columnId: string
+  loading: boolean
+  placeholder: string
+  commitOnEnter?: boolean
+}) {
+  const [localValue, setLocalValue] = useState(value)
+  const committedValueRef = useRef(value)
+
+  useEffect(() => {
+    setLocalValue(value)
+    committedValueRef.current = value
+  }, [value])
+
+  const commitFilter = useCallback(() => {
+    if (localValue === committedValueRef.current) return
+
+    committedValueRef.current = localValue
+    onFilterChange(columnId, localValue)
+  }, [columnId, localValue, onFilterChange])
+
+  return (
+    <TextField
+      size='small'
+      value={commitOnEnter ? localValue : value}
+      onChange={e => {
+        if (commitOnEnter) {
+          setLocalValue(e.target.value)
+
+          return
+        }
+
+        onFilterChange(columnId, e.target.value)
+      }}
+      onBlur={commitOnEnter ? commitFilter : undefined}
+      onKeyDown={commitOnEnter ? e => {
+        if (e.key === 'Enter') commitFilter()
+      } : undefined}
+      placeholder={placeholder}
+      fullWidth
+      variant='outlined'
+      disabled={loading}
+      sx={{ ...COMPACT_INPUT_SX, minWidth: 120 }}
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position='start' sx={{ mr: 0.5 }}>
+              <i className='ri-search-line' style={{ fontSize: '0.875rem', opacity: 0.5 }} />
+            </InputAdornment>
+          ),
+        },
+      }}
+    />
+  )
+}
+
 // ── Searchable Autocomplete filter (with built-in search bar) ──
 function SearchableSelectFilter({
   value,
@@ -219,24 +284,13 @@ export function createColumnFilterFactory(
     // 1. Text search
     if (TEXT_SEARCH_COLUMNS.has(columnId)) {
       return (
-        <TextField
-          size='small'
+        <TextSearchFilter
           value={value}
-          onChange={e => onFilterChange(columnId, e.target.value)}
+          onFilterChange={onFilterChange}
+          columnId={columnId}
           placeholder={t.filterSearch}
-          fullWidth
-          variant='outlined'
-          disabled={loading}
-          sx={{ ...COMPACT_INPUT_SX, minWidth: 120 }}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position='start' sx={{ mr: 0.5 }}>
-                  <i className='ri-search-line' style={{ fontSize: '0.875rem', opacity: 0.5 }} />
-                </InputAdornment>
-              ),
-            },
-          }}
+          loading={loading}
+          commitOnEnter={columnId === 'id'}
         />
       )
     }
