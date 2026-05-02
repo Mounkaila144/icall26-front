@@ -422,6 +422,8 @@
   "docLoadError": "خطأ في تحميل المستندات",
   "docDocumentsFor": "وثائق لـ",
   "docNoPolluter": "لا يوجد ملوث مرتبط بهذا العقد.",
+  "docContractOnHold": "العقد معلّق — المستندات غير متاحة.",
+  "docContractHoldQuote": "عرض الأسعار مُقفل — المستندات غير متاحة.",
   "docVerifyBillingDate": "تحقق من تاريخ الفوترة",
   "docQuotations": "عروض الأسعار",
   "docBillings": "الفواتير",

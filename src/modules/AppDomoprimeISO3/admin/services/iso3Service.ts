@@ -810,11 +810,20 @@ return response.data;
         `${BASE_URL}/contracts/${contractId}/company-doc-signatures`
       );
 
-      
+
 return response.data;
     } catch (error) {
       console.error(`Error fetching company doc signatures for contract ${contractId}:`, error);
       throw error;
     }
+  },
+
+  async exportCompanyModelPdf(contractId: number, modelId: number): Promise<Blob> {
+    const response = await apiClient.get(
+      `${BASE_URL}/contracts/${contractId}/company-models/${modelId}/export`,
+      { responseType: 'blob' }
+    );
+
+    return response.data;
   },
 };

@@ -19,6 +19,18 @@ import type { ActionType } from './MeetingActions'
 
 const columnHelper = createColumnHelper<CustomerMeeting>()
 
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
 /**
  * Maps frontend column IDs to backend filter parameter names.
  */
@@ -240,6 +252,16 @@ return defaults
         case 'copy_meeting':   result = await meetingsService.copyMeeting(meetingId); break
         case 'recycle':        result = await meetingsService.recycleMeeting(meetingId); break
         case 'create_contract': result = await meetingsService.createContract(meetingId); break
+        case 'create_default_products': result = await meetingsService.createDefaultProducts(meetingId); break
+        case 'migrate':        result = await meetingsService.migrateMeeting(meetingId); break
+        case 'transfer_to_slave': result = await meetingsService.transferToSlave(meetingId); break
+        case 'slaves_transfer': result = await meetingsService.slavesTransfer(meetingId); break
+        case 'export_kml':
+          downloadBlob(await meetingsService.exportKml(meetingId), `meeting_${meetingId}.kml`)
+          break
+        case 'export_pdf':
+          downloadBlob(await meetingsService.exportPdf(meetingId), `meeting_${meetingId}.pdf`)
+          break
 
         // Communication (open dialogs)
         case 'send_sms':     setSmsDialogMeetingId(meetingId); 
@@ -315,8 +337,8 @@ return { ...prev, [columnId]: value }
   const handleCloseCommentDialog = useCallback(() => setCommentDialogMeetingId(null), [])
 
   // Column filter factory
-  const createColumnFilter = useCallback(
-    createColumnFilterFactory(columnFilters, handleColumnFilterChange, loading, filterOptions, t),
+  const createColumnFilter = useMemo(
+    () => createColumnFilterFactory(columnFilters, handleColumnFilterChange, loading, filterOptions, t),
     [columnFilters, handleColumnFilterChange, loading, filterOptions, t]
   )
 

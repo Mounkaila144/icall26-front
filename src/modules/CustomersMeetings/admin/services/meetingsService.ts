@@ -198,6 +198,48 @@ return response.data
 
   // ─── Communication ────────────────────────────────────────
 
+  async createDefaultProducts(id: number): Promise<MeetingActionResponse> {
+    const response = await apiClient.post<MeetingActionResponse>(`${MEETINGS_BASE_URL}/${id}/create-default-products`)
+
+    
+return response.data
+  },
+
+  async migrateMeeting(id: number): Promise<MeetingActionResponse> {
+    const response = await apiClient.post<MeetingActionResponse>(`${MEETINGS_BASE_URL}/${id}/migrate`)
+
+    
+return response.data
+  },
+
+  async transferToSlave(id: number): Promise<MeetingActionResponse> {
+    const response = await apiClient.post<MeetingActionResponse>(`${MEETINGS_BASE_URL}/${id}/transfer-to-slave`)
+
+    
+return response.data
+  },
+
+  async slavesTransfer(id: number): Promise<MeetingActionResponse> {
+    const response = await apiClient.post<MeetingActionResponse>(`${MEETINGS_BASE_URL}/${id}/slaves-transfer`)
+
+    
+return response.data
+  },
+
+  async exportKml(id: number): Promise<Blob> {
+    const response = await apiClient.get(`${MEETINGS_BASE_URL}/${id}/export-kml`, { responseType: 'blob' })
+
+    
+return response.data
+  },
+
+  async exportPdf(id: number): Promise<Blob> {
+    const response = await apiClient.get(`${MEETINGS_BASE_URL}/${id}/export-pdf`, { responseType: 'blob' })
+
+    
+return response.data
+  },
+
   async sendSms(id: number, data: { message: string }): Promise<MeetingActionResponse> {
     const response = await apiClient.post<MeetingActionResponse>(`${MEETINGS_BASE_URL}/${id}/send-sms`, data)
 

@@ -251,6 +251,7 @@ export interface CustomerMeeting {
   is_works_hold?: 'Y' | 'N'
   is_locked?: 'YES' | 'NO'
   is_callback_cancelled?: 'YES' | 'NO'
+  transferred?: boolean | 'YES' | 'NO' | 0 | 1 | '0' | '1' | null
 
   // Computed state flags (from backend)
   is_cancelled?: boolean

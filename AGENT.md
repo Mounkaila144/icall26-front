@@ -1,321 +1,295 @@
-# CLAUDE.md
+# AGENT.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Project instructions for Codex when working in this repository.
 
-## Project Overview
+## Project Summary
 
-This is a **Materialize MUI Next.js Admin Template** - a full-featured admin dashboard built with Next.js 15, Material-UI (MUI) 6, TypeScript, and Prisma. The project includes internationalization (i18n) support for English, French, and Arabic with RTL support.
+This repository is the ICALL26 frontend, built from the Materialize MUI Next.js Admin Template and customized into a modular admin application.
 
-## Development Commands
+Main stack:
+- Next.js 15 App Router, React 18, TypeScript strict mode.
+- MUI 6, Emotion, Tailwind CSS 3 with logical properties for RTL.
+- Redux Toolkit for shared client state.
+- Axios for backend calls through a shared API client.
+- NextAuth and Prisma are still present from the template.
+- Internationalization supports `en`, `fr`, and `ar`; Arabic is RTL.
 
-### Core Commands
-- `pnpm dev` - Start development server with Turbopack
-- `pnpm build` - Build production bundle
-- `pnpm start` - Start production server
-- `pnpm lint` - Run ESLint
-- `pnpm lint:fix` - Run ESLint with auto-fix
-- `pnpm format` - Format code with Prettier
+Treat the app as a real business application, not only as a template. Prefer the feature modules in `src/modules` and shared utilities in `src/shared` over legacy template demo patterns.
 
-### Database
-- `pnpm migrate` - Run Prisma migrations (requires `.env` file)
-- Prisma schema location: `src/prisma/schema.prisma`
-- Database: SQLite (configurable via `DATABASE_URL` in `.env`)
+## Commands
 
-### Other
-- `pnpm build:icons` - Bundle Iconify icons (runs automatically on postinstall)
-- `pnpm removeI18n` - Remove translation scripts
+Use `pnpm` by default.
 
-## Architecture
+- `pnpm dev` - start the development server with Turbopack.
+- `pnpm build` - build the production bundle.
+- `pnpm start` - start the production server.
+- `pnpm lint` - run ESLint.
+- `pnpm lint:fix` - run ESLint with automatic fixes.
+- `pnpm format` - format source files with Prettier.
+- `pnpm build:icons` - bundle Iconify icons.
+- `pnpm migrate` - run Prisma migrations using `.env`.
+- `pnpm removeI18n` - run the template script that removes i18n features.
 
-### App Structure (Next.js 15 App Router)
+Before finishing code changes, run the most relevant check. For broad TypeScript or UI changes, prefer `pnpm lint` and `pnpm build` when time allows.
 
-The application uses Next.js App Router with a sophisticated routing structure:
+## Important Directories
 
-```
-src/app/
-├── [lang]/                          # Language-based routing (en, fr, ar)
-│   ├── (dashboard)/(private)/       # Authenticated dashboard pages
-│   └── (blank-layout-pages)/        # Pages without dashboard layout
-│       └── (guest-only)/            # Login, register, etc.
-└── api/                             # API routes
-```
+- `src/app` - Next.js App Router routes.
+- `src/app/[lang]` - locale-prefixed routes.
+- `src/app/[lang]/admin/[...slug]` - dynamic admin module routing.
+- `src/app/[lang]/superadmin/[...slug]` - dynamic superadmin module routing.
+- `src/app/api` - Next.js API routes.
+- `src/modules` - business feature modules. Add new domain work here first.
+- `src/shared` - cross-module components, hooks, contexts, config, i18n, API, permissions, and utilities.
+- `src/components/shared/DataTable` - reusable data table system.
+- `src/@core`, `src/@layouts`, `src/@menu` - Materialize/MUI template core, layouts, and menu primitives.
+- `src/data/dictionaries` and `src/shared/i18n` - translations.
+- `src/prisma/schema.prisma` - Prisma schema.
 
-**Route Groups:**
-- `(dashboard)/(private)` - Protected pages requiring authentication, includes full dashboard layout
-- `(blank-layout-pages)` - No dashboard chrome, used for auth pages and misc pages
-- `(guest-only)` - Nested within blank-layout, prevents access for authenticated users
+Current business modules include:
+- `AppDomoprime`
+- `AppDomoprimeISO3`
+- `Configuration`
+- `Customers`
+- `CustomersContracts`
+- `CustomersDocuments`
+- `CustomersMeetings`
+- `Dashboard`
+- `Site`
+- `SuperAdmin`
+- `Users`
+- `UsersGuard`
 
-### Path Aliases (tsconfig.json)
+## Path Aliases
 
-- `@/*` → `src/*`
-- `@core/*` → `src/@core/*` - Core theme, hooks, utilities
-- `@layouts/*` → `src/@layouts/*` - Layout components (Vertical, Horizontal, Blank)
-- `@menu/*` → `src/@menu/*` - Menu system and navigation
-- `@assets/*` → `src/assets/*`
-- `@components/*` → `src/components/*`
-- `@configs/*` → `src/configs/*`
-- `@views/*` → `src/views/*` - Page-level view components
+Configured in `tsconfig.json`:
 
-### Layout System
+- `@/*` -> `src/*`
+- `@core/*` -> `src/@core/*`
+- `@layouts/*` -> `src/@layouts/*`
+- `@menu/*` -> `src/@menu/*`
+- `@assets/*` -> `src/assets/*`
+- `@components/*` -> `src/components/*`
+- `@configs/*` -> `src/configs/*`
+- `@views/*` -> `src/views/*`
+- `@/modules/*` -> `src/modules/*`
+- `@/shared/*` -> `src/shared/*`
 
-The application supports **three layout modes**:
-1. **Vertical Layout** - Traditional sidebar navigation (default)
-2. **Horizontal Layout** - Top navigation bar
-3. **Collapsed Layout** - Minimized sidebar
+Use these aliases instead of deep relative imports when crossing feature boundaries.
 
-**Key Layout Files:**
-- `src/@layouts/LayoutWrapper.tsx` - Switches between layout modes based on settings
-- `src/@layouts/VerticalLayout.tsx` - Sidebar layout implementation
-- `src/@layouts/HorizontalLayout.tsx` - Top navigation layout
-- `src/@layouts/BlankLayout.tsx` - Minimal layout for auth pages
+## Routing And Layouts
 
-**Layout Configuration:**
-- Settings stored in cookies (see `themeConfig.settingsCookieName`)
-- Theme customizer component allows runtime layout switching
-- Settings context: `src/@core/contexts/settingsContext.tsx`
+The application uses the Next.js App Router with language prefixes.
 
-### Authentication (NextAuth.js)
+Relevant route groups:
+- `(dashboard)/(private)` - protected dashboard pages with dashboard layout.
+- `(blank-layout-pages)` - auth and misc pages without dashboard chrome.
+- `(guest-only)` - pages that authenticated users should not access.
+- `admin/[...slug]` - admin module route dispatcher.
+- `superadmin/[...slug]` - superadmin module route dispatcher.
 
-- Configuration: `src/libs/auth.ts`
-- API route: `src/app/api/auth/[...nextauth]/route.ts`
-- Providers: Credentials (custom login API) and Google OAuth
-- Session strategy: JWT
-- Auth guards:
-  - `src/hocs/AuthGuard.tsx` - Protects private routes
-  - `src/hocs/GuestOnlyRoute.tsx` - Restricts authenticated users from auth pages
+Redirects are defined in `next.config.ts`:
+- `/` -> `/en/dashboards/crm`
+- `/:lang` -> `/:lang/dashboards/crm`
+- paths without a language prefix get redirected to `/en/:path`
 
-**Environment Variables Required:**
-- `NEXTAUTH_SECRET` - JWT encryption secret
-- `NEXTAUTH_URL` - Full auth URL including basepath
-- `NEXTAUTH_BASEPATH` - If deploying to subdirectory
-- `API_URL` - Backend API for credentials login
-- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` - For OAuth
+Layouts:
+- `src/@layouts/LayoutWrapper.tsx` chooses the active layout.
+- `src/@layouts/VerticalLayout.tsx` implements the sidebar layout.
+- `src/@layouts/HorizontalLayout.tsx` implements top navigation.
+- `src/@layouts/BlankLayout.tsx` is for auth and simple pages.
 
-### Internationalization (i18n)
+Settings such as layout, theme mode, and skin are stored in cookies through `themeConfig.settingsCookieName`. If a visual setting appears stuck during development, clear browser cookies or reset through the customizer.
 
-**Supported Languages:** English (en), French (fr), Arabic (ar)
+## Feature Module Pattern
 
-**Key Files:**
-- `src/configs/i18n.ts` - i18n configuration including RTL support for Arabic
-- `src/data/dictionaries/` - Translation JSON files
-- `src/utils/getDictionary.ts` - Server-side translation loader
-- `src/components/layout/shared/LanguageDropdown.tsx` - Language switcher
+Prefer a feature-first structure inside `src/modules/<ModuleName>`.
 
-**Direction Handling:**
-- RTL automatically applied for Arabic
-- Direction prop flows through Providers → ThemeProvider
-- MUI theme and Tailwind both support RTL
+Recommended organization:
+- `types/` or `*.types.ts` - domain and API types.
+- `services/` - typed API calls.
+- `hooks/` - state, business logic, filtering, permissions, and actions.
+- `components/` - UI-only pieces.
+- `menu.config.ts` - module menu entries.
+- route/page adapters only compose hooks and components.
 
-### State Management
+Keep business logic out of large page components. Components should mostly render props and call handlers from hooks.
 
-- **Redux Toolkit** - Global state (`src/redux-store/`)
-- Slices:
-  - `calendar.ts` - Calendar events
-  - `chat.ts` - Chat messages
-  - `email.ts` - Email client
-  - `kanban.ts` - Kanban boards
-- Provider: `src/redux-store/ReduxProvider.tsx` (wraps app in Providers)
+When adding a new module menu:
+1. Create or update `src/modules/<ModuleName>/menu.config.ts`.
+2. Register it in `src/shared/config/menu-registry.ts`.
+3. Ensure route generation matches the module's admin or superadmin context.
 
-### Menu/Navigation System
+## API Access
 
-**Menu Data:**
-- `src/data/navigation/verticalMenuData.tsx` - Sidebar menu structure
-- `src/data/navigation/horizontalMenuData.tsx` - Top nav menu structure
+Use the shared API client and typed services. Do not call `fetch` or raw `axios` directly from components unless there is a clear existing local pattern.
 
-**Menu Components:**
-- `src/@menu/` - Core menu system library
-- `src/components/layout/vertical/VerticalMenu.tsx` - Sidebar renderer
-- `src/components/layout/horizontal/HorizontalMenu.tsx` - Top nav renderer
-- `src/components/GenerateMenu.tsx` - Dynamic menu generation from data
+Primary API client:
+- `src/shared/lib/api-client.ts`
 
-**Menu System Features:**
-- Supports nested submenus, sections, links, external links
-- Menu configuration: `src/@menu/defaultConfigs.ts`
-- Toggle animations controlled by duration constants
+Important behavior:
+- Base URL uses `NEXT_PUBLIC_API_URL` with `/api` fallback.
+- Admin requests include `X-Tenant-ID` from `localStorage.tenant_id`.
+- Requests include `Accept-Language` from the current URL/local storage.
+- Auth tokens are stored separately for admin and superadmin contexts.
+- 401 responses try token refresh once, then clear auth state and redirect to login.
+- Superadmin context is detected from `/superadmin` in the path.
 
-### Theming (MUI + Tailwind)
+Backend data rules:
+- Use current backend field names, not old Symfony labels. Example: use `team.name`, not `regie_callcenter`.
+- Treat API fields as optional when permissions can hide them.
+- Use optional chaining and explicit fallbacks for display values.
+- Status objects should display `status.value ?? status.name` where applicable.
+- Some booleans may arrive as strings such as `YES`, `NO`, `Y`, or `N`; use or create a helper instead of inline checks.
 
-**MUI Theme:**
-- Theme definition: `src/@core/theme/`
-- Color schemes: `src/@core/theme/colorSchemes.ts`
-- Component overrides: `src/@core/theme/overrides/` (extensive MUI customization)
-- Mode: Supports `light`, `dark`, `system`
-- Skin: `default` or `bordered`
+## Auth And Permissions
 
-**Tailwind:**
-- Config: `tailwind.config.ts`
-- Custom plugin: `src/@core/tailwind/plugin.ts`
-- Uses `tailwindcss-logical` for RTL-aware spacing
-- Preflight disabled (MUI provides base styles)
-- Important selector: `#__next` (scopes Tailwind to app)
+Auth-related files:
+- `src/libs/auth.ts`
+- `src/app/api/auth/[...nextauth]/route.ts`
+- `src/hocs/AuthGuard.tsx`
+- `src/hocs/GuestOnlyRoute.tsx`
+- `src/modules/UsersGuard`
+- `src/shared/contexts/PermissionsContext.tsx`
+- `src/shared/components/permissions/Can.tsx`
+- `src/shared/utils/permissions.ts`
 
-**Theme Configuration:**
-- `src/configs/themeConfig.ts` - Default theme settings
-- Settings persisted in cookies
-- Customizer UI: `src/@core/components/customizer/`
+Frontend permissions are for UI visibility only. The backend remains the source of truth for security.
 
-### Data Layer
+Permission conventions:
+- Prefer explicit permission slugs.
+- For column visibility, use an `AVAILABLE_COLUMNS` configuration with a permission or credential field.
+- Compute permitted columns with `useMemo`.
+- Use `Set` for O(1) lookup of permitted column ids.
+- Desktop tables and mobile cards must follow the same permission rules.
+- Keep permission logic in hooks or helpers, not scattered through JSX.
 
-**Fake Data:**
-- `src/fake-db/` - Mock data for demos (apps, pages, widgets)
-- API routes in `src/app/api/` serve this data
+Existing credential arrays may use OR-style groups such as `[['superadmin', 'admin', 'specific_permission']]`. Preserve the current module's pattern when editing.
 
-**Prisma (Real Database):**
-- Schema: `src/prisma/schema.prisma`
-- Models: User, Account, Session, VerificationToken (NextAuth adapter schema)
-- Default provider: SQLite (can be changed to PostgreSQL, MySQL, etc.)
+## Internationalization
 
-### Component Patterns
+Supported locales:
+- `en`
+- `fr`
+- `ar`
 
-**Custom Components:**
-- `src/@core/components/` - Reusable core components (customizer, scroll-to-top, option-menu)
-- `src/components/` - App-specific components (layout, dialogs, cards)
-- `src/components/dialogs/` - Reusable dialog components (confirmation, payment, user forms)
+Important files:
+- `src/configs/i18n.ts`
+- `src/data/dictionaries/*.json`
+- `src/shared/i18n/translations/*.json`
+- `src/utils/getDictionary.ts`
+- `src/shared/i18n/use-translation.ts`
+- `src/components/layout/shared/LanguageDropdown.tsx`
+- `src/shared/components/LanguageSwitcher.tsx`
 
-**HOCs:**
-- `src/hocs/TranslationWrapper.tsx` - Provides dictionary to client components
-- `src/hocs/AuthGuard.tsx` - Protects routes, redirects to login
-- `src/hocs/GuestOnlyRoute.tsx` - Redirects authenticated users away from auth pages
+Rules:
+- Keep route URLs locale-aware.
+- Do not hardcode user-facing strings in new reusable UI when a translation layer is already used nearby.
+- Preserve RTL support for Arabic. Use logical CSS utilities/properties where possible.
 
-**Client Wrappers:**
-- Heavy libraries lazy-loaded via client wrappers in `src/libs/`:
-  - `ApexCharts.tsx`, `Recharts.tsx` - Chart libraries
-  - `ReactPlayer.tsx` - Video player
+## UI And Styling
 
-### Styling Strategy
+Use the existing MUI and Materialize conventions.
 
-**CSS Modules:**
-- Used for component-specific styles
-- Examples: `src/@core/components/customizer/styles.module.css`
+- Prefer MUI components for forms, tables, dialogs, navigation, and feedback.
+- Use `src/components/shared/DataTable` for reusable table behavior.
+- Use Tailwind for layout utilities when consistent with surrounding code.
+- Use CSS modules for local component-specific styles when the nearby code does.
+- Do not introduce a new design system.
+- Keep dashboards dense, practical, and easy to scan.
+- Match existing spacing, colors, typography, and card patterns.
 
-**Global Styles:**
-- `src/app/globals.css` - Base styles and Tailwind imports
-- Library styles: `src/libs/styles/` (react-datepicker, fullcalendar, etc.)
+Theme files:
+- `src/@core/theme`
+- `src/@core/theme/overrides`
+- `src/configs/themeConfig.ts`
+- `src/configs/primaryColorConfig.ts`
+- `src/components/theme`
 
-**MUI Styled Components:**
-- `@emotion/styled` for styled components
-- Emotion cache configuration for SSR
+Icon system:
+- Iconify icons are bundled by `pnpm build:icons`.
+- Bootstrap Icons are the default icon set.
+- Prefer existing icon patterns before adding new libraries.
 
-### Icon System
+## TypeScript And React Standards
 
-**Iconify:**
-- Icons bundled at build time via `pnpm build:icons`
-- Bundle script: `src/assets/iconify-icons/bundle-icons-css.ts`
-- Uses Bootstrap Icons by default
-- Remote fallback available
+TypeScript:
+- Keep strict typing.
+- Use `import type` for type-only imports.
+- Prefer `unknown` plus type guards over `any`.
+- Use interfaces for component props when extending or sharing shapes.
+- Keep API response types aligned with backend reality.
+- Use discriminated unions for meaningful async or state variants.
 
-## Code Standards
+React:
+- Prefer Server Components by default.
+- Add `'use client'` only for hooks, event handlers, local state, browser APIs, or client-only libraries.
+- Do not define React components inside other components.
+- Extract large components into smaller components and hooks.
+- Memoize expensive derived values with `useMemo`.
+- Use `useCallback` for handlers passed deep or into memoized children.
+- Avoid prop drilling past two levels; use composition or context.
+- Avoid boolean prop proliferation; prefer a `variant`, config object, or compound component where appropriate.
 
-### ESLint Rules
+## Code Style
 
-**Import Ordering:**
+Follow the repository ESLint and Prettier configuration.
+
+Import order expected by the lint rules:
 1. `react`
 2. `next/**`
 3. External packages
-4. `@/**` (internal aliases)
+4. Internal aliases such as `@/**`
 5. Relative imports
 
-**Spacing Rules:**
-- Blank line before comments (with exceptions for block/object/array starts)
-- Blank line after variable declarations
-- Blank line before/after functions and multi-line blocks
-- Blank line before return statements
-- Blank line after imports
+Other standards:
+- Components use PascalCase filenames.
+- Utilities and configs use camelCase.
+- CSS modules use `*.module.css`.
+- Delete dead code instead of commenting it out.
+- Comments should explain why, not restate what the code does.
+- Prefer guard clauses over deeply nested conditionals.
+- Avoid magic strings for storage keys, endpoints, and permission names.
+- Avoid unrelated refactors while fixing a focused issue.
 
-**TypeScript:**
-- Consistent type imports required (`import type`)
-- No `any` allowed in lint (but disabled in config)
-- Unused vars are errors
+## Testing And Verification
 
-### File Naming
-- React components: PascalCase (e.g., `VerticalLayout.tsx`)
-- Utilities/configs: camelCase (e.g., `themeConfig.ts`)
-- CSS Modules: `*.module.css`
+There is no explicit `test` script in `package.json` at the time of writing. Do not claim tests were run unless a valid command was actually run.
 
-## Important Notes
+Use the available checks:
+- `pnpm lint` for lint and import/order issues.
+- `pnpm build` for TypeScript and Next.js integration issues.
+- `pnpm format` only when formatting source files is appropriate.
 
-### Redirects
-The app automatically redirects:
-- `/` → `/en/dashboards/crm`
-- `/:lang` → `/:lang/dashboards/crm`
-- Missing language prefix → `/en/:path`
+When making risky UI changes, run the app with `pnpm dev` and inspect the affected route if possible.
 
-These are defined in `next.config.ts`.
+## Environment Notes
 
-### Cookie-Based Settings
-Layout, theme mode, skin, and other UI settings are stored in cookies. To see config changes during development, either:
-1. Use the Customizer reset button
-2. Clear cookies from browser DevTools
+Common environment variables:
+- `NEXT_PUBLIC_API_URL` - backend API base URL used by the shared API client.
+- `NEXTAUTH_SECRET` - NextAuth JWT/session secret.
+- `NEXTAUTH_URL` - full auth URL.
+- `NEXTAUTH_BASEPATH` - auth base path when deployed under a subdirectory.
+- `API_URL` - may still be used by legacy/template auth code.
+- `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` - Google OAuth.
+- `DATABASE_URL` - Prisma database URL.
+- `BASEPATH` - deployment subdirectory support in Next config.
 
-### Prisma Client Generation
-`prisma generate` runs automatically on `postinstall`. If Prisma types are missing, run `pnpm install` again.
+Prisma:
+- Schema is `src/prisma/schema.prisma`.
+- `prisma generate` runs on `postinstall`.
+- If Prisma types are missing, run dependency installation again before changing generated assumptions.
 
-### BASEPATH Support
-The app supports deployment to subdirectories via the `BASEPATH` environment variable. All URLs and auth paths respect this setting.
+## Codex Workflow
 
-### Translation Removal
-The template includes scripts to remove i18n features if not needed (`pnpm removeI18n`). This modifies packages, layout files, and removes translation-related code.
+When modifying this project:
+1. Read the nearby module before editing.
+2. Preserve existing module conventions unless they are clearly broken.
+3. Prefer changes in `src/modules` or `src/shared` over edits in template internals.
+4. Keep API logic in services and hooks.
+5. Keep JSX focused on rendering.
+6. Update menus, permissions, translations, and mobile views together when a feature requires them.
+7. Run a relevant verification command and report exactly what passed or failed.
+8. Do not revert unrelated user changes in the working tree.
 
-## Code Quality Standards
-
-These rules come from installed skills (clean-code, typescript-advanced-types, vercel-react-best-practices, vercel-composition-patterns, test-driven-development, architecture-patterns). Apply them automatically to ALL code — never wait for the user to ask.
-
-### Clean Code (skill: clean-code)
-- Intention-revealing names: `getCustomerFullName()` not `getName()`, `permittedColumnIds` not `ids`
-- Functions do ONE thing, max 20 lines. If name has "and", split it
-- Early returns over nested if/else: guard clauses first, happy path last
-- No dead code: delete unused imports, variables, components — don't comment them out
-- Don't comment bad code — rewrite it. Comments explain WHY, not WHAT
-- Small parameter lists: 0-2 ideal, 3+ needs an options object or interface
-- No magic strings: use constants for storage keys, credential names, API endpoints
-- Avoid null returns: use fallback values (`|| '-'`) or optional chaining (`?.`)
-- DRY: 3+ identical patterns → extract helper, 2 similar → leave as-is
-
-### React Best Practices (skills: vercel-react-best-practices, vercel-composition-patterns)
-- Components: max 150 lines. If larger, extract sub-components or custom hooks
-- Extract logic to custom hooks: `useContractListState`, `useContracts`, etc.
-- Memoize expensive computations: `useMemo` for filtered/derived data, `useCallback` for handlers passed as props
-- Never define components inside components — extract to separate files
-- Conditional rendering: prefer early returns and `&&` over ternary nesting
-- Prop drilling max 2 levels — beyond that, use Context or composition
-- Boolean prop proliferation → use compound components or variant prop
-- Co-locate related files: `contracts-list/useContractListState.ts` next to `ContractMobileCard.tsx`
-- Prefer Server Components by default, use `'use client'` only when needed (hooks, event handlers, browser APIs)
-
-### TypeScript Advanced Types (skill: typescript-advanced-types)
-- Always type props with interfaces: `interface ContractColumnConfig extends ColumnConfig`
-- Use `type` imports: `import type { CustomerContract } from '../../types'`
-- Prefer `unknown` over `any` — use type guards instead of `as` assertions
-- Generics for reusable components: `interface PaginatedProps<T> { items: T[]; total: number }`
-- Discriminated unions for state: `type Result<T> = { status: 'success'; data: T } | { status: 'error'; error: string }`
-- Mapped types to avoid duplication: `type EditForm<T> = Partial<T>` for edit versions of create types
-- Use `readonly` for immutable data: `readonly permissions: string[]`
-- Template literal types for string patterns when appropriate
-- API response types must match backend: permission-gated fields use `?` (e.g. `customer?: { phone?: string }`)
-
-### Architecture Patterns (skill: architecture-patterns)
-- Module structure: `types/` (domain) → `hooks/` (logic) → `components/` (UI) → `services/` (API calls)
-- Custom hooks encapsulate all business logic — components only render
-- Services abstract API calls behind typed functions — components never call `fetch` directly
-- Co-locate by feature, not by type: `modules/CustomersContracts/admin/` has its own hooks, components, types
-
-### Test-Driven Development (skill: test-driven-development)
-- RED-GREEN-REFACTOR: write failing test → minimal code to pass → refactor
-- One behavior per test: split tests with "and" in their names
-- Real code in tests, mocks ONLY for API calls and external dependencies
-- Use React Testing Library: test behavior (what user sees), not implementation
-- Run tests with `pnpm test` — never commit code that breaks existing tests
-
-### Permissions Pattern (always apply)
-- Column visibility: `AVAILABLE_COLUMNS` array with `credential` field per column
-- Filter with `useMemo`: `permittedColumns = AVAILABLE_COLUMNS.filter(col => !col.credential || hasCredential(col.credential))`
-- O(1) lookup: `permittedColumnIds = new Set(permittedColumns.map(col => col.id))`
-- Mobile cards must also respect permissions (use `hidden` prop with `hasCredential()`)
-- Backend is source of truth for security — frontend only hides UI (defense in depth)
-- Credential format: `[['superadmin', 'admin', 'specific_permission']]` (OR logic matching Symfony 1)
-
-### API Data Access (always apply)
-- Use backend field names, not legacy Symfony names: `team.name` not `regie_callcenter`
-- Always handle optional fields with `?.` and fallback `|| '-'`
-- Status objects: access `status.value ?? status.name` for i18n display
-- Booleans from API are strings: use helper `isYes(val)` to check "YES"/"NO"/"Y"/"N"
+Current repository may contain local uncommitted work. Check `git status --short` before larger edits and avoid touching unrelated files.

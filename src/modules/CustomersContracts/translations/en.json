@@ -422,6 +422,8 @@
   "docLoadError": "Error loading documents",
   "docDocumentsFor": "Documents for",
   "docNoPolluter": "No polluter associated with this contract.",
+  "docContractOnHold": "Contract is on hold — documents are not accessible.",
+  "docContractHoldQuote": "Quotation is locked — documents are not accessible.",
   "docVerifyBillingDate": "Verify billing date",
   "docQuotations": "Quotations",
   "docBillings": "Billings",

@@ -422,6 +422,8 @@
   "docLoadError": "Erreur lors du chargement des documents",
   "docDocumentsFor": "Documents pour",
   "docNoPolluter": "Aucun pollueur associé au contrat.",
+  "docContractOnHold": "Le contrat est bloqué — aucun document accessible.",
+  "docContractHoldQuote": "Le devis est bloqué — aucun document accessible.",
   "docVerifyBillingDate": "Vérifier la date de facturation",
   "docQuotations": "Devis",
   "docBillings": "Facture",
