@@ -27,8 +27,13 @@ import type {
   Iso3QuotationResponse,
   Iso3QuotationListResponse,
   Iso3BillingListResponse,
+  Iso3NewQuotationFormResponse,
+  CreateQuotationMode,
+  Iso3QuotationEligibilityResponse,
   Iso3SimulationResponse,
   Iso3SimulationInput,
+  Iso3CreateQuotationInput,
+  Iso3CreateQuotationResponse,
   CreateQuotationMeetingData,
   CreateQuotationContractData,
   UpdateQuotationMeetingData,
@@ -289,6 +294,38 @@ return response.data;
 // ============================================================================
 
 export const iso3QuotationService = {
+  async checkEligibility(contractId: number): Promise<Iso3QuotationEligibilityResponse> {
+    try {
+      const response = await apiClient.get<Iso3QuotationEligibilityResponse>(
+        `${BASE_URL}/contracts/${contractId}/quotation-eligibility`
+      );
+
+      
+return response.data;
+    } catch (error) {
+      console.error(`Error checking quotation eligibility for contract ${contractId}:`, error);
+      throw error;
+    }
+  },
+
+  async getNewForm(
+    contractId: number,
+    mode: CreateQuotationMode = 'standard'
+  ): Promise<Iso3NewQuotationFormResponse> {
+    try {
+      const response = await apiClient.get<Iso3NewQuotationFormResponse>(
+        `${BASE_URL}/quotations/contracts/${contractId}/new-form`,
+        { params: { mode } }
+      );
+
+      
+return response.data;
+    } catch (error) {
+      console.error(`Error fetching new quotation form for contract ${contractId}:`, error);
+      throw error;
+    }
+  },
+
   async listMasterProducts(): Promise<Iso3MasterProductListResponse> {
     try {
       const response = await apiClient.get<Iso3MasterProductListResponse>(
@@ -427,10 +464,44 @@ return response.data;
         data
       );
 
-      
+
 return response.data;
     } catch (error) {
       console.error('Error running simulation:', error);
+      throw error;
+    }
+  },
+
+  async simulateForContract(
+    contractId: number,
+    data: Iso3SimulationInput
+  ): Promise<Iso3SimulationResponse> {
+    try {
+      const response = await apiClient.post<Iso3SimulationResponse>(
+        `${BASE_URL}/quotations/contracts/${contractId}/simulate`,
+        data
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error(`Error running simulation for contract ${contractId}:`, error);
+      throw error;
+    }
+  },
+
+  async createQuotationForContract(
+    contractId: number,
+    data: Iso3CreateQuotationInput
+  ): Promise<Iso3CreateQuotationResponse> {
+    try {
+      const response = await apiClient.post<Iso3CreateQuotationResponse>(
+        `${BASE_URL}/quotations/contracts/${contractId}/create`,
+        data
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error(`Error creating quotation for contract ${contractId}:`, error);
       throw error;
     }
   },

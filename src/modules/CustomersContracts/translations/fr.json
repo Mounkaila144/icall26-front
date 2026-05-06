@@ -353,6 +353,7 @@
   "isoPricing": "Tarif CUMAC",
   "isoParcelSurface": "Surface sur parcelle",
   "isoLayerType": "Type de pose",
+  "isoSurfaceHome": "Surface habitat",
   "isoSurfaceTop": "Surface 101",
   "isoSurfaceWall": "Surface 102",
   "isoSurfaceFloor": "Surface 103",

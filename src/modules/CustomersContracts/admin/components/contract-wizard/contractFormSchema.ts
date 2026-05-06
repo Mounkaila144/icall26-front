@@ -143,6 +143,7 @@ export const isoSchema = object({
   tax_credit_used: optional(number()),
 
   // Home (template 2, section "Home")
+  surface_home: optional(number()),
   surface_top: optional(number()),
   surface_wall: optional(number()),
   surface_floor: optional(number()),

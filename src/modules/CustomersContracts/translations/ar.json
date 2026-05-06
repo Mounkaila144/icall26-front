@@ -353,6 +353,7 @@
   "isoPricing": "التسعير",
   "isoParcelSurface": "مساحة القطعة",
   "isoLayerType": "نوع التركيب",
+  "isoSurfaceHome": "مساحة المسكن",
   "isoSurfaceTop": "مساحة 101",
   "isoSurfaceWall": "مساحة 102",
   "isoSurfaceFloor": "مساحة 103",

@@ -353,6 +353,7 @@
   "isoPricing": "Pricing",
   "isoParcelSurface": "Parcel Surface",
   "isoLayerType": "Installation Type",
+  "isoSurfaceHome": "Home surface",
   "isoSurfaceTop": "Surface 101",
   "isoSurfaceWall": "Surface 102",
   "isoSurfaceFloor": "Surface 103",

@@ -268,6 +268,11 @@ export default function StepIso({ form, verifForm, domoprimeOptions, domoprimeOp
           <Grid container spacing={3}>
             {!hideRemovableFields && (
               <Grid size={{ xs: 12, sm: 6 }}>
+                <NumberField name='surface_home' control={control} label={t.isoSurfaceHome} unit='m²' />
+              </Grid>
+            )}
+            {!hideRemovableFields && (
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <NumberField name='surface_top' control={control} label={t.isoSurfaceTop} unit='m²' />
               </Grid>
             )}

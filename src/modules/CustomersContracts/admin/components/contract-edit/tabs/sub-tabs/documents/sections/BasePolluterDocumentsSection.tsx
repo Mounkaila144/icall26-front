@@ -1,9 +1,16 @@
 'use client'
 
+import { useState } from 'react'
+
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Alert from '@mui/material/Alert'
+import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
 import Snackbar from '@mui/material/Snackbar'
 import Tooltip from '@mui/material/Tooltip'
 import IconButton from '@mui/material/IconButton'
@@ -11,6 +18,7 @@ import Collapse from '@mui/material/Collapse'
 
 import type { CustomerContract } from '../../../../../../../types'
 import type { ContractTranslations } from '../../../../../../hooks/useContractTranslations'
+import { iso3QuotationService } from '@/modules/AppDomoprimeISO3'
 import { usePermissions } from '@/shared/contexts/PermissionsContext'
 
 import { POLLUTER_TYPE_SUFFIXES, formatDate } from '../helpers'
@@ -21,6 +29,7 @@ import BillingDetailsTable from '../BillingDetailsTable'
 import CompanyModelsSection from '../CompanyModelsSection'
 import CompanyDocSignatureSection from '../CompanyDocSignatureSection'
 import CreateBillingDialog from '../CreateBillingDialog'
+import CreateQuotationDialog from '../CreateQuotationDialog'
 import EditQuotationView from '../EditQuotationView'
 
 export type PolluterType = 'ITE' | 'BOILER' | 'PAC' | 'TYPE1' | 'TYPE2' | 'ISO'
@@ -39,6 +48,9 @@ export default function BasePolluterDocumentsSection({
   polluterType,
 }: BasePolluterDocumentsSectionProps) {
   const { hasCredential } = usePermissions()
+  const [createQuotationMode, setCreateQuotationMode] = useState<'standard' | 'advanced' | null>(null)
+  const [eligibilityErrors, setEligibilityErrors] = useState<string[]>([])
+  const [checkingEligibility, setCheckingEligibility] = useState(false)
 
   const polluterCommercial = contract?.polluter?.commercial ?? contract?.polluter?.name ?? '-'
   const suffix = POLLUTER_TYPE_SUFFIXES[polluterType] ?? ''
@@ -113,6 +125,36 @@ export default function BasePolluterDocumentsSection({
   const billingLabel = lastBilling
     ? `${t.docBillings} ${lastBilling.reference} ${formatDate(lastBilling.dated_at)}`
     : t.docBillings
+
+  const openCreateQuotationDialog = async (mode: 'standard' | 'advanced') => {
+    if (!contractId) return
+
+    setCheckingEligibility(true)
+
+    try {
+      const result = await iso3QuotationService.checkEligibility(contractId)
+
+      if (!result.eligible) {
+        setEligibilityErrors(result.errors)
+
+        return
+      }
+
+      setCreateQuotationMode(mode)
+    } catch {
+      setEligibilityErrors(['No calculation possible'])
+    } finally {
+      setCheckingEligibility(false)
+    }
+  }
+
+  const closeCreateQuotationDialog = () => {
+    setCreateQuotationMode(null)
+  }
+
+  const closeEligibilityDialog = () => {
+    setEligibilityErrors([])
+  }
 
   if (loading) {
     return (
@@ -351,8 +393,16 @@ export default function BasePolluterDocumentsSection({
             {hasCredential([['superadmin', 'app_domoprime_iso3_contract_list_quotation_new']]) ? (
               <Tooltip title={t.docActionNewQuotation}>
                 <span>
-                  <IconButton size='small' color='primary' disabled={isHold}>
-                    <i className='ri-add-line' style={{ fontSize: 16 }} />
+                  <IconButton
+                    size='small'
+                    color='primary'
+                    disabled={isHold || checkingEligibility}
+                    onClick={() => openCreateQuotationDialog('standard')}
+                  >
+                    {checkingEligibility
+                      ? <CircularProgress size={14} />
+                      : <i className='ri-add-line' style={{ fontSize: 16 }} />
+                    }
                   </IconButton>
                 </span>
               </Tooltip>
@@ -361,8 +411,16 @@ export default function BasePolluterDocumentsSection({
             {hasCredential([['superadmin', 'app_domoprime_iso3_contract_list_quotation_new3']]) ? (
               <Tooltip title={t.docActionNewQuotation3}>
                 <span>
-                  <IconButton size='small' sx={{ color: 'info.main' }} disabled={isHold}>
-                    <i className='ri-add-line' style={{ fontSize: 16 }} />
+                  <IconButton
+                    size='small'
+                    sx={{ color: 'info.main' }}
+                    disabled={isHold || checkingEligibility}
+                    onClick={() => openCreateQuotationDialog('advanced')}
+                  >
+                    {checkingEligibility
+                      ? <CircularProgress size={14} />
+                      : <i className='ri-add-line' style={{ fontSize: 16 }} />
+                    }
                   </IconButton>
                 </span>
               </Tooltip>
@@ -496,6 +554,30 @@ export default function BasePolluterDocumentsSection({
         loading={billingLoading}
         t={t}
       />
+
+      <CreateQuotationDialog
+        contractId={contractId}
+        mode={createQuotationMode ?? 'standard'}
+        open={createQuotationMode !== null}
+        onClose={closeCreateQuotationDialog}
+        onCreated={() => { fetchDocuments() }}
+      />
+
+      <Dialog open={eligibilityErrors.length > 0} onClose={closeEligibilityDialog} fullWidth maxWidth='sm'>
+        <DialogTitle>No calculation possible</DialogTitle>
+        <DialogContent dividers>
+          <Box component='ul' sx={{ m: 0, pl: 3 }}>
+            {eligibilityErrors.map(error => (
+              <Box component='li' key={error} sx={{ mb: 0.75 }}>
+                <Typography variant='body2'>{error}</Typography>
+              </Box>
+            ))}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeEligibilityDialog}>Fermer</Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar
         open={notification.open}

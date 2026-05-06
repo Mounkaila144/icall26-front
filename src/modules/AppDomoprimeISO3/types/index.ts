@@ -272,6 +272,98 @@ export interface QuotationProductItemInput {
   coefficient?: number;
 }
 
+export type CreateQuotationMode = 'standard' | 'advanced';
+
+export interface Iso3NewQuotationProduct {
+  contract_product_id: number;
+  product_id: number;
+  reference: string | null;
+  title: string;
+  unit: string | null;
+  default_quantity: number;
+}
+
+export interface Iso3NewQuotationSubItem {
+  id: number;
+  is_default: boolean;
+}
+
+export interface Iso3NewQuotationItem {
+  id: number;
+  name: string;
+  description: string | null;
+  unit: string | null;
+  default_price: number;
+  default_quantity: number;
+  is_default_checked: boolean;
+  is_parent: boolean;
+  sub_items: Iso3NewQuotationSubItem[];
+}
+
+export interface Iso3NewQuotationCategory {
+  id: number;
+  reference: string | null;
+  title: string;
+  unit: string | null;
+  items: Iso3NewQuotationItem[];
+}
+
+export interface Iso3NewQuotationSelectorOption {
+  id: number;
+  product_id: number;
+  label: string;
+  sub_items: Iso3NewQuotationSubItem[];
+}
+
+export interface Iso3NewQuotationSubventionType {
+  id: number;
+  name: string;
+  commercial: string | null;
+  value: string;
+}
+
+export interface Iso3NewQuotationPermissions {
+  can_set_dated_at: boolean;
+  can_set_subvention_type: boolean;
+  can_set_discount_amount: boolean;
+}
+
+export interface Iso3NewQuotationFormData {
+  contract: {
+    id: number;
+    reference: string | null;
+  };
+  polluter: {
+    id: number | null;
+    name: string | null;
+    commercial?: string | null;
+    type: string;
+  };
+  mode: CreateQuotationMode;
+  quantity_kind: 'surface_m2' | 'quantity';
+  defaults: {
+    dated_at: string | null;
+    discount_amount: number;
+    subvention_type_id: number | null;
+  };
+  permissions: Iso3NewQuotationPermissions;
+  subvention_types: Iso3NewQuotationSubventionType[];
+  product_categories: Iso3NewQuotationCategory[];
+  product_selector_options: Iso3NewQuotationSelectorOption[];
+  /** @deprecated kept for backward compatibility — empty in the new payload */
+  products?: Iso3NewQuotationProduct[];
+}
+
+export interface Iso3NewQuotationFormResponse {
+  success: boolean;
+  data: Iso3NewQuotationFormData;
+}
+
+export interface Iso3QuotationEligibilityResponse {
+  eligible: boolean;
+  errors: string[];
+}
+
 export type UpdateQuotationMeetingData = Partial<CreateQuotationMeetingData>;
 export type UpdateQuotationContractData = Partial<CreateQuotationContractData>;
 
@@ -279,23 +371,82 @@ export type UpdateQuotationContractData = Partial<CreateQuotationContractData>;
 // Simulation
 // ----------------------------------------------------------------------------
 
+export interface Iso3QuotationItemInput {
+  item_id: number;
+  quantity: number;
+  price?: number;
+  name?: string;
+}
+
 export interface Iso3SimulationInput {
-  type: string;
-  customer_id: number;
-  polluter_id?: number;
-  subvention_type_id?: number;
-  products: QuotationProductInput[];
+  dated_at?: string;
+  subvention_type_id?: number | null;
+  // Manuel subvention overrides — Symfony's checkboxes (when checked, the
+  // corresponding value below is used in the rest_in_charge formula instead
+  // of the automatic one).
+  ana_prime_check?: boolean;
+  cee_prime_check?: boolean;
+  discount_check?: boolean;
+  ana_prime?: number;
+  cee_prime?: number;
+  discount_amount?: number;
+  tva_rate?: number;
+  items: Iso3QuotationItemInput[];
+}
+
+export type Iso3CreateQuotationInput = Iso3SimulationInput;
+
+export interface Iso3SimulationItem {
+  item_id: number;
+  product_id: number;
+  name: string;
+  quantity: number;
+  price: number;
+  total_without_tax: number;
+  total_with_tax: number;
 }
 
 export interface Iso3SimulationResult {
-  total_sale_with_tax: number;
-  total_sale_without_tax: number;
+  cumac: number;
+  /** Auto-computed CEE prime (always returned). */
+  cee_prime_auto: number;
+  /** Effective value used in rest_in_charge (manual override if check is true, else auto). */
+  cee_prime_effective: number;
+  /** Auto-computed ANAH prime. */
+  ana_prime_auto: number;
+  ana_prime_effective: number;
+  /** Auto-computed discount. */
+  discount_auto: number;
+  discount_effective: number;
+  total_without_tax: number;
   total_tax: number;
-  prime: number;
-  cee_prime: number;
+  total_with_tax: number;
   rest_in_charge: number;
+  tva_rate: number;
+  items: Iso3SimulationItem[];
+  /** @deprecated kept for back-compat with the old flat panel; mirror of cee_prime_effective. */
+  cee_prime?: number;
+  /** @deprecated mirror of ana_prime_effective. */
+  ana_prime?: number;
+  /** @deprecated mirror of cee_prime_effective. */
+  prime_cee?: number;
+}
+
+export interface Iso3CreatedQuotation {
+  id: number;
+  reference: string;
+  cee_prime: number;
   qmac_value: number;
-  products: DomoprimeQuotationProduct[];
+  total_sale_without_tax: number;
+  total_sale_with_tax: number;
+  total_tax: number;
+  rest_in_charge: number;
+  is_last: string;
+}
+
+export interface Iso3CreateQuotationResponse {
+  success: boolean;
+  data: Iso3CreatedQuotation;
 }
 
 // ----------------------------------------------------------------------------

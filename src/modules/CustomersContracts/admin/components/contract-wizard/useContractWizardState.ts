@@ -115,6 +115,7 @@ export function useContractWizardState() {
       number_of_parts: undefined,
       number_of_children: undefined,
       tax_credit_used: undefined,
+      surface_home: undefined,
       surface_top: undefined,
       surface_wall: undefined,
       surface_floor: undefined,

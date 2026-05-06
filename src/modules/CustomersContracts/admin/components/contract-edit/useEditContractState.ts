@@ -269,6 +269,7 @@ return
           number_of_parts: pickNumber(iso.number_of_parts, vars.number_of_parts, data.number_of_parts),
           number_of_children: pickNumber(iso.number_of_children, vars.number_of_children, data.number_of_children),
           tax_credit_used: pickNumber(iso.tax_credit_used, vars.tax_credit_used, data.tax_credit_used),
+          surface_home: pickNumber(iso.surface_home, data.surface_home, vars.surface_home),
           surface_top: pickNumber(iso.surface_top, iso.src_surface_top, data.surface_top, vars.surface_top),
           surface_wall: pickNumber(iso.surface_wall, iso.src_surface_wall, data.surface_wall, vars.surface_wall),
           surface_floor: pickNumber(iso.surface_floor, iso.src_surface_floor, data.surface_floor, vars.surface_floor),
