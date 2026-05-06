@@ -21,6 +21,14 @@ import CompanyConfigCrud from './CompanyConfigCrud'
 import TypeConfigCrud from './TypeConfigCrud'
 import CampaignConfigCrud from './CampaignConfigCrud'
 import FormConfigCrud from './FormConfigCrud'
+import IsoI18nCrud from './IsoI18nCrud'
+import IsoEnergyCrud from './iso-i18n/IsoEnergyCrud'
+import IsoClassCrud from './iso-i18n/IsoClassCrud'
+import IsoModelI18nCrud from './iso-i18n/IsoModelI18nCrud'
+import IsoZoneCrud from './IsoZoneCrud'
+import IsoPolluterCrud from './IsoPolluterCrud'
+import IsoSettingsForm from './IsoSettingsForm'
+import IsoDocumentCrud from './IsoDocumentCrud'
 import { useConfigTranslations } from '../hooks/useConfigTranslations'
 
 // ─── Types ───────────────────────────────────────────────
@@ -128,6 +136,91 @@ const configBlocks: ConfigBlock[] = [
         descriptionKey: 'itemFormsDesc',
         icon: 'ri-file-edit-line',
         color: '#F59E0B',
+      },
+    ],
+  },
+  {
+    key: 'iso',
+    labelKey: 'blockIso',
+    icon: 'ri-leaf-line',
+    color: '#10B981',
+    items: [
+      {
+        key: 'iso-settings',
+        labelKey: 'itemIsoSettings',
+        descriptionKey: 'itemIsoSettingsDesc',
+        icon: 'ri-settings-4-line',
+        color: '#059669',
+      },
+      {
+        key: 'iso-sectors',
+        labelKey: 'itemIsoSectors',
+        descriptionKey: 'itemIsoSectorsDesc',
+        icon: 'ri-map-pin-2-line',
+        color: '#0891B2',
+      },
+      {
+        key: 'iso-energies',
+        labelKey: 'itemIsoEnergy',
+        descriptionKey: 'itemIsoEnergyDesc',
+        icon: 'ri-flashlight-line',
+        color: '#F59E0B',
+      },
+      {
+        key: 'iso-documents',
+        labelKey: 'itemIsoDocuments',
+        descriptionKey: 'itemIsoDocumentsDesc',
+        icon: 'ri-file-list-2-line',
+        color: '#6366F1',
+      },
+      {
+        key: 'iso-classes',
+        labelKey: 'itemIsoClasses',
+        descriptionKey: 'itemIsoClassesDesc',
+        icon: 'ri-bar-chart-grouped-line',
+        color: '#7C3AED',
+      },
+      {
+        key: 'iso-quotation-models',
+        labelKey: 'itemIsoQuotationModels',
+        descriptionKey: 'itemIsoQuotationModelsDesc',
+        icon: 'ri-bill-line',
+        color: '#2563EB',
+      },
+      {
+        key: 'iso-billing-models',
+        labelKey: 'itemIsoBillingModels',
+        descriptionKey: 'itemIsoBillingModelsDesc',
+        icon: 'ri-receipt-line',
+        color: '#D97706',
+      },
+      {
+        key: 'iso-afterwork-models',
+        labelKey: 'itemIsoAfterWorkModels',
+        descriptionKey: 'itemIsoAfterWorkModelsDesc',
+        icon: 'ri-tools-line',
+        color: '#BE185D',
+      },
+      {
+        key: 'iso-premeeting-models',
+        labelKey: 'itemIsoPreMeetingModels',
+        descriptionKey: 'itemIsoPreMeetingModelsDesc',
+        icon: 'ri-calendar-check-line',
+        color: '#4F46E5',
+      },
+      {
+        key: 'iso-asset-models',
+        labelKey: 'itemIsoAssetModels',
+        descriptionKey: 'itemIsoAssetModelsDesc',
+        icon: 'ri-archive-line',
+        color: '#0D9488',
+      },
+      {
+        key: 'iso-polluters',
+        labelKey: 'itemIsoPollutings',
+        descriptionKey: 'itemIsoPollutingsDesc',
+        icon: 'ri-building-2-line',
+        color: '#DC2626',
       },
     ],
   },
@@ -316,6 +409,30 @@ export default function ConfigurationPage() {
         </Breadcrumbs>
 
         {/* Section content */}
+        {/* ISO */}
+        {activeSection === 'iso-settings' ? <IsoSettingsForm /> : null}
+        {activeSection === 'iso-sectors' ? <IsoZoneCrud /> : null}
+        {activeSection === 'iso-energies' ? <IsoEnergyCrud title={t.isoEnergiesTitle} /> : null}
+        {activeSection === 'iso-documents' ? <IsoDocumentCrud /> : null}
+        {activeSection === 'iso-classes' ? <IsoClassCrud title={t.isoClassesTitle} /> : null}
+        {activeSection === 'iso-quotation-models' ? (
+          <IsoModelI18nCrud apiType='quotation-models' title={t.isoQuotationModelsTitle} withPolluterColumn withExportVariables />
+        ) : null}
+        {activeSection === 'iso-billing-models' ? (
+          <IsoModelI18nCrud apiType='billing-models' title={t.isoBillingModelsTitle} withPolluterColumn />
+        ) : null}
+        {activeSection === 'iso-afterwork-models' ? (
+          <IsoModelI18nCrud apiType='afterwork-models' title={t.isoAfterWorkModelsTitle} withPolluterColumn />
+        ) : null}
+        {activeSection === 'iso-premeeting-models' ? (
+          <IsoModelI18nCrud apiType='premeeting-models' title={t.isoPreMeetingModelsTitle} withPolluterColumn />
+        ) : null}
+        {activeSection === 'iso-asset-models' ? (
+          <IsoModelI18nCrud apiType='asset-models' title={t.isoAssetModelsTitle} />
+        ) : null}
+        {activeSection === 'iso-polluters' ? <IsoPolluterCrud /> : null}
+
+        {/* Contract / Documents / Meeting */}
         {activeSection === 'documents' ? <DocumentSettings /> : null}
         {activeSection === 'contract-settings' ? <ContractSettings /> : null}
         {activeSection === 'meeting-settings' ? <MeetingSettings /> : null}
