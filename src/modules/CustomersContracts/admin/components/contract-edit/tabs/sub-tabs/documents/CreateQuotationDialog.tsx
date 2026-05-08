@@ -36,7 +36,10 @@ import type {
 } from '@/modules/AppDomoprimeISO3/types'
 
 interface CreateQuotationDialogProps {
-  contractId: number | null
+  contractId?: number | null
+  // Story M0: when set, the dialog targets a meeting instead of a contract.
+  // Exactly one of contractId / meetingId must be provided.
+  meetingId?: number | null
   mode: CreateQuotationMode
   open: boolean
   onClose: () => void
@@ -56,11 +59,16 @@ const formatNumber = (value: number) =>
 
 export default function CreateQuotationDialog({
   contractId,
+  meetingId,
   mode,
   open,
   onClose,
   onCreated,
 }: CreateQuotationDialogProps) {
+  // Resolve the parent type once. We do not support both being set — the
+  // button that opens the dialog passes exactly one.
+  const isMeeting = meetingId != null
+  const parentId = isMeeting ? meetingId : contractId ?? null
   const [form, setForm] = useState<Iso3NewQuotationFormData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -122,7 +130,7 @@ export default function CreateQuotationDialog({
   }
 
   useEffect(() => {
-    if (!open || !contractId) return
+    if (!open || parentId == null) return
 
     let active = true
 
@@ -130,8 +138,11 @@ export default function CreateQuotationDialog({
     setError(null)
     setSimulation(null)
 
-    iso3QuotationService
-      .getNewForm(contractId, mode)
+    const formPromise = isMeeting
+      ? iso3QuotationService.getNewFormForMeeting(parentId, mode)
+      : iso3QuotationService.getNewForm(parentId, mode)
+
+    formPromise
       .then(response => {
         if (!active) return
 
@@ -172,7 +183,7 @@ export default function CreateQuotationDialog({
     return () => {
       active = false
     }
-  }, [contractId, mode, open])
+  }, [parentId, isMeeting, mode, open])
 
   useEffect(() => {
     if (!open) resetState()
@@ -252,7 +263,7 @@ export default function CreateQuotationDialog({
   const lastSimulationRef = useRef<string>('')
 
   useEffect(() => {
-    if (!contractId || !open || itemsPayload.length === 0) {
+    if (parentId == null || !open || itemsPayload.length === 0) {
       setSimulation(null)
       return
     }
@@ -265,12 +276,15 @@ export default function CreateQuotationDialog({
       setSimulationError(null)
 
       try {
-        const response = await iso3QuotationService.simulateForContract(contractId, {
+        const payload = {
           dated_at: datedAt || undefined,
           subvention_type_id: subventionTypeId ?? undefined,
           items: itemsPayload,
           ...manualOverridesPayload,
-        })
+        }
+        const response = isMeeting
+          ? await iso3QuotationService.simulateForMeeting(parentId, payload)
+          : await iso3QuotationService.simulateForContract(parentId, payload)
         setSimulation(response.data)
       } catch {
         setSimulationError('Impossible de simuler le devis')
@@ -281,7 +295,7 @@ export default function CreateQuotationDialog({
     }, 400)
 
     return () => clearTimeout(handle)
-  }, [contractId, open, simulationKey, itemsPayload, datedAt, subventionTypeId, manualOverridesPayload])
+  }, [parentId, isMeeting, open, simulationKey, itemsPayload, datedAt, subventionTypeId, manualOverridesPayload])
 
   const subventionRequired = form?.permissions?.can_set_subvention_type ?? true
   const canSave = checkedItems.size > 0
@@ -289,18 +303,21 @@ export default function CreateQuotationDialog({
     && !saving
 
   const handleSave = async () => {
-    if (!contractId || !canSave) return
+    if (parentId == null || !canSave) return
 
     setSaving(true)
     setError(null)
 
     try {
-      const response = await iso3QuotationService.createQuotationForContract(contractId, {
+      const payload = {
         dated_at: datedAt || undefined,
         subvention_type_id: subventionTypeId ?? undefined,
         items: itemsPayload,
         ...manualOverridesPayload,
-      })
+      }
+      const response = isMeeting
+        ? await iso3QuotationService.createQuotationForMeeting(parentId, payload)
+        : await iso3QuotationService.createQuotationForContract(parentId, payload)
 
       onCreated?.(response.data)
       onClose()

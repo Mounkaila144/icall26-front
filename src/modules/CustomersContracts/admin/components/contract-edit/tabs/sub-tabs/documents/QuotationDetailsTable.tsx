@@ -14,9 +14,9 @@ import CircularProgress from '@mui/material/CircularProgress'
 
 import type { DomoprimeQuotation } from '@/modules/AppDomoprime/types'
 import { usePermissions } from '@/shared/contexts/PermissionsContext'
-import type { ContractTranslations } from '../../../../../hooks/useContractTranslations'
 
 import { formatDate, formatCurrency } from './helpers'
+import type { QuotationTableTranslations } from './translations'
 
 // ---------------------------------------------------------------------------
 // Props
@@ -29,9 +29,12 @@ interface QuotationDetailsTableProps {
   onDownloadPdf: (id: number, ref: string) => void
   onDisable: (id: number) => void
   onEnable: (id: number) => void
-  onOpenBillingDialog: (id: number) => void
+  // Optional: meeting parents have no billing flow yet (Story M2/M4).
+  onOpenBillingDialog?: (id: number) => void
   onEditQuotation?: (id: number) => void
-  t: ContractTranslations
+  // Optional permanent-delete (superadmin) — meeting CRUD (Story M2).
+  onRemove?: (id: number) => void
+  t: QuotationTableTranslations
 }
 
 // ---------------------------------------------------------------------------
@@ -49,13 +52,15 @@ export default function QuotationDetailsTable({
   onEnable,
   onOpenBillingDialog,
   onEditQuotation,
+  onRemove,
   t,
 }: QuotationDetailsTableProps) {
   const { hasCredential } = usePermissions()
 
-  const canEdit = hasCredential([['superadmin', 'app_domoprime_contract_view_quotation_edit', 'app_domoprime_contract_view_quotation_edit3']])
+  const canEdit = hasCredential([['superadmin', 'app_domoprime_contract_view_quotation_edit', 'app_domoprime_contract_view_quotation_edit3', 'app_domoprime_meeting_list_quotation_edit']])
   const canCreateBilling = hasCredential([['superadmin', 'app_domoprime_list_quotation_create_billing']])
-  const canDelete = hasCredential([['superadmin', 'app_domoprime_contract_view_quotation_delete']])
+  const canDelete = hasCredential([['superadmin', 'app_domoprime_contract_view_quotation_delete', 'app_domoprime_meeting_list_quotation_delete']])
+  const canPermanentDelete = hasCredential([['superadmin']])
 
   // Permission-gated financial columns (exact Symfony credential names from permissions.csv)
   const showDate = hasCredential([['superadmin', 'app_domoprime_contract_quotation_date']])
@@ -180,8 +185,8 @@ export default function QuotationDetailsTable({
                       </Tooltip>
                     )}
 
-                    {/* Billing */}
-                    {canCreateBilling && isActive ? (
+                    {/* Billing — only when a billing handler is wired (contract). */}
+                    {canCreateBilling && isActive && onOpenBillingDialog ? (
                       <Tooltip title={t.docActionBilling}>
                         <span>
                           <IconButton
@@ -234,6 +239,19 @@ export default function QuotationDetailsTable({
                           </IconButton>
                         </Tooltip>
                       )
+                    ) : null}
+
+                    {/* Permanent delete (superadmin only) — Story M2 */}
+                    {canPermanentDelete && onRemove ? (
+                      <Tooltip title='Supprimer définitivement'>
+                        <IconButton
+                          size='small'
+                          color='error'
+                          onClick={() => onRemove(q.id)}
+                        >
+                          <i className='ri-close-circle-line' style={{ fontSize: 16 }} />
+                        </IconButton>
+                      </Tooltip>
                     ) : null}
                   </Box>
                 </TableCell>

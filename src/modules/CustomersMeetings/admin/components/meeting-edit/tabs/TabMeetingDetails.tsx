@@ -25,6 +25,7 @@ import EditSubTabCustomerDetails from './sub-tabs/EditSubTabCustomerDetails'
 import EditSubTabAssignment from './sub-tabs/EditSubTabAssignment'
 import EditSubTabInstallation from './sub-tabs/EditSubTabInstallation'
 import EditSubTabAdditional from './sub-tabs/EditSubTabAdditional'
+import EditSubTabDocuments from './sub-tabs/EditSubTabDocuments'
 
 interface TabMeetingDetailsProps {
   detailsForm: UseFormReturn<MeetingDetailsEditFormData>
@@ -84,6 +85,7 @@ export default function TabMeetingDetails({
               <Tab label={t.editSubTabAssignment} value='3' sx={SUB_TAB_STYLE} />
               <Tab label={t.editSubTabInstallation} value='4' sx={SUB_TAB_STYLE} />
               <Tab label={t.editSubTabAdditional} value='5' sx={SUB_TAB_STYLE} />
+              <Tab label={t.editSubTabDocuments} value='6' sx={SUB_TAB_STYLE} />
             </TabList>
           </Box>
         </Box>
@@ -110,6 +112,14 @@ export default function TabMeetingDetails({
 
         <TabPanel value='5' sx={{ px: 0, py: 0 }}>
           <EditSubTabAdditional detailsForm={detailsForm} teamForm={teamForm} domoprimeForm={domoprimeForm} filterOptions={filterOptions} t={t} />
+        </TabPanel>
+
+        {/* Story M1 / mirror du sous-onglet contract `EditSubTabDocuments`:
+            section ISO3 polluter-typée (PreMeeting PDF + résumé du dernier
+            devis). Le grand onglet "Documents" reste réservé à l'upload de
+            fichiers (CustomersDocuments). */}
+        <TabPanel value='6' sx={{ px: 0, py: 0 }}>
+          <EditSubTabDocuments meetingId={meeting?.id ?? null} meeting={meeting} t={t} />
         </TabPanel>
       </TabContext>
     </Box>

@@ -22,9 +22,18 @@ interface TabDocumentsProps {
 }
 
 /**
- * Documents tab - mirrors Symfony customers_documents/listForMeeting component.
+ * Documents tab — mirrors Symfony customers_documents/listForMeeting component.
  * Features: file upload (dropzone), document list with status, download, delete.
- * Currently a structured placeholder - API integration pending CustomersDocuments module migration.
+ * Currently a structured placeholder — API integration pending CustomersDocuments
+ * module migration. Equivalent to the contract main "Documents" tab
+ * (`CustomersContracts/.../tabs/TabDocuments.tsx`) which already wires the
+ * upload/download endpoints — once the meeting endpoints exist on the
+ * CustomersDocuments backend, this placeholder can be promoted to a full
+ * implementation.
+ *
+ * Note (Story M1): the polluter-typed ISO3 documents (PreMeeting PDF + last
+ * quotation summary) live in a separate sub-tab "Documents" inside the
+ * Rendez-vous tab — see `tabs/sub-tabs/EditSubTabDocuments.tsx`.
  */
 export default function TabDocuments({ t }: TabDocumentsProps) {
   const [dragOver, setDragOver] = useState(false)
@@ -32,7 +41,7 @@ export default function TabDocuments({ t }: TabDocumentsProps) {
 
   return (
     <Box>
-      {/* Upload zone - mirrors Symfony Dropzone */}
+      {/* Upload zone — mirrors Symfony Dropzone */}
       <Paper
         variant='outlined'
         onDragOver={e => { e.preventDefault(); setDragOver(true) }}
@@ -62,7 +71,7 @@ export default function TabDocuments({ t }: TabDocumentsProps) {
         {tR.tabDocumentsComingSoon ?? 'La gestion des documents sera disponible après la migration du module CustomersDocuments.'}
       </Alert>
 
-      {/* Documents table - mirrors Symfony table structure */}
+      {/* Documents table — mirrors Symfony table structure */}
       <TableContainer component={Paper} variant='outlined'>
         <Table size='small'>
           <TableHead>

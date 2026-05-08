@@ -344,6 +344,43 @@ export function useDocumentState(contractId: number | null, t: ContractTranslati
     }
   }, [contractId, t.docDownloadError, showNotification])
 
+  // Official ITE AH document — opens inline in a new tab (Symfony parity).
+  const handleDownloadAhQuotation = useCallback(async () => {
+    if (!contractId) return
+    const key = `ah-quotation-${contractId}`
+
+    setDownloading(key)
+
+    try {
+      const blob = await iso3ExportService.exportIteAhQuotationPdf(contractId)
+      const url = URL.createObjectURL(blob)
+
+      window.open(url, '_blank', 'noopener,noreferrer')
+    } catch {
+      showNotification(t.docDownloadError ?? 'Erreur lors du téléchargement', 'error')
+    } finally {
+      setDownloading(null)
+    }
+  }, [contractId, t.docDownloadError, showNotification])
+
+  const handleDownloadAhBilling = useCallback(async () => {
+    if (!contractId) return
+    const key = `ah-billing-${contractId}`
+
+    setDownloading(key)
+
+    try {
+      const blob = await iso3ExportService.exportIteAhBillingPdf(contractId)
+      const url = URL.createObjectURL(blob)
+
+      window.open(url, '_blank', 'noopener,noreferrer')
+    } catch {
+      showNotification(t.docDownloadError ?? 'Erreur lors du téléchargement', 'error')
+    } finally {
+      setDownloading(null)
+    }
+  }, [contractId, t.docDownloadError, showNotification])
+
   return {
     loading,
     error,
@@ -395,6 +432,8 @@ export function useDocumentState(contractId: number | null, t: ContractTranslati
     handleDownloadAfterWorkPdf,
     handleDownloadAllDocsPdf,
     handleDownloadAllSignedPdf,
+    handleDownloadAhQuotation,
+    handleDownloadAhBilling,
 
     // Quotation extra actions
     handleRefreshReference,

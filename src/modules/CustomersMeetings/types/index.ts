@@ -313,10 +313,17 @@ export interface MeetingDetailResponse {
 export interface MeetingActionResponse {
   success: boolean
   action: string
-  id: number
+  id?: number
   state?: { icon: string; color: string }
   state_i18n?: string
-  message: string
+  message?: string
+  // Story M4 — populated when action is 'CreateContract'
+  meeting_id?: number
+  customer_id?: number
+  contract_id?: number
+  reference?: string
+  quotations_migrated?: number
+  already_existed?: boolean
 }
 
 export interface MeetingHistoryResponse {

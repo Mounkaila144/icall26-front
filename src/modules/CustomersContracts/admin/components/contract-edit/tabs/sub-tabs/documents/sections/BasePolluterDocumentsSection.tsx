@@ -19,6 +19,7 @@ import Collapse from '@mui/material/Collapse'
 import type { CustomerContract } from '../../../../../../../types'
 import type { ContractTranslations } from '../../../../../../hooks/useContractTranslations'
 import { iso3QuotationService } from '@/modules/AppDomoprimeISO3'
+import { QuotationSignatureSection, BillingSignatureSection } from '@/modules/AppDomoprimeYousignEvidence'
 import { usePermissions } from '@/shared/contexts/PermissionsContext'
 
 import { POLLUTER_TYPE_SUFFIXES, formatDate } from '../helpers'
@@ -74,6 +75,12 @@ export default function BasePolluterDocumentsSection({
   const canViewBillings = hasCredential([['superadmin', 'app_domoprime_contract_view_billings']])
   const canViewQuotations = hasCredential([['superadmin', 'app_domoprime_iso_contract_view_quotations']])
 
+  // Symfony documentITEForViewContract / documentITEBillingForViewContract gates.
+  // Only ITE polluters render the "AH official" rows.
+  const isIte = polluterType === 'ITE'
+  const canViewAhDocument = isIte && hasCredential([['superadmin', 'app_domoprime_iso3_contract_view_ite_document']])
+  const canViewAhBilling = isIte && hasCredential([['superadmin', 'app_domoprime_iso3_contract_view_ite_document_linked_to_billing']])
+
   const {
     loading,
     error,
@@ -103,6 +110,8 @@ export default function BasePolluterDocumentsSection({
     handleDownloadAfterWorkPdf,
     handleDownloadAllDocsPdf,
     handleDownloadAllSignedPdf,
+    handleDownloadAhQuotation,
+    handleDownloadAhBilling,
     handleRefreshReference,
     handleSendQuotationEmail,
     billingDialogOpen,
@@ -217,6 +226,28 @@ export default function BasePolluterDocumentsSection({
           available={Boolean(contract?.polluter_id) && !isHold}
           loading={downloading === `premeeting-${contractId}`}
           onClick={() => handleDownloadPreMeetingPdf()}
+        />
+      ) : null}
+
+      {/* Symfony /app_domoprime_iso3/documentITEForViewContract — official AH quotation. */}
+      {canViewAhDocument && hasValidDates ? (
+        <DocumentLinkRow
+          icon='ri-file-pdf-2-line'
+          label={t.docAhDocument}
+          available={Boolean(lastQuotation) && !isHold}
+          loading={downloading === `ah-quotation-${contractId}`}
+          onClick={() => handleDownloadAhQuotation()}
+        />
+      ) : null}
+
+      {/* Symfony /app_domoprime_iso3/documentITEBillingForViewContract — official AH billing. */}
+      {canViewAhBilling && hasValidDates && activeBillings.length > 0 ? (
+        <DocumentLinkRow
+          icon='ri-file-pdf-2-line'
+          label={t.docAhDocument}
+          available={!isHold}
+          loading={downloading === `ah-billing-${contractId}`}
+          onClick={() => handleDownloadAhBilling()}
         />
       ) : null}
 
@@ -357,6 +388,12 @@ export default function BasePolluterDocumentsSection({
               </Tooltip>
             </Box>
 
+            {/* Yousign Evidence — signature status row (replaces disabled placeholder) */}
+            <QuotationSignatureSection
+              quotationId={lastQuotation.id}
+              reference={lastQuotation.reference}
+            />
+
             <Collapse in={expandedQuotation}>
               <Box sx={{ pl: 2, pb: 1 }}>
                 <QuotationDetailsTable
@@ -442,10 +479,12 @@ export default function BasePolluterDocumentsSection({
               </span>
             </Tooltip>
 
+            {/* Yousign Evidence placeholder — no quotation yet, nothing to sign.
+                The real signature row appears in the lastQuotation branch above. */}
             <Tooltip title={t.docActionYousignEvidence}>
               <span>
                 <IconButton size='small' disabled>
-                  <i className='ri-file-text-line' style={{ fontSize: 16, color: '#1976d2' }} />
+                  <i className='ri-quill-pen-line' style={{ fontSize: 16, color: '#1976d2', opacity: 0.5 }} />
                 </IconButton>
               </span>
             </Tooltip>
@@ -468,27 +507,37 @@ export default function BasePolluterDocumentsSection({
       ) : null}
 
       {hasValidDates && canViewBillings ? (
-        <DocumentLinkRow
-          icon='ri-bill-line'
-          label={billingLabel}
-          available={activeBillings.length > 0}
-          loading={downloading === `all-${lastBilling?.id ?? 0}`}
-          onClick={() => activeBillings.length > 0 && lastBilling
-            ? handleDownloadBillingPdf(lastBilling.id, lastBilling.reference)
-            : undefined}
-          expandable={activeBillings.length > 1}
-          expanded={expandedBilling}
-          onToggle={() => setExpandedBilling(prev => !prev)}
-        >
-          <BillingDetailsTable
-            billings={activeBillings}
-            downloading={downloading}
-            onDownloadPdf={handleDownloadBillingPdf}
-            onSendEmail={handleSendBillingEmail}
-            onCreateAsset={handleCreateAssetFromBilling}
-            t={t}
-          />
-        </DocumentLinkRow>
+        <>
+          <DocumentLinkRow
+            icon='ri-bill-line'
+            label={billingLabel}
+            available={activeBillings.length > 0}
+            loading={downloading === `all-${lastBilling?.id ?? 0}`}
+            onClick={() => activeBillings.length > 0 && lastBilling
+              ? handleDownloadBillingPdf(lastBilling.id, lastBilling.reference)
+              : undefined}
+            expandable={activeBillings.length > 1}
+            expanded={expandedBilling}
+            onToggle={() => setExpandedBilling(prev => !prev)}
+          >
+            <BillingDetailsTable
+              billings={activeBillings}
+              downloading={downloading}
+              onDownloadPdf={handleDownloadBillingPdf}
+              onSendEmail={handleSendBillingEmail}
+              onCreateAsset={handleCreateAssetFromBilling}
+              t={t}
+            />
+          </DocumentLinkRow>
+
+          {/* Yousign Evidence — billing signature status (replaces placeholder) */}
+          {lastBilling ? (
+            <BillingSignatureSection
+              billingId={lastBilling.id}
+              reference={lastBilling.reference}
+            />
+          ) : null}
+        </>
       ) : null}
 
       {canViewAfterWork ? (

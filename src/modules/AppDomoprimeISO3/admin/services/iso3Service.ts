@@ -318,10 +318,27 @@ return response.data;
         { params: { mode } }
       );
 
-      
+
 return response.data;
     } catch (error) {
       console.error(`Error fetching new quotation form for contract ${contractId}:`, error);
+      throw error;
+    }
+  },
+
+  async getNewFormForMeeting(
+    meetingId: number,
+    mode: CreateQuotationMode = 'standard'
+  ): Promise<Iso3NewQuotationFormResponse> {
+    try {
+      const response = await apiClient.get<Iso3NewQuotationFormResponse>(
+        `${BASE_URL}/quotations/meetings/${meetingId}/new-form`,
+        { params: { mode } }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching new quotation form for meeting ${meetingId}:`, error);
       throw error;
     }
   },
@@ -489,6 +506,23 @@ return response.data;
     }
   },
 
+  async simulateForMeeting(
+    meetingId: number,
+    data: Iso3SimulationInput
+  ): Promise<Iso3SimulationResponse> {
+    try {
+      const response = await apiClient.post<Iso3SimulationResponse>(
+        `${BASE_URL}/quotations/meetings/${meetingId}/simulate`,
+        data
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error(`Error running simulation for meeting ${meetingId}:`, error);
+      throw error;
+    }
+  },
+
   async createQuotationForContract(
     contractId: number,
     data: Iso3CreateQuotationInput
@@ -502,6 +536,23 @@ return response.data;
       return response.data;
     } catch (error) {
       console.error(`Error creating quotation for contract ${contractId}:`, error);
+      throw error;
+    }
+  },
+
+  async createQuotationForMeeting(
+    meetingId: number,
+    data: Iso3CreateQuotationInput
+  ): Promise<Iso3CreateQuotationResponse> {
+    try {
+      const response = await apiClient.post<Iso3CreateQuotationResponse>(
+        `${BASE_URL}/quotations/meetings/${meetingId}/create`,
+        data
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error(`Error creating quotation for meeting ${meetingId}:`, error);
       throw error;
     }
   },
@@ -802,10 +853,24 @@ return response.data;
         { responseType: 'blob' }
       );
 
-      
+
 return response.data;
     } catch (error) {
       console.error(`Error exporting pre-meeting PDF for contract ${contractId}:`, error);
+      throw error;
+    }
+  },
+
+  async exportPreMeetingPdfForMeeting(meetingId: number): Promise<Blob> {
+    try {
+      const response = await apiClient.get(
+        `${BASE_URL}/meetings/${meetingId}/export/premeeting-pdf`,
+        { responseType: 'blob' }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error(`Error exporting pre-meeting PDF for meeting ${meetingId}:`, error);
       throw error;
     }
   },
@@ -847,12 +912,32 @@ return response.data;
         { responseType: 'blob' }
       );
 
-      
+
 return response.data;
     } catch (error) {
       console.error(`Error exporting all signed PDF for contract ${contractId}:`, error);
       throw error;
     }
+  },
+
+  // Official ITE AH document — single signed quotation PDF (Symfony documentITEForViewContract)
+  async exportIteAhQuotationPdf(contractId: number): Promise<Blob> {
+    const response = await apiClient.get(
+      `${BASE_URL}/contracts/${contractId}/export/ite-ah-quotation-pdf`,
+      { responseType: 'blob' }
+    );
+
+    return response.data;
+  },
+
+  // Official ITE AH billing — single signed billing PDF (Symfony documentITEBillingForViewContract)
+  async exportIteAhBillingPdf(contractId: number): Promise<Blob> {
+    const response = await apiClient.get(
+      `${BASE_URL}/contracts/${contractId}/export/ite-ah-billing-pdf`,
+      { responseType: 'blob' }
+    );
+
+    return response.data;
   },
 };
 

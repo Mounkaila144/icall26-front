@@ -20,7 +20,8 @@ import Divider from '@mui/material/Divider'
 
 import { iso3QuotationService } from '@/modules/AppDomoprimeISO3'
 import type { DomoprimeQuotation, DomoprimeSubventionType } from '@/modules/AppDomoprime/types'
-import type { ContractTranslations } from '../../../../../hooks/useContractTranslations'
+
+import type { EditQuotationViewTranslations } from './translations'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -50,7 +51,7 @@ interface EditQuotationViewProps {
   quotationId: number
   onSave: () => void
   onCancel: () => void
-  t: ContractTranslations
+  t: EditQuotationViewTranslations
 }
 
 // ---------------------------------------------------------------------------

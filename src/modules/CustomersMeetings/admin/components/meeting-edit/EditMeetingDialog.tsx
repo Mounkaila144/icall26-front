@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
@@ -10,6 +10,7 @@ import Alert from '@mui/material/Alert'
 import LinearProgress from '@mui/material/LinearProgress'
 import CircularProgress from '@mui/material/CircularProgress'
 import IconButton from '@mui/material/IconButton'
+import Snackbar from '@mui/material/Snackbar'
 import Typography from '@mui/material/Typography'
 import Tab from '@mui/material/Tab'
 import TabContext from '@mui/lab/TabContext'
@@ -19,6 +20,9 @@ import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 
 import type { AxiosError } from 'axios'
+
+import { meetingsService } from '../../services/meetingsService'
+import { usePermissions } from '@/shared/contexts/PermissionsContext'
 
 import { useEditMeetingState } from './useEditMeetingState'
 import { useMeetingTranslations } from '../../hooks/useMeetingTranslations'
@@ -109,6 +113,68 @@ export default function EditMeetingDialog({
     }
   }, [isOpen, meetingId, loadMeeting, onFetchMeeting, resetAll])
 
+  const tR = t as Record<string, string>
+  const { hasCredential } = usePermissions()
+
+  const [transforming, setTransforming] = useState(false)
+  const [transformNotice, setTransformNotice] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+    open: false,
+    message: '',
+    severity: 'success',
+  })
+
+  const canTransform = Boolean(
+    meeting?.customer_id &&
+    meeting?.polluter_id &&
+    hasCredential([['superadmin', 'customer_meeting_transform_to_contract']])
+  )
+
+  const handleTransformToContract = useCallback(async () => {
+    if (!meetingId || !canTransform) return
+    if (!window.confirm(tR.transformToContractConfirm ?? 'Transformer en contrat ?')) return
+
+    setTransforming(true)
+    setError(null)
+
+    try {
+      const res = await meetingsService.createContract(meetingId)
+
+      if (!res.success) {
+        const message = res.message ?? (tR.transformError ?? 'Erreur')
+        setTransformNotice({ open: true, message, severity: 'error' })
+        return
+      }
+
+      const reference = res.reference ?? `CT-${res.contract_id ?? ''}`
+      const tpl = res.already_existed
+        ? (tR.transformAlreadyExists ?? 'Contrat déjà existant : {reference}')
+        : (tR.transformSuccess ?? 'Contrat créé : {reference}')
+      const message = tpl.replace('{reference}', reference)
+
+      const migratedTpl = tR.transformQuotationsMigrated ?? '{count} devis migrés'
+      const migratedMsg = (res.quotations_migrated ?? 0) > 0
+        ? ` — ${migratedTpl.replace('{count}', String(res.quotations_migrated))}`
+        : ''
+
+      setTransformNotice({ open: true, message: message + migratedMsg, severity: 'success' })
+
+      // Refresh the meeting so any state changes (state_id) propagate.
+      if (meetingId) {
+        await loadMeeting(meetingId, onFetchMeeting)
+      }
+    } catch (err: unknown) {
+      const axiosErr = err as AxiosError<ApiValidationError>
+      const responseMessage = axiosErr?.response?.data?.message
+      setTransformNotice({
+        open: true,
+        message: responseMessage ?? (tR.transformError ?? 'Erreur lors de la transformation'),
+        severity: 'error',
+      })
+    } finally {
+      setTransforming(false)
+    }
+  }, [meetingId, canTransform, tR, setError, loadMeeting, onFetchMeeting])
+
   const handleSave = useCallback(async () => {
     if (!meetingId) return
 
@@ -163,7 +229,7 @@ export default function EditMeetingDialog({
       case 'results-anah':
         return <TabResultsAnah meetingId={meetingId} t={t} />
       case 'quotations':
-        return <TabQuotations meetingId={meetingId} t={t} />
+        return <TabQuotations meetingId={meetingId} meeting={meeting} t={t} />
       case 'comments':
         return <TabComments meetingId={meetingId} t={t} />
       case 'requests':
@@ -200,6 +266,18 @@ export default function EditMeetingDialog({
               </Typography>
             ) : null}
           </Box>
+          {canTransform ? (
+            <Button
+              color='success'
+              variant='outlined'
+              startIcon={<i className='ri-arrow-right-line' />}
+              onClick={handleTransformToContract}
+              disabled={transforming || submitting || loading}
+              sx={{ mr: 1 }}
+            >
+              {transforming ? '…' : (tR.transformToContract ?? 'Transformer en contrat')}
+            </Button>
+          ) : null}
           <Button color='secondary' onClick={onClose} sx={{ mr: 1 }}>
             {t.cancel}
           </Button>
@@ -212,6 +290,21 @@ export default function EditMeetingDialog({
           </Button>
         </Toolbar>
       </AppBar>
+
+      <Snackbar
+        open={transformNotice.open}
+        autoHideDuration={6000}
+        onClose={() => setTransformNotice(prev => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          severity={transformNotice.severity}
+          onClose={() => setTransformNotice(prev => ({ ...prev, open: false }))}
+          sx={{ width: '100%' }}
+        >
+          {transformNotice.message}
+        </Alert>
+      </Snackbar>
 
       <DialogContent sx={{ p: 0 }}>
         {error ? (
