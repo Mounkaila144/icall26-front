@@ -1,20 +1,15 @@
-
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import { useRouter } from 'next/navigation';
 
 import type { AxiosError } from 'axios';
 
 import { adminAuthService } from '../services/authService';
-import type { AuthState, LoginCredentials } from '../../types/auth.types';
+import type { AuthState, LoginCredentials, Tenant } from '../../types/auth.types';
 import { usePermissionsOptional } from '@/shared/contexts/PermissionsContext';
 import { extractPermissionsFromLogin } from '@/shared/lib/permissions/extractPermissions';
-import { isTokenExpired, isTokenExpiringSoon } from '@/shared/lib/api-client';
-
-/** Check token freshness every 5 minutes */
-const REFRESH_CHECK_INTERVAL_MS = 5 * 60 * 1000;
 
 interface UseAuthReturn extends AuthState {
     login: (credentials: LoginCredentials) => Promise<void>;
@@ -23,13 +18,18 @@ interface UseAuthReturn extends AuthState {
     error: string | null;
 }
 
+/**
+ * Sanctum SPA mode — auth lives in an httpOnly session cookie set by Laravel.
+ * The hook restores UI state from a stored user object, then verifies the
+ * session is still alive by hitting /auth/me. A 401 from any subsequent
+ * request triggers an auto-redirect to /login via the api-client interceptor.
+ */
 export const useAuth = (): UseAuthReturn => {
     const router = useRouter();
     const permissionsContext = usePermissionsOptional();
 
     const [state, setState] = useState<AuthState>({
         user: null,
-        token: null,
         tenant: null,
         isAuthenticated: false,
         isLoading: true,
@@ -37,91 +37,39 @@ export const useAuth = (): UseAuthReturn => {
 
     const [error, setError] = useState<string | null>(null);
 
-    // Ref to track if proactive refresh is already running
-    const refreshingRef = useRef(false);
-
-    // ── Restore auth state from localStorage on mount ────────────────────
+    // ── Restore + verify on mount ────────────────────────────────────────
     useEffect(() => {
-        const token = adminAuthService.getStoredToken();
-
-        // Token exists but has expired → clear auth data, treat as unauthenticated
-        if (token && isTokenExpired(false)) {
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('auth_token_issued_at');
-            localStorage.removeItem('user');
-            localStorage.removeItem('tenant');
-
-            setState({
-                user: null,
-                token: null,
-                tenant: null,
-                isAuthenticated: false,
-                isLoading: false,
-            });
-
-            return;
-        }
-
-        const user = adminAuthService.getStoredUser();
+        const storedUser = adminAuthService.getStoredUser();
         const tenantStr = localStorage.getItem('tenant');
-        let tenant = null;
+        let tenant: Tenant | null = null;
 
         if (tenantStr) {
             try {
                 tenant = JSON.parse(tenantStr);
             } catch {
-                // ignore
+                /* ignore */
             }
         }
 
-        setState({
-            user,
-            token,
-            tenant,
-            isAuthenticated: !!token,
-            isLoading: false,
-        });
-    }, []);
+        if (!storedUser) {
+            setState({ user: null, tenant: null, isAuthenticated: false, isLoading: false });
 
-    // ── Proactive token refresh ──────────────────────────────────────────
-    const proactiveRefresh = useCallback(async () => {
-        if (refreshingRef.current) return;
-        if (!adminAuthService.getStoredToken()) return;
-        if (!isTokenExpiringSoon(false)) return;
-
-        refreshingRef.current = true;
-
-        try {
-            const newToken = await adminAuthService.refreshToken();
-
-            if (newToken) {
-                setState(prev => ({ ...prev, token: newToken }));
-            }
-        } finally {
-            refreshingRef.current = false;
+            return;
         }
+
+        // Optimistic state from localStorage; verify against server.
+        setState({ user: storedUser, tenant, isAuthenticated: true, isLoading: true });
+
+        adminAuthService
+            .getCurrentUser()
+            .then((freshUser) => {
+                setState({ user: freshUser, tenant, isAuthenticated: true, isLoading: false });
+            })
+            .catch(() => {
+                // 401 already redirects via api-client interceptor — just clear UI state.
+                setState({ user: null, tenant: null, isAuthenticated: false, isLoading: false });
+            });
     }, []);
-
-    useEffect(() => {
-        if (!state.isAuthenticated) return;
-
-        // Periodic check
-        const intervalId = setInterval(proactiveRefresh, REFRESH_CHECK_INTERVAL_MS);
-
-        // Also refresh when the user returns to the tab
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible') {
-                proactiveRefresh();
-            }
-        };
-
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-
-        return () => {
-            clearInterval(intervalId);
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-        };
-    }, [state.isAuthenticated, proactiveRefresh]);
 
     // ── Login ────────────────────────────────────────────────────────────
     const login = useCallback(async (credentials: LoginCredentials) => {
@@ -134,13 +82,11 @@ export const useAuth = (): UseAuthReturn => {
             if (response.success) {
                 setState({
                     user: response.data.user,
-                    token: response.data.token,
-                    tenant: response.data.tenant,
+                    tenant: response.data.tenant ?? null,
                     isAuthenticated: true,
                     isLoading: false,
                 });
 
-                // Extract and store permissions (NO additional API request!)
                 if (permissionsContext) {
                     const permissions = extractPermissionsFromLogin(response);
 
@@ -176,20 +122,17 @@ export const useAuth = (): UseAuthReturn => {
         } catch {
             // Logout failed; proceed with local cleanup
         } finally {
-            // Clear permissions
             if (permissionsContext) {
                 permissionsContext.clearPermissions();
             }
 
             setState({
                 user: null,
-                token: null,
                 tenant: null,
                 isAuthenticated: false,
                 isLoading: false,
             });
 
-            // Get current locale from URL
             const currentPath = window.location.pathname;
             const locale = currentPath.split('/')[1] || 'en';
 

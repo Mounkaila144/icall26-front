@@ -53,23 +53,12 @@ export interface LoginResponse {
   message: string;
   data: {
     user: User;
-    token: string;
-    token_type: string;
-    tenant: Tenant;
-  };
-}
-
-export interface RefreshTokenResponse {
-  success: boolean;
-  data: {
-    token: string;
-    token_type: string;
+    tenant?: Tenant;
   };
 }
 
 export interface AuthState {
   user: User | null;
-  token: string | null;
   tenant: Tenant | null;
   isAuthenticated: boolean;
   isLoading: boolean;

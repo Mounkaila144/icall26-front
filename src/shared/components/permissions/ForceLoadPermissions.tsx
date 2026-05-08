@@ -24,18 +24,17 @@ export function ForceLoadPermissions() {
     setResult(null)
 
     try {
-      // Try to reconstruct login response from stored data
+      // SPA mode: there is no token in localStorage; auth lives in an httpOnly cookie.
       const storedUser = localStorage.getItem('user')
-      const storedToken = localStorage.getItem('auth_token')
       const storedTenant = localStorage.getItem('tenant')
 
-      if (!storedUser || !storedToken) {
+      if (!storedUser) {
         setResult({
           success: false,
           message: 'User data not found in localStorage. Please log out and log in again.',
         })
         setLoading(false)
-        
+
 return
       }
 
@@ -49,16 +48,15 @@ return
             'User data does not contain groups. The backend may not be sending groups in the login response.',
         })
         setLoading(false)
-        
+
 return
       }
 
-      // Reconstruct login response format
+      // Reconstruct login response format (token field is no longer present in SPA mode)
       const reconstructedResponse = {
         success: true,
         data: {
           user: userData,
-          token: storedToken,
           tenant: storedTenant ? JSON.parse(storedTenant) : null,
         },
       }
