@@ -27,6 +27,7 @@ import type { Locale } from '@configs/i18n'
 // Hook Imports
 import { useSettings } from '@core/hooks/useSettings'
 import { useAuth } from '@/modules/UsersGuard/admin/hooks/useAuth'
+import { usePermissions } from '@/shared/contexts/PermissionsContext'
 
 // Util Imports
 import { getLocalizedUrl } from '@/utils/i18n'
@@ -66,6 +67,14 @@ const UserDropdown = () => {
   const { user, logout } = useAuth()
   const { settings } = useSettings()
   const { lang: locale } = useParams()
+  const { hasCredential } = usePermissions()
+
+  // Surface a "Super Admin" cross-domain link only to users with the superadmin
+  // credential. The href is an absolute URL because the superadmin interface lives
+  // on its own host (config: NEXT_PUBLIC_SUPERADMIN_URL → backend SUPERADMIN_DOMAIN),
+  // not on the current tenant host.
+  const isSuperadmin = hasCredential([['superadmin']])
+  const superadminUrl = process.env.NEXT_PUBLIC_SUPERADMIN_URL || ''
 
   const handleDropdownOpen = () => {
     !open ? setOpen(true) : setOpen(false)
@@ -158,6 +167,17 @@ const UserDropdown = () => {
                     <i className='ri-settings-4-line' />
                     <Typography color='text.primary'>Settings</Typography>
                   </MenuItem>
+                  {isSuperadmin && superadminUrl ? (
+                    <MenuItem
+                      className='gap-3 pli-4'
+                      component='a'
+                      href={`${superadminUrl}/${locale}/loginsuperadmin`}
+                      onClick={() => setOpen(false)}
+                    >
+                      <i className='ri-shield-keyhole-line' />
+                      <Typography color='text.primary'>Super Admin</Typography>
+                    </MenuItem>
+                  ) : null}
                   <MenuItem className='gap-3 pli-4' onClick={e => handleDropdownClose(e, '/pages/pricing')}>
                     <i className='ri-money-dollar-circle-line' />
                     <Typography color='text.primary'>Pricing</Typography>
